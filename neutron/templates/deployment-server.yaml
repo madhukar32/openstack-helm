@@ -71,6 +71,11 @@ spec:
               mountPath: /etc/neutron/neutron.conf
               subPath: neutron.conf
               readOnly: true
+            {{- if .Values.sdn.opencontrail.enabled }}
+            - name: neutron-etc
+              mountPath: /etc/neutron/plugins/opencontrail_plugin.ini
+              subPath: opencontrail_plugin.ini
+            {{- else }}
             - name: neutron-etc
               mountPath: /etc/neutron/plugins/ml2/ml2_conf.ini
               subPath: ml2_conf.ini
@@ -83,6 +88,7 @@ spec:
               mountPath: /etc/neutron/policy.json
               subPath: policy.json
               readOnly: true
+            {{- end }}
       volumes:
         - name: neutron-bin
           configMap:

@@ -79,8 +79,8 @@ spec:
               subPath: policy.json
               readOnly: true
 {{- if eq .Values.storage "file" }}
-            - name: glance-images
-              mountPath: {{ .Values.conf.glance.glance_store.glance.store.filesystem_store_datadir }}
+            #- name: glance-images
+            #  mountPath: {{ .Values.conf.glance.glance_store.glance.store.filesystem_store_datadir }}
 {{- else }}
             - name: cephconf
               mountPath: /etc/ceph/ceph.conf
@@ -100,8 +100,8 @@ spec:
             name: glance-etc
 {{- if eq .Values.storage "file" }}
         - name: glance-images
-          persistentVolumeClaim:
-            claimName: glance-images
+          hostPath:
+            path: {{ .Values.volume.storage_path }}
 {{- else }}
         - name: cephconf
           configMap:

@@ -67,6 +67,7 @@ kind: ConfigMap
 metadata:
   name: glance-etc
 data:
+{{- if eq .Values.storage "file" }}
   ceph.conf: |+
 {{ if .Values.conf.ceph.override -}}
 {{ .Values.conf.ceph.override | indent 4 }}
@@ -90,6 +91,7 @@ data:
 {{- end }}
 {{- if .Values.conf.ceph_client.append -}}
 {{ .Values.conf.ceph_client.append | indent 4 }}
+{{- end }}
 {{- end }}
   glance-api.conf: |+
 {{ if .Values.conf.glance.override -}}

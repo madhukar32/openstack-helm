@@ -29,9 +29,6 @@ spec:
       annotations:
         configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.hash" }}
         configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.hash" }}
-        pod.beta.kubernetes.io/init-containers: '[
-{{ tuple $envAll $dependencies $mounts_nova_compute_init | include "helm-toolkit.kubernetes_entrypoint_init_container" | indent 10 }}
-        ]'
     spec:
       nodeSelector:
         {{ .Values.labels.agent.compute.node_selector_key }}: {{ .Values.labels.agent.compute.node_selector_value }}

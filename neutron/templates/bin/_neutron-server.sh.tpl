@@ -17,4 +17,8 @@
 set -x
 exec neutron-server \
       --config-file /etc/neutron/neutron.conf \
+{{- if not .Values.sdn.opencontrail.enabled }}
       --config-file /etc/neutron/plugins/ml2/ml2_conf.ini
+{{- else }}
+      --config-file /etc/neutron/plugins/opencontrail_plugin.ini 
+{{- end }}

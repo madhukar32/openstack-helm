@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+{{- if not .Values.sdn.opencontrail.enabled }}
 {{- $envAll := . }}
 {{- $dependencies := .Values.dependencies.l3 }}
 apiVersion: extensions/v1beta1
@@ -96,3 +97,4 @@ spec:
         - name: socket
           hostPath:
             path: /var/lib/neutron/stackanetes
+{{- end }}

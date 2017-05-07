@@ -21,7 +21,7 @@ replicas:
   api: 1
   registry: 1
 
-storage: ceph
+storage: file
 
 labels:
   node_selector_key: openstack-control-plane
@@ -104,12 +104,15 @@ conf:
     glance_store:
       glance:
         store:
-          stores: file, http, rbd
-          default_store: rbd
-          rbd_store_chunk_size: 8
-          rbd_store_pool: images
-          rbd_store_user: admin
-          rbd_store_ceph_conf: /etc/ceph/ceph.conf
+          #stores: file, http, rbd
+          #stores: file, http
+          #default_store: file
+          #default_store: rbd
+          #rbd_store_chunk_size: 8
+          #rbd_store_pool: images
+          #rbd_store_user: admin
+          #rbd_store_ceph_conf: /etc/ceph/ceph.conf
+          #filesystem_store_datadir: /var/lib/glance/images
   paste_registry:
     override:
     append:
@@ -150,12 +153,13 @@ ceph:
   # a null value for the keyring will
   # attempt to use the key from
   # common/secrets/ceph-client-key
-  glance_keyring: null
+  glance_keyring: foo
 
 volume:
   class_path: volume.beta.kubernetes.io/storage-class
   class_name: general
   size: 2Gi
+  storage_path: /var/lib/localkube/glance
 
 misc:
   workers: 8

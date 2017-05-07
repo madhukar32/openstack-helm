@@ -17,6 +17,10 @@
 # Declare name/value pairs to be passed into your templates.
 # name: value
 
+sdn:
+  opencontrail:
+    enabled: true
+
 labels:
   agent:
     compute:
@@ -88,7 +92,7 @@ bootstrap:
 network:
   dns:
     servers:
-      - "10.96.0.10"
+      - "10.87.116.130"
       - "8.8.8.8"
     kubernetes_domain: "cluster.local"
     other_domains: ""
@@ -122,7 +126,7 @@ ceph:
   enabled: false
   monitors: []
   cinder_user: "cinder"
-  cinder_keyring: null
+  cinder_keyring: foo
   nova_pool: "vms"
   secret_uuid: ""
 
@@ -168,8 +172,6 @@ dependencies:
     service:
     - keystone-api
     - nova-api
-    daemonset:
-    - ovs-agent
   libvirt:
     jobs:
     - nova-db-sync

@@ -70,19 +70,19 @@ network:
       port: 30877
 
 ceph:
-  enabled: true
+  enabled: false
   monitors: []
   cinder_user: "admin"
   # a null value for the keyring will
   # attempt to use the key from
   # common/secrets/ceph-client-key
-  cinder_keyring: null
+  cinder_keyring: foo
 
 backends:
   enabled:
   - rbd1
   rbd1:
-    secret: null
+    secret: "foo"
     user: "admin"
     pool: "volumes"
 

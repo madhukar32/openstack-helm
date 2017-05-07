@@ -13,6 +13,8 @@
 # limitations under the License.
 
 {{- include "neutron.conf.neutron_values_skeleton" .Values.conf.neutron | trunc 0 -}}
+
+{{- if not .Values.sdn.opencontrail.enabled }}
 {{- include "neutron.conf.dhcp_agent_values_skeleton" .Values.conf.dhcp_agent | trunc 0 -}}
 {{- include "neutron.conf.l3_agent_values_skeleton" .Values.conf.l3_agent | trunc 0 -}}
 {{- include "neutron.conf.metadata_agent_values_skeleton" .Values.conf.metadata_agent | trunc 0 -}}
@@ -24,6 +26,7 @@
 {{- include "neutron.conf.ml2_conf_sriov_values_skeleton" .Values.conf.ml2_conf_sriov | trunc 0 -}}
 {{- include "neutron.conf.openvswitch_agent_values_skeleton" .Values.conf.openvswitch_agent | trunc 0 -}}
 {{- include "neutron.conf.sriov_agent_values_skeleton" .Values.conf.sriov_agent | trunc 0 -}}
+{{- end }} 
 
 {{- if empty .Values.conf.neutron.keystone_authtoken.keystonemiddleware.auth_token.auth_uri -}}
 {{- tuple "identity" "internal" "api" . | include "helm-toolkit.keystone_endpoint_uri_lookup"| set .Values.conf.neutron.keystone_authtoken.keystonemiddleware.auth_token "auth_uri" | quote | trunc 0 -}}
@@ -54,6 +57,7 @@ kind: ConfigMap
 metadata:
   name: neutron-etc
 data:
+{{- if not .Values.sdn.opencontrail.enabled }}
   api-paste.ini: |+
 {{ if .Values.conf.paste.override -}}
 {{ .Values.conf.paste.override | indent 4 }}
@@ -125,18 +129,6 @@ data:
 {{- end }}
 {{- if .Values.conf.metering_agent.append -}}
 {{ .Values.conf.metering_agent.append | indent 4 }}
-{{- end }}
-  neutron.conf: |+
-{{ if .Values.conf.neutron.override -}}
-{{ .Values.conf.neutron.override | indent 4 }}
-{{- else -}}
-{{- if .Values.conf.neutron.prefix -}}
-{{ .Values.conf.neutron.prefix | indent 4 }}
-{{- end }}
-{{ tuple "etc/_neutron.conf.tpl" . | include "helm-toolkit.template" | indent 4 }}
-{{- end }}
-{{- if .Values.conf.neutron.append -}}
-{{ .Values.conf.neutron.append | indent 4 }}
 {{- end }}
   ml2_conf.ini: |+
 {{ if .Values.conf.ml2_conf.override -}}
@@ -213,3 +205,19 @@ data:
   resolv.conf: |+
 {{ tuple "etc/_resolv.conf.tpl" . | include "helm-toolkit.template" | indent 4 }}
   dnsmasq.conf: ""
+{{- else }}
+  neutron.conf: |+
+{{ if .Values.conf.neutron.override -}}
+{{ .Values.conf.neutron.override | indent 4 }}
+{{- else -}}
+{{- if .Values.conf.neutron.prefix -}}
+{{ .Values.conf.neutron.prefix | indent 4 }}
+{{- end }}
+{{ tuple "etc/_neutron.conf.tpl" . | include "helm-toolkit.template" | indent 4 }}
+{{- end }}
+{{- if .Values.conf.neutron.append -}}
+{{ .Values.conf.neutron.append | indent 4 }}
+{{- end }}
+  opencontrail_plugin.ini: |+
+{{ tuple "etc/_opencontrail_plugin.ini.tpl" . | include "helm-toolkit.template" | indent 4 }}
+{{- end }}
