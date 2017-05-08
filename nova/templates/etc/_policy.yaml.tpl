@@ -177,9 +177,9 @@
 #
 "os_compute_api:os-flavor-extra-specs:index": ""
 #
-"os_compute_api:os-flavor-manage": "rule:admin_api"
+"os_compute_api:os-flavor-manage": ""
 #
-"os_compute_api:os-flavor-manage:discoverable": "@"
+"os_compute_api:os-flavor-manage:discoverable": ""
 #
 "os_compute_api:os-flavor-rxtx": "rule:admin_or_owner"
 #
