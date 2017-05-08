@@ -165,17 +165,17 @@
 #
 "os_compute_api:os-flavor-access": "rule:admin_or_owner"
 #
-"os_compute_api:os-flavor-extra-specs:show": "rule:admin_or_owner"
+"os_compute_api:os-flavor-extra-specs:show": ""
 #
-"os_compute_api:os-flavor-extra-specs:create": "rule:admin_api"
+"os_compute_api:os-flavor-extra-specs:create": ""
 #
-"os_compute_api:os-flavor-extra-specs:discoverable": "@"
+"os_compute_api:os-flavor-extra-specs:discoverable": """
 #
-"os_compute_api:os-flavor-extra-specs:update": "rule:admin_api"
+"os_compute_api:os-flavor-extra-specs:update": ""
 #
-"os_compute_api:os-flavor-extra-specs:delete": "rule:admin_api"
+"os_compute_api:os-flavor-extra-specs:delete": ""
 #
-"os_compute_api:os-flavor-extra-specs:index": "rule:admin_or_owner"
+"os_compute_api:os-flavor-extra-specs:index": ""
 #
 "os_compute_api:os-flavor-manage": "rule:admin_api"
 #
