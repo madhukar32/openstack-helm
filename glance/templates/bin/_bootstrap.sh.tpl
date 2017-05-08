@@ -21,6 +21,9 @@ export HOME=/tmp
 
 cd /tmp/images
 
+curl -o http://10.84.5.120/cs-shared/images/vsrx/junos-vsrx-12.1-in-network.img.gz
+gunzip junos-vsrx-12.1-in-network.img.gz
+
 {{ range .Values.bootstrap.images }}
 openstack image show {{ .name  | quote }} || \
   { curl -O {{ .source_url }}{{ .image_file }}; \

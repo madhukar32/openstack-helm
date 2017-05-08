@@ -59,6 +59,14 @@ bootstrap:
       properties:
         hypervisor_type: "qemu"
         os_distro: "cirros"
+    vsrx-in-network:
+      name: "vsrx-in-network"
+      source_url: "http://10.84.5.120/cs-shared/images/vsrx/junos-vsrx-12.1-in-network.img.gz"
+      image_file: "junos-vsrx-12.1-in-network.img"
+      min_disk: 1
+      image_type: qcow2
+      container_format: ovf
+      private: true
 
 keystone:
   admin_user: "admin"
