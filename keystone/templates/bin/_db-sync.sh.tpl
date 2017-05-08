@@ -22,6 +22,7 @@ keystone-manage --config-file=/etc/keystone/keystone.conf bootstrap \
     --bootstrap-username {{ .Values.keystone.admin_user }} \
     --bootstrap-password {{ .Values.keystone.admin_password }} \
     --bootstrap-project-name {{ .Values.keystone.admin_project_name }} \
+    --bootstrap-role-name {{ .Values.keystone.admin_role }} \
     --bootstrap-admin-url {{ tuple "identity" "admin" "admin" . | include "helm-toolkit.keystone_endpoint_uri_lookup" }} \
     --bootstrap-public-url {{ tuple "identity" "public" "api" . | include "helm-toolkit.keystone_endpoint_uri_lookup" }} \
     --bootstrap-internal-url {{ tuple "identity" "internal" "api" . | include "helm-toolkit.keystone_endpoint_uri_lookup" }} \
