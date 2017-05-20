@@ -92,7 +92,7 @@ bootstrap:
 network:
   dns:
     servers:
-      - "10.87.116.130"
+      - "10.87.116.10"
       - "8.8.8.8"
     kubernetes_domain: "cluster.local"
     other_domains: ""

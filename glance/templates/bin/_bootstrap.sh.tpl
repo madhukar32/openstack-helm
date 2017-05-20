@@ -19,10 +19,6 @@ export HOME=/tmp
 
 {{ if .Values.bootstrap.enabled }}
 
-cd /tmp/images
-
-curl -O http://10.84.5.120/cs-shared/images/vsrx/junos-vsrx-12.1-in-network.img.gz
-gunzip junos-vsrx-12.1-in-network.img.gz
 
 {{ range .Values.bootstrap.images }}
 openstack image show {{ .name  | quote }} || \
