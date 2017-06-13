@@ -22,16 +22,14 @@ service:
     name: ceph-mon
 
 images:
+  #daemon: docker.io/library/ceph/daemon:latest
+  #daemon: quay.io/attcomdev/ceph-daemon:latest
   daemon: docker.io/library/ceph/daemon:tag-build-master-jewel-ubuntu-16.04
-  pull_policy: IfNotPresent
+  pull_policy: Always
 
 labels:
   node_selector_key: ceph-storage
   node_selector_value: enabled
-
-pod_disruption_budget:
-  mon:
-    min_available: 0
 
 network:
   public: "10.25.0.0/16"
@@ -45,7 +43,10 @@ storage:
   var_directory: /var/lib/openstack-helm/ceph/ceph
   mon_directory: /var/lib/openstack-helm/ceph/mon
 
-# rgw is optionally disabled
+# rgw is optionall disabled
+rgw:
+  enabled: false
+
 rgw:
   enabled: false
 
@@ -53,10 +54,10 @@ resources:
   osd:
     requests:
       memory: "512Mi"
-      cpu: "500m"
+      cpu: "1000m"
     limits:
       memory: "1024Mi"
-      cpu: "1000m"
+      cpu: "2000m"
   mds:
     requests:
       memory: "10Mi"
@@ -67,10 +68,10 @@ resources:
   mon:
     requests:
       memory: "50Mi"
-      cpu: "250m"
+      cpu: "1000m"
     limits:
       memory: "100Mi"
-      cpu: "500m"
+      cpu: "2000m"
   mon_check:
     requests:
       memory: "5Mi"

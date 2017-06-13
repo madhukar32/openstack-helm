@@ -23,7 +23,7 @@ spec:
     metadata:
       annotations:
         pod.beta.kubernetes.io/init-containers: '[
-{{ tuple $envAll $dependencies "[]" | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 10 }}
+{{ tuple $envAll $dependencies "[]" | include "helm-toolkit.kubernetes_entrypoint_init_container" | indent 10 }}
         ]'
     spec:
       restartPolicy: OnFailure
@@ -43,25 +43,22 @@ spec:
               cpu: {{ .Values.resources.cinder_db_sync.limits.cpu | quote }}
           {{- end }}
           command:
-            - bash
-            - /tmp/db-sync.sh
+            - cinder-manage
+          args:
+            - --config-dir
+            - /etc/cinder/conf
+            - db
+            - sync
           volumeMounts:
-            - name: cinder-bin
-              mountPath: /tmp/db-sync.sh
-              subPath: db-sync.sh
-              readOnly: true
-            - name: etccinder
+            - name: pod-etc-cinder
               mountPath: /etc/cinder
-            - name: cinder-etc
-              mountPath: /etc/cinder/cinder.conf
+            - name: cinderconf
+              mountPath: /etc/cinder/conf/cinder.conf
               subPath: cinder.conf
               readOnly: true
       volumes:
-        - name: etccinder
+        - name: pod-etc-cinder
           emptyDir: {}
-        - name: cinder-etc
+        - name: cinderconf
           configMap:
             name: cinder-etc
-        - name: cinder-bin
-          configMap:
-            name: cinder-bin

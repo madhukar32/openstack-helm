@@ -12,14 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: v1
-description: OpenStack-Helm Keystone
+description: A Helm chart for keystone
 name: keystone
 version: 0.1.0
-home: https://docs.openstack.org/developer/keystone
-icon: https://www.openstack.org/themes/openstack/images/project-mascots/Keystone/OpenStack_Project_Keystone_vertical.png
-sources:
-  - https://git.openstack.org/cgit/openstack/keystone
-  - https://git.openstack.org/cgit/openstack/openstack-helm
-maintainers:
-  - name: OpenStack-Helm Authors

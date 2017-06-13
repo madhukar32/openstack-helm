@@ -33,10 +33,10 @@ spec:
       labels:
         app: cinder-volume
       annotations:
-        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.utils.hash" }}
-        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.utils.hash" }}
+        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.hash" }}
+        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.hash" }}
         pod.beta.kubernetes.io/init-containers: '[
-{{ tuple $envAll $dependencies "[]" | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 10 }}
+{{ tuple $envAll $dependencies "[]" | include "helm-toolkit.kubernetes_entrypoint_init_container" | indent 10 }}
         ]'
     spec:
       nodeSelector:
@@ -63,15 +63,15 @@ spec:
               mountPath: /etc/cinder
             - name: pod-var-cache-cinder
               mountPath: /var/cache/cinder
-            - name: cinder-etc
+            - name: cinderconf
               mountPath: /etc/cinder/conf/cinder.conf
               subPath: cinder.conf
               readOnly: true
-            - name: cinder-etc
+            - name: cephconf
               mountPath: /etc/ceph/ceph.conf
               subPath: ceph.conf
               readOnly: true
-            - name: cinder-etc
+            - name: cephclientcinderkeyring
               mountPath: /etc/ceph/ceph.client.{{ .Values.ceph.cinder_user }}.keyring
               subPath: ceph.client.{{ .Values.ceph.cinder_user }}.keyring
               readOnly: true
@@ -80,6 +80,12 @@ spec:
           emptyDir: {}
         - name: pod-var-cache-cinder
           emptyDir: {}
-        - name: cinder-etc
+        - name: cinderconf
+          configMap:
+            name: cinder-etc
+        - name: cephconf
+          configMap:
+            name: cinder-etc
+        - name: cephclientcinderkeyring
           configMap:
             name: cinder-etc

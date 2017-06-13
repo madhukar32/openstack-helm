@@ -36,7 +36,6 @@
      ,{etcd_scheme, http}
      ,{etcd_host, {{ .Values.endpoints.etcd.hosts.default }}}
      ,{etcd_port, {{ .Values.endpoints.etcd.port }}}
-     ,{node_type, {{ .Values.autocluster.node_type }} }
    ]}
 ].
 % EOF

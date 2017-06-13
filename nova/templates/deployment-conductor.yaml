@@ -14,14 +14,12 @@
 
 {{- $envAll := . }}
 {{- $dependencies := .Values.dependencies.conductor }}
-{{- $mounts_nova_conductor := .Values.mounts.nova_conductor.nova_conductor }}
-{{- $mounts_nova_conductor_init := .Values.mounts.nova_conductor.init_container }}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: nova-conductor
 spec:
-  replicas: {{ .Values.replicas.conductor }}
+  replicas: {{ .Values.control_replicas }}
   revisionHistoryLimit: {{ .Values.upgrades.revision_history }}
   strategy:
     type: {{ .Values.upgrades.pod_replacement_strategy }}
@@ -35,14 +33,14 @@ spec:
       labels:
         app: nova-conductor
       annotations:
-        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.utils.hash" }}
-        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.utils.hash" }}
+        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.hash" }}
+        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.hash" }}
         pod.beta.kubernetes.io/init-containers: '[
-{{ tuple $envAll $dependencies $mounts_nova_conductor_init | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 10 }}
+{{ tuple $envAll $dependencies "[]" | include "helm-toolkit.kubernetes_entrypoint_init_container" | indent 10 }}
         ]'
     spec:
       nodeSelector:
-        {{ .Values.labels.conductor.node_selector_key }}: {{ .Values.labels.conductor.node_selector_value }}
+        {{ .Values.labels.control_node_selector_key }}: {{ .Values.labels.control_node_selector_value }}
       containers:
         - name: nova-conductor
           image: {{ .Values.images.conductor }}
@@ -57,23 +55,17 @@ spec:
               cpu: {{ .Values.resources.nova_conductor.limits.cpu | quote }}
           {{- end }}
           command:
-            - bash
-            - /tmp/nova-conductor.sh
+            - nova-conductor
+            - --config-file
+            - /etc/nova/nova.conf
           volumeMounts:
-            - name: nova-bin
-              mountPath: /tmp/nova-conductor.sh
-              subPath: nova-conductor.sh
-              readOnly: true
-            - name: nova-etc
+            - name: novaconf
               mountPath: /etc/nova/nova.conf
               subPath: nova.conf
-              readOnly: true
-{{ if $mounts_nova_conductor.volumeMounts }}{{ toYaml $mounts_nova_conductor.volumeMounts | indent 12 }}{{ end }}
       volumes:
-        - name: nova-bin
-          configMap:
-            name: nova-bin
-        - name: nova-etc
+        - name: novaconf
           configMap:
             name: nova-etc
-{{ if $mounts_nova_conductor.volumes }}{{ toYaml $mounts_nova_conductor.volumes | indent 8 }}{{ end }}
+            items:
+            - key: nova.conf
+              path: nova.conf

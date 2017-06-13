@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+sed -i 's/return "<Service: %s>" % self.service/return "<Service: %s>" % self._info/g' /usr/lib/python2.7/site-packages/cinderclient/v2/services.py
+
 set -ex
 
 # Loading Apache2 ENV variables
@@ -22,7 +24,7 @@ rm -rf /var/run/apache2/*
 APACHE_DIR="apache2"
 
 # Compress Horizon's assets.
-/var/lib/kolla/venv/bin/manage.py collectstatic --noinput
+/var/lib/kolla/venv/bin/manage.py collectstatic --noinput 
 /var/lib/kolla/venv/bin/manage.py compress --force
 rm -rf /tmp/_tmp_.secret_key_store.lock /tmp/.secret_key_store
 

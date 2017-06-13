@@ -1,4 +1,4 @@
-# openstack-helm/ceph
+# aic-helm/ceph
 
 This chart installs a working version of ceph.  It is based on the ceph-docker work and follows closely with the setup [examples](https://github.com/ceph/ceph-docker/tree/master/examples/kubernetes) for kubernetes.
 
@@ -112,7 +112,7 @@ You should see a deployed/successful helm deployment:
 
 ```
 # helm ls
-NAME     	REVISION	UPDATED                 	STATUS  	CHART
+NAME     	REVISION	UPDATED                 	STATUS  	CHART     
 saucy-elk	1       	Thu Nov 17 13:43:27 2016	DEPLOYED	ceph-0.1.0
 ```
 

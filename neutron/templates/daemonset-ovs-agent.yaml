@@ -12,10 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+{{- if not .Values.sdn.opencontrail.enabled }}
 {{- $envAll := . }}
 {{- $dependencies := .Values.dependencies.ovs_agent }}
-{{- $mounts_neutron_ovs_agent := .Values.mounts.neutron_ovs_agent.neutron_ovs_agent }}
-{{- $mounts_neutron_ovs_agent_init := .Values.mounts.neutron_ovs_agent.init_container }}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
@@ -26,10 +25,10 @@ spec:
       labels:
         app: ovs-agent
       annotations:
-        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.utils.hash" }}
-        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.utils.hash" }}
+        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.hash" }}
+        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.hash" }}
         pod.beta.kubernetes.io/init-containers: '[
-{{ tuple $envAll $dependencies $mounts_neutron_ovs_agent_init | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 10 }}
+{{ tuple $envAll $dependencies "[]" | include "helm-toolkit.kubernetes_entrypoint_init_container" | indent 10 }}
         ]'
     spec:
       nodeSelector:
@@ -65,38 +64,36 @@ spec:
                 - -c
                 - 'ovs-vsctl list-br | grep -q br-int'
           volumeMounts:
-            - name: neutron-bin
+            - name: neutronopenvswitchagentsh
               mountPath: /tmp/neutron-openvswitch-agent.sh
               subPath: neutron-openvswitch-agent.sh
-              readOnly: true
-            - name: neutron-etc
+            - name: neutronconf
               mountPath: /etc/neutron/neutron.conf
               subPath: neutron.conf
-              readOnly: true
-            - name: neutron-etc
-              mountPath: /etc/neutron/plugins/ml2/ml2_conf.ini
-              subPath: ml2_conf.ini
-              readOnly: true
-            - name: neutron-etc
-              mountPath: /etc/neutron/plugins/ml2/openvswitch_agent.ini
-              subPath: openvswitch_agent.ini
-              readOnly: true
+            - name: ml2confini
+              mountPath: /etc/neutron/plugins/ml2/ml2-conf.ini
+              subPath: ml2-conf.ini
             - name: libmodules
               mountPath: /lib/modules
               readOnly: true
             - name: run
               mountPath: /run
-            - name: neutron-etc
-              mountPath: /etc/resolv.conf
+            - mountPath: /etc/resolv.conf
+              name: resolvconf
               subPath: resolv.conf
-{{ if $mounts_neutron_ovs_agent.volumeMounts }}{{ toYaml $mounts_neutron_ovs_agent.volumeMounts | indent 12 }}{{ end }}
       volumes:
         - name: varlibopenvswitch
           emptyDir: {}
-        - name: neutron-bin
+        - name: neutronopenvswitchagentsh
           configMap:
             name: neutron-bin
-        - name: neutron-etc
+        - name: neutronconf
+          configMap:
+            name: neutron-etc
+        - name: ml2confini
+          configMap:
+            name: neutron-etc
+        - name: resolvconf
           configMap:
             name: neutron-etc
         - name: libmodules
@@ -105,4 +102,4 @@ spec:
         - name: run
           hostPath:
             path: /run
-{{ if $mounts_neutron_ovs_agent.volumes }}{{ toYaml $mounts_neutron_ovs_agent.volumes | indent 8 }}{{ end }}
+{{- end }}

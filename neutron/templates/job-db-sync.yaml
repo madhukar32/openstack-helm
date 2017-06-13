@@ -23,7 +23,7 @@ spec:
     metadata:
       annotations:
         pod.beta.kubernetes.io/init-containers: '[
-{{ tuple $envAll $dependencies "[]" | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 10 }}
+{{ tuple $envAll $dependencies "[]" | include "helm-toolkit.kubernetes_entrypoint_init_container" | indent 10 }}
         ]'
     spec:
       restartPolicy: OnFailure
@@ -37,8 +37,13 @@ spec:
             - neutron-db-manage
             - --config-file
             - /etc/neutron/neutron.conf
+            {{- if .Values.sdn.opencontrail.enabled }}
             - --config-file
-            - /etc/neutron/plugins/ml2/ml2_conf.ini
+            - /etc/neutron/plugins/opencontrail_plugin.ini
+            {{- else }}
+            - --config-file
+            - /etc/neutron/plugins/ml2/ml2-conf.ini
+            {{- end }}
             - upgrade
             - head
           {{- if .Values.resources.enabled }}
@@ -50,30 +55,27 @@ spec:
               cpu: {{ .Values.resources.jobs.db_sync.requests.cpu | quote }}
               memory: {{ .Values.resources.jobs.db_sync.requests.memory | quote }}
           {{- end }}
-          command:
-            - bash
-            - /tmp/db-sync.sh
           volumeMounts:
-            - name: neutron-bin
-              mountPath: /tmp/db-sync.sh
-              subPath: db-sync.sh
-              readOnly: true
-            - name: etcneutron
+            - name: pod-etc-neutron
               mountPath: /etc/neutron
-            - name: neutron-etc
+            - name: neutronconf
               mountPath: /etc/neutron/neutron.conf
               subPath: neutron.conf
-              readOnly: true
-            - name: neutron-etc
-              mountPath: /etc/neutron/plugins/ml2/ml2_conf.ini
-              subPath: ml2_conf.ini
-              readOnly: true
+            {{- if .Values.sdn.opencontrail.enabled }}
+            - name: neutronconf
+              mountPath: /etc/neutron/plugins/opencontrail_plugin.ini
+              subPath: opencontrail_plugin.ini
+            {{- else }}
+            - name: ml2confini
+              mountPath: /etc/neutron/plugins/ml2/ml2-conf.ini
+              subPath: ml2-conf.ini
+            {{- end }}
       volumes:
-        - name: etcneutron
+        - name: pod-etc-neutron
           emptyDir: {}
-        - name: neutron-etc
+        - name: neutronconf
           configMap:
             name: neutron-etc
-        - name: neutron-bin
+        - name: ml2confini
           configMap:
-            name: neutron-bin
+            name: neutron-etc

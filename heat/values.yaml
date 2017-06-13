@@ -29,32 +29,17 @@ labels:
   node_selector_value: enabled
 
 images:
-  db_init: docker.io/kolla/ubuntu-source-heat-api:3.0.3
-  db_sync: docker.io/kolla/ubuntu-source-heat-api:3.0.3
-  ks_user: docker.io/kolla/ubuntu-source-kolla-toolbox:3.0.3
-  ks_service: docker.io/kolla/ubuntu-source-kolla-toolbox:3.0.3
-  ks_endpoints: docker.io/kolla/ubuntu-source-kolla-toolbox:3.0.3
-  api: docker.io/kolla/ubuntu-source-heat-api:3.0.3
-  cfn: docker.io/kolla/ubuntu-source-heat-api:3.0.3
-  cloudwatch: docker.io/kolla/ubuntu-source-heat-api:3.0.3
-  engine: docker.io/kolla/ubuntu-source-heat-engine:3.0.3
-  dep_check: docker.io/kolla/ubuntu-source-kubernetes-entrypoint:4.0.0
+  dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.1.1
+  db_init: quay.io/stackanetes/stackanetes-kolla-toolbox:newton
+  db_sync: docker.io/kolla/ubuntu-source-heat-api:3.0.1
+  ks_user: quay.io/stackanetes/stackanetes-kolla-toolbox:newton
+  ks_service: quay.io/stackanetes/stackanetes-kolla-toolbox:newton
+  ks_endpoints: quay.io/stackanetes/stackanetes-kolla-toolbox:newton
+  api: docker.io/kolla/ubuntu-source-heat-api:3.0.1
+  cfn: docker.io/kolla/ubuntu-source-heat-api:3.0.1
+  cloudwatch: docker.io/kolla/ubuntu-source-heat-api:3.0.1
+  engine: docker.io/kolla/ubuntu-source-heat-engine:3.0.1
   pull_policy: "IfNotPresent"
-
-upgrades:
-  revision_history: 3
-  pod_replacement_strategy: RollingUpdate
-  rolling_update:
-    max_unavailable: 1
-    max_surge: 3
-
-pod_disruption_budget:
-  api:
-    min_available: 0
-  cfn:
-    min_available: 0
-  cloudwatch:
-    min_available: 0
 
 keystone_secrets:
   admin: "heat-env-keystone-admin"
@@ -70,109 +55,79 @@ keystone:
   admin_project_domain: "default"
   admin_region_name: "RegionOne"
 
+  heat_user: "heat"
+  heat_user_domain: "default"
   heat_user_role: "admin"
+  heat_password: "password"
+  heat_project_name: "service"
+  heat_project_domain: "default"
+  heat_region_name: "RegionOne"
 
+  heat_trustee_user: "heat-trust"
+  heat_trustee_user_domain: "default"
   heat_trustee_role: "admin"
+  heat_trustee_password: "password"
+  heat_trustee_project_name: "service"
+  heat_trustee_project_domain: "default"
   heat_trustee_region_name: "RegionOne"
 
+  heat_stack_user: "heat-domain"
+  heat_stack_domain: "heat"
   heat_stack_user_role: "admin"
+  heat_stack_password: "password"
   heat_stack_region_name: "RegionOne"
-
-
-conf:
-  paste:
-    override:
-    append:
-  policy:
-    override:
-    append:
-  heat:
-    override:
-    append:
-    default:
-      heat:
-        common:
-          config:
-            stack_user_domain_name: heat
-            stack_domain_admin: heat-domain
-            stack_domain_admin_password: password
-            num_engine_workers: 4
-            trusts_delegated_roles: Member
-    keystone_authtoken:
-      keystonemiddleware:
-        auth_token:
-          auth_type: password
-          auth_version: v3
-          region_name: RegionOne
-          project_domain_name: default
-          project_name: service
-          user_domain_name: default
-          username: heat
-          password: password
-    trustee:
-      heat:
-        common:
-          context:
-            password: password
-            user_domain_name: default
-            username: heat-trust
-            project_domain_name: default
-            project_name: service
-    heat_api:
-      heat:
-        common:
-          wsgi:
-            bind_port: 8004
-            workers: 4
-    heat_api_cloudwatch:
-      heat:
-        common:
-          wsgi:
-            bind_port: 8003
-            workers: 4
-    heat_api_cfn:
-      heat:
-        common:
-          wsgi:
-            bind_port: 8000
-            workers: 4
-    paste_deploy:
-      heat.common:
-        config:
-          api_paste_config: /etc/heat/api-paste.ini
-    clients:
-      heat:
-        common:
-          config:
-            endpoint_type: internalURL
-    clients_keystone:
-      heat:
-        common:
-          config:
-            endpoint_type: internalURL
 
 network:
   api:
     name: "heat-api"
+    port: 8004
     proto: "http"
     node_port:
       enabled: false
       port: 30004
   cfn:
     name: "heat-cfn"
+    port: 8000
     proto: "http"
     node_port:
       enabled: false
       port: 30800
   cloudwatch:
     name: "heat-cloudwatch"
+    port: 8003
     proto: "http"
     node_port:
       enabled: false
       port: 30003
 
+database:
+  address: mariadb
+  port: 3306
+  root_user: root
+  root_password: password
+  heat_database_name: heat
+  heat_password: password
+  heat_user: heat
+
+messaging:
+  hosts: rabbitmq
+  user: rabbitmq
+  password: password
+
+memcached:
+  host: memcached
+  port: 11211
+
+misc:
+  debug: true
+
+secrets:
+  keystone_admin:
+
 dependencies:
   db_init:
+    jobs:
+    - mariadb-seed
     service:
     - mariadb
   db_sync:
@@ -263,39 +218,6 @@ endpoints:
     scheme: 'http'
     port:
       api: 8003
-  oslo_db:
-    auth:
-      admin:
-        username: root
-        password: password
-      user:
-        username: heat
-        password: password
-    hosts:
-      default: mariadb
-    path: /heat
-    scheme: mysql+pymysql
-    port:
-      mysql: 3306
-  oslo_cache:
-    hosts:
-      default: memcache
-    port:
-      memcache: 11211
-  oslo_messaging:
-    auth:
-      admin:
-        username: admin
-        password: password
-      user:
-        username: rabbitmq
-        password: password
-    hosts:
-      default: rabbitmq
-    path: /
-    scheme: rabbit
-    port:
-      amqp: 5672
 
 resources:
   enabled: false
@@ -362,17 +284,11 @@ resources:
     limits:
       memory: "1024Mi"
       cpu: "2000m"
-
-mounts:
-  heat_api:
-    init_container: null
-    heat_api:
-  heat_cfn:
-    init_container: null
-    heat_cfn:
-  heat_cloudwatch:
-    init_container: null
-    heat_cloudwatch:
-  heat_engine:
-    init_container: null
-    heat_engine:
+  api:
+    workers: 8
+  cfn:
+    workers: 8
+  cloudwatch:
+    workers: 8
+  engine:
+    workers: 8

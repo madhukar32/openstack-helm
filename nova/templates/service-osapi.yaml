@@ -21,13 +21,7 @@ metadata:
   name: nova-api
 spec:
   ports:
-  - name: nova-api-osapi
-    port: {{ .Values.network.osapi.port }}
-    {{ if .Values.network.osapi.node_port.enabled }}
-    nodePort: {{ .Values.network.osapi.node_port.port }}
-    {{ end }}
+  - name: nova-osapi
+    port: {{ .Values.network.port.osapi }}
   selector:
-    app: nova-api-osapi
-  {{ if .Values.network.osapi.node_port.enabled }}
-  type: NodePort
-  {{ end }}
+    app: nova-osapi

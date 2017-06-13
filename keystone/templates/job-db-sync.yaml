@@ -25,7 +25,7 @@ spec:
     metadata:
       annotations:
         pod.beta.kubernetes.io/init-containers: '[
-{{ tuple $envAll $dependencies $mounts_keystone_db_sync_init | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 10 }}
+{{ tuple $envAll $dependencies $mounts_keystone_db_sync_init | include "helm-toolkit.kubernetes_entrypoint_init_container" | indent 10 }}
         ]'
     spec:
       restartPolicy: OnFailure
@@ -47,25 +47,7 @@ spec:
           command:
             - bash
             - /tmp/db-sync.sh
-          volumeMounts:
-          - name: etckeystone
-            mountPath: /etc/keystone
-          - name: keystone-etc
-            mountPath: /etc/keystone/keystone.conf
-            subPath: keystone.conf
-            readOnly: true
-          - name: keystone-bin
-            mountPath: /tmp/db-sync.sh
-            subPath: db-sync.sh
-            readOnly: true
-{{ if $mounts_keystone_db_sync.volumeMounts }}{{ toYaml $mounts_keystone_db_sync.volumeMounts | indent 10 }}{{ end }}
+          volumeMounts:            
+{{ toYaml $mounts_keystone_db_sync.volumeMounts | indent 12 }}
       volumes:
-      - name: etckeystone
-        emptyDir: {}
-      - name: keystone-etc
-        configMap:
-          name: keystone-etc
-      - name: keystone-bin
-        configMap:
-          name: keystone-bin
-{{ if $mounts_keystone_db_sync.volumes }}{{ toYaml $mounts_keystone_db_sync.volumes | indent 6 }}{{ end }}
+{{ toYaml $mounts_keystone_db_sync.volumes | indent 8 }}

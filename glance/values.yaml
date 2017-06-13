@@ -21,22 +21,23 @@ replicas:
   api: 1
   registry: 1
 
-# ceph or pvc
-storage: ceph
+development:
+  enabled: false
+  storage_path: /data/openstack-helm/glance/images
 
 labels:
   node_selector_key: openstack-control-plane
   node_selector_value: enabled
 
 images:
-  db_init: docker.io/kolla/ubuntu-source-glance-api:3.0.3
-  db_sync: docker.io/kolla/ubuntu-source-glance-api:3.0.3
-  ks_user: docker.io/kolla/ubuntu-source-kolla-toolbox:3.0.3
-  ks_service: docker.io/kolla/ubuntu-source-kolla-toolbox:3.0.3
-  ks_endpoints: docker.io/kolla/ubuntu-source-kolla-toolbox:3.0.3
-  api: docker.io/kolla/ubuntu-source-glance-api:3.0.3
-  registry: docker.io/kolla/ubuntu-source-glance-registry:3.0.3
-  dep_check: docker.io/kolla/ubuntu-source-kubernetes-entrypoint:4.0.0
+  db_init: kolla/ubuntu-source-kolla-toolbox:3.0.2
+  db_sync: kolla/ubuntu-source-glance-api:2.0.2
+  ks_user: kolla/ubuntu-source-kolla-toolbox:3.0.2
+  ks_service: kolla/ubuntu-source-kolla-toolbox:3.0.2
+  ks_endpoints: kolla/ubuntu-source-kolla-toolbox:3.0.2
+  api: kolla/ubuntu-source-glance-api:2.0.2
+  registry: kolla/ubuntu-source-glance-registry:2.0.2
+  dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.1.1
   pull_policy: "IfNotPresent"
 
 upgrades:
@@ -46,27 +47,6 @@ upgrades:
     max_unavailable: 1
     max_surge: 3
 
-pod_disruption_budget:
-  api:
-    min_available: 0
-  registry:
-    min_available: 0
-
-bootstrap:
-  enabled: true
-  images:
-    cirros:
-      name: "Cirros 0.3.5 64-bit"
-      source_url: "http://download.cirros-cloud.net/0.3.5/"
-      image_file: "cirros-0.3.5-x86_64-disk.img"
-      min_disk: 1
-      image_type: qcow2
-      container_format: bare
-      private: true
-      properties:
-        hypervisor_type: "qemu"
-        os_distro: "cirros"
-
 keystone:
   admin_user: "admin"
   admin_user_domain: "default"
@@ -74,89 +54,38 @@ keystone:
   admin_project_name: "admin"
   admin_project_domain: "default"
   admin_region_name: "RegionOne"
+
+  glance_user: "glance"
+  glance_user_domain: "default"
   glance_user_role: "admin"
-
-
-conf:
-  ceph:
-    monitors: []
-    keyring: null
-    override:
-    append:
-  ceph_client:
-    override:
-    append:
-  paste:
-    override:
-    append:
-  policy:
-    override:
-    append:
-  glance:
-    override:
-    append:
-    default:
-      glance:
-        api:
-          bind_port: 9292
-    keystone_authtoken:
-      keystonemiddleware:
-        auth_token:
-          auth_type: password
-          auth_version: v3
-          region_name: RegionOne
-          project_domain_name: default
-          project_name: service
-          user_domain_name: default
-          username: glance
-          password: password
-    glance_store:
-      glance:
-        store:
-          stores: file, http, rbd
-          default_store: rbd
-          rbd_store_chunk_size: 8
-          rbd_store_pool: images
-          rbd_store_user: admin
-          rbd_store_ceph_conf: /etc/ceph/ceph.conf
-          filesystem_store_datadir: /var/lib/glance/images
-  paste_registry:
-    override:
-    append:
-  glance_registry:
-    override:
-    append:
-    default:
-      glance:
-        registry:
-          bind_port: 9191
-    keystone_authtoken:
-      keystonemiddleware:
-        auth_token:
-          auth_type: password
-          auth_version: v3
-          region_name: RegionOne
-          project_domain_name: default
-          project_name: service
-          user_domain_name: default
-          username: glance
-          password: password
+  glance_password: "password"
+  glance_project_name: "service"
+  glance_project_domain: "default"
+  glance_region_name: "RegionOne"
 
 network:
-  api:
-    name: "glance-api"
-    node_port:
-      enabled: false
-      port: 30092
-  registry:
-    name: "glance-registry"
-    node_port:
-      enabled: false
-      port: 30091
+  port:
+    api: 9292
+    registry: 9191
 
-volume:
-  class_name: general
-  size: 2Gi
+database:
+  address: mariadb
+  port: 3306
+  root_user: root
+  root_password: password
+  glance_database_name: glance
+  glance_password: password
+  glance_user: glance
+
+ceph:
+  enabled: true
+  monitors: []
+  glance_user: "admin"
+  glance_pool: "images"
+  # a null value for the keyring will
+  # attempt to use the key from
+  # common/secrets/ceph-client-key
+  glance_keyring: foo
 
 misc:
   workers: 8
@@ -200,16 +129,11 @@ resources:
       requests:
         memory: "128Mi"
         cpu: "500m"
-    bootstrap:
-      limits:
-        memory: "128Mi"
-        cpu: "500m"
-      requests:
-        memory: "128Mi"
-        cpu: "500m"
 
 dependencies:
   db_init:
+    jobs:
+    - mariadb-seed
     service:
     - mariadb
   db_sync:
@@ -217,14 +141,6 @@ dependencies:
     - glance-db-init
     service:
     - mariadb
-  bootstrap:
-    jobs:
-    - glance-db-sync
-    - glance-ks-user
-    - glance-ks-endpoints
-    service:
-    - mariadb
-    - glance-api
   ks_user:
     service:
     - keystone-api
@@ -275,52 +191,4 @@ endpoints:
     scheme: 'http'
     port:
       api: 9292
-  image_registry:
-    name: glance-registry
-    hosts:
-      default: glance-registry
-    path: null
-    scheme: 'http'
-    port:
-      api: 9191
-  oslo_db:
-    auth:
-      admin:
-        username: root
-        password: password
-      user:
-        username: glance
-        password: password
-    hosts:
-      default: mariadb
-    path: /glance
-    scheme: mysql+pymysql
-    port:
-      mysql: 3306
-  oslo_cache:
-    hosts:
-      default: memcache
-    port:
-      memcache: 11211
-  oslo_messaging:
-    auth:
-      admin:
-        username: admin
-        password: password
-      user:
-        username: rabbitmq
-        password: password
-    hosts:
-      default: rabbitmq
-    path: /
-    scheme: rabbit
-    port:
-      amqp: 5672
-
-mounts:
-  glance_api:
-    init_container: null
-    glance_api:
-  glance_registry:
-    init_container: null
-    glance_registry:
+      registry: 9191

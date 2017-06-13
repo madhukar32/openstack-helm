@@ -14,8 +14,6 @@
 
 {{- $envAll := . }}
 {{- $dependencies := .Values.dependencies.server }}
-{{- $mounts_neutron_server := .Values.mounts.neutron_server.neutron_server }}
-{{- $mounts_neutron_server_init := .Values.mounts.neutron_server.init_container }}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -35,10 +33,10 @@ spec:
       labels:
         app: neutron-server
       annotations:
-        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.utils.hash" }}
-        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.utils.hash" }}
+        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.hash" }}
+        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.hash" }}
         pod.beta.kubernetes.io/init-containers: '[
-{{ tuple $envAll $dependencies $mounts_neutron_server_init | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 10 }}
+{{ tuple $envAll $dependencies "[]" | include "helm-toolkit.kubernetes_entrypoint_init_container" | indent 10 }}
         ]'
     spec:
       nodeSelector:
@@ -47,6 +45,17 @@ spec:
         - name: neutron-server
           image: {{ .Values.images.server }}
           imagePullPolicy: {{ .Values.images.pull_policy }}
+          command:
+            - neutron-server
+            - --config-file
+            - /etc/neutron/neutron.conf
+          {{- if .Values.sdn.opencontrail.enabled }}
+            - --config-file
+            - /etc/neutron/plugins/opencontrail_plugin.ini
+          {{- else }}
+            - --config-file
+            - /etc/neutron/plugins/ml2/ml2-conf.ini
+          {{- end }}
           {{- if .Values.resources.enabled }}
           resources:
             limits:
@@ -57,40 +66,27 @@ spec:
               memory: {{ .Values.resources.server.requests.memory | quote }}
           {{- end }}
           ports:
-            - containerPort: {{ .Values.network.server.port }}
+          - containerPort: {{ .Values.network.port.server }}
           readinessProbe:
             tcpSocket:
-              port: {{ .Values.network.server.port }}
-          command:
-            - bash
-            - /tmp/neutron-server.sh
+              port: {{ .Values.network.port.server }}
           volumeMounts:
-            - name: neutron-bin
-              mountPath: /tmp/neutron-server.sh
-              subPath: neutron-server.sh
-              readOnly: true
-            - name: neutron-etc
+            - name: neutronconf
               mountPath: /etc/neutron/neutron.conf
               subPath: neutron.conf
-              readOnly: true
-            - name: neutron-etc
-              mountPath: /etc/neutron/plugins/ml2/ml2_conf.ini
-              subPath: ml2_conf.ini
-              readOnly: true
-            - name: neutron-etc
-              mountPath: /etc/neutron/api-paste.ini
-              subPath: api-paste.ini
-              readOnly: true
-            - name: neutron-etc
-              mountPath: /etc/neutron/policy.json
-              subPath: policy.json
-              readOnly: true
-{{ if $mounts_neutron_server.volumeMounts }}{{ toYaml $mounts_neutron_server.volumeMounts | indent 12 }}{{ end }}
+            {{- if .Values.sdn.opencontrail.enabled }}
+            - name: neutronconf
+              mountPath: /etc/neutron/plugins/opencontrail_plugin.ini
+              subPath: opencontrail_plugin.ini
+            {{- else }}
+            - name: ml2confini
+              mountPath: /etc/neutron/plugins/ml2/ml2-conf.ini
+              subPath: ml2-conf.ini
+            {{- end }}
       volumes:
-        - name: neutron-bin
-          configMap:
-            name: neutron-bin
-        - name: neutron-etc
+        - name: neutronconf
           configMap:
             name: neutron-etc
-{{ if $mounts_neutron_server.volumes }}{{ toYaml $mounts_neutron_server.volumes | indent 8 }}{{ end }}
+        - name: ml2confini
+          configMap:
+            name: neutron-etc

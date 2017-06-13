@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+{{- if not .Values.sdn.opencontrail.enabled }}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
@@ -22,8 +23,8 @@ spec:
       labels:
         app: ovs-db
       annotations:
-        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.utils.hash" }}
-        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.utils.hash" }}
+        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.hash" }}
+        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.hash" }}
     spec:
       nodeSelector:
         {{ .Values.labels.ovs.node_selector_key }}: {{ .Values.labels.ovs.node_selector_value }}
@@ -35,7 +36,7 @@ spec:
         - name: ovs-db
           image: {{ .Values.images.openvswitch_db_server }}
           imagePullPolicy: {{ .Values.images.pull_policy }}
-          {{- if .Values.resources.enabled }}
+          {{- if .Values.resources.enabled }}         
           resources:
             limits:
               cpu: {{ .Values.resources.ovs.db.limits.cpu | quote }}
@@ -50,25 +51,23 @@ spec:
             - bash
             - /tmp/openvswitch-db-server.sh
           volumeMounts:
-            - name: neutron-bin
+            - name: openvswitchdbserversh
               mountPath: /tmp/openvswitch-db-server.sh
               subPath: openvswitch-db-server.sh
-              readOnly: true
-            - name: neutron-etc
-              mountPath: /etc/resolv.conf
+            - mountPath: /etc/resolv.conf
+              name: resolvconf
               subPath: resolv.conf
-              readOnly: true
             - name: varlibopenvswitch
               mountPath: /var/lib/openvswitch/
             - name: run
               mountPath: /run
       volumes:
-        - name: neutron-bin
+        - name: openvswitchdbserversh
           configMap:
             name: neutron-bin
         - name: varlibopenvswitch
           emptyDir: {}
-        - name: neutron-etc
+        - name: resolvconf
           configMap:
             name: neutron-etc
         - name: libmodules
@@ -77,3 +76,4 @@ spec:
         - name: run
           hostPath:
             path: /run
+{{- end }}

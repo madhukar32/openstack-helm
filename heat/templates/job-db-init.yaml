@@ -23,7 +23,7 @@ spec:
     metadata:
       annotations:
         pod.beta.kubernetes.io/init-containers: '[
-{{ tuple $envAll $dependencies "[]" | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 10 }}
+{{ tuple $envAll $dependencies "[]" | include "helm-toolkit.kubernetes_entrypoint_init_container" | indent 10 }}
         ]'
     spec:
       restartPolicy: OnFailure
@@ -43,37 +43,17 @@ spec:
               cpu: {{ .Values.resources.heat_db_init.limits.cpu | quote }}
           {{- end }}
           env:
-            - name: ROOT_DB_CONNECTION
-              valueFrom:
-                secretKeyRef:
-                  name: heat-db-root
-                  key: DB_CONNECTION
-            - name: OPENSTACK_CONFIG_FILE
-              value: /etc/heat/heat.conf
-            - name: OPENSTACK_CONFIG_DB_SECTION
-              value: database
-            - name: OPENSTACK_CONFIG_DB_KEY
-              value: connection
+          - name: ANSIBLE_LIBRARY
+            value: /usr/share/ansible/
           command:
-            - python
-            - /tmp/db-init.py
+            - bash
+            - /tmp/db-init.sh
           volumeMounts:
-            - name: heat-bin
-              mountPath: /tmp/db-init.py
-              subPath: db-init.py
-              readOnly: true
-            - name: etcheat
-              mountPath: /etc/heat
-            - name: heat-etc
-              mountPath: /etc/heat/heat.conf
-              subPath: heat.conf
+            - name: dbinitsh
+              mountPath: /tmp/db-init.sh
+              subPath: db-init.sh
               readOnly: true
       volumes:
-        - name: etcheat
-          emptyDir: {}
-        - name: heat-etc
-          configMap:
-            name: heat-etc
-        - name: heat-bin
+        - name: dbinitsh
           configMap:
             name: heat-bin

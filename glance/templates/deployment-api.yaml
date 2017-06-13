@@ -14,14 +14,16 @@
 
 {{- $envAll := . }}
 {{- $dependencies := .Values.dependencies.api }}
-{{- $mounts_glance_api := .Values.mounts.glance_api.glance_api }}
-{{- $mounts_glance_api_init := .Values.mounts.glance_api.init_container }}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: glance-api
 spec:
+{{- if .Values.development.enabled }}
+  replicas: 1
+{{- else }}
   replicas: {{ .Values.replicas.api }}
+{{- end }}
   revisionHistoryLimit: {{ .Values.upgrades.revision_history }}
   strategy:
     type: {{ .Values.upgrades.pod_replacement_strategy }}
@@ -35,10 +37,10 @@ spec:
       labels:
         app: glance-api
       annotations:
-        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.utils.hash" }}
-        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.utils.hash" }}
+        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.hash" }}
+        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.hash" }}
         pod.beta.kubernetes.io/init-containers: '[
-{{ tuple $envAll $dependencies $mounts_glance_api_init | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 10 }}
+{{ tuple $envAll $dependencies "[]" | include "helm-toolkit.kubernetes_entrypoint_init_container" | indent 10 }}
         ]'
     spec:
       nodeSelector:
@@ -61,48 +63,59 @@ spec:
           - --config-file
           - /etc/glance/glance-api.conf
           ports:
-            - containerPort: {{ .Values.conf.glance.default.glance.api.bind_port }}
+            - containerPort: {{ .Values.network.port.api }}
           readinessProbe:
             tcpSocket:
-              port: {{ .Values.conf.glance.default.glance.api.bind_port }}
+              port: {{ .Values.network.port.api }}
           volumeMounts:
             - name: etcglance
               mountPath: /etc/glance
-            - name: glance-etc
+            - name: glanceapiconf
               mountPath: /etc/glance/glance-api.conf
               subPath: glance-api.conf
               readOnly: true
-            - name: glance-etc
+            - name: glanceapipaste
               mountPath: /etc/glance/glance-api-paste.ini
               subPath: glance-api-paste.ini
               readOnly: true
-            - name: glance-etc
+            - name: glancepolicy
               mountPath: /etc/glance/policy.json
               subPath: policy.json
               readOnly: true
-{{- if eq .Values.storage "pvc" }}
-            - name: glance-images
-              mountPath: {{ .Values.conf.glance.glance_store.glance.store.filesystem_store_datadir }}
+{{- if .Values.development.enabled }}
+            - name: glance-data
+              mountPath: /var/lib/glance/images
 {{- else }}
-            - name: glance-etc
+            - name: cephconf
               mountPath: /etc/ceph/ceph.conf
               subPath: ceph.conf
               readOnly: true
-            - name: glance-etc
-              mountPath: /etc/ceph/ceph.client.{{ .Values.conf.glance.glance_store.glance.store.rbd_store_user }}.keyring
-              subPath: ceph.client.{{ .Values.conf.glance.glance_store.glance.store.rbd_store_user }}.keyring
+            - name: cephclientglancekeyring
+              mountPath: /etc/ceph/ceph.client.{{ .Values.ceph.glance_user }}.keyring
+              subPath: ceph.client.{{ .Values.ceph.glance_user }}.keyring
               readOnly: true
 {{- end }}
-{{ if $mounts_glance_api.volumeMounts }}{{ toYaml $mounts_glance_api.volumeMounts | indent 12 }}{{ end }}
       volumes:
-        - name: glance-etc
+        - name: glanceapiconf
           configMap:
             name: glance-etc
-{{- if eq .Values.storage "pvc" }}
-        - name: glance-images
-          persistentVolumeClaim:
-            claimName: glance-images
+        - name: glanceapipaste
+          configMap:
+            name: glance-etc
+{{- if .Values.development.enabled }}
+        - name: glance-data
+          hostPath:
+            path: {{ .Values.development.storage_path }}
+{{- else }}
+        - name: cephconf
+          configMap:
+            name: glance-etc
+        - name: cephclientglancekeyring
+          configMap:
+            name: glance-etc
 {{- end }}
         - name: etcglance
           emptyDir: {}
-{{ if $mounts_glance_api.volumes }}{{ toYaml $mounts_glance_api.volumes | indent 8 }}{{ end }}
+        - name: glancepolicy
+          configMap:
+            name: glance-etc

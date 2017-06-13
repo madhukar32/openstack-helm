@@ -20,8 +20,8 @@
 replicas: 1
 
 images:
-  horizon: docker.io/kolla/ubuntu-source-horizon:3.0.3
-  dep_check: docker.io/kolla/ubuntu-source-kubernetes-entrypoint:4.0.0
+  dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.1.1
+  horizon: kolla/ubuntu-source-horizon:2.0.2
   pull_policy: "IfNotPresent"
 
 upgrades:
@@ -31,17 +31,13 @@ upgrades:
     max_unavailable: 1
     max_surge: 3
 
-pod_disruption_budget:
-  horizon:
-    min_available: 0
-
 labels:
   node_selector_key: openstack-control-plane
   node_selector_value: enabled
 
 network:
   port: 80
-  node_port: 31000
+  node_port: 30000
   enable_node_port: false
 
 memcached:
@@ -81,8 +77,3 @@ endpoints:
     port:
       admin: 35357
       api: 5000
-
-mounts:
-  horizon:
-    init_container: null
-    horizon:

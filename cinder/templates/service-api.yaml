@@ -18,12 +18,6 @@ metadata:
   name: cinder-api
 spec:
   ports:
-    - port: {{ .Values.network.api.port }}
-    {{ if .Values.network.api.node_port.enabled }}
-      nodePort: {{ .Values.network.api.node_port.port }}
-    {{ end }}
+    - port: {{ .Values.network.port.api }}
   selector:
     app: cinder-api
-  {{ if .Values.network.api.node_port.enabled }}
-  type: NodePort
-  {{ end }}

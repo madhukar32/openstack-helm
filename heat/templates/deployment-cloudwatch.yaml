@@ -14,31 +14,19 @@
 
 {{- $envAll := . }}
 {{- $dependencies := .Values.dependencies.cloudwatch }}
-{{- $mounts_heat_cloudwatch := .Values.mounts.heat_cloudwatch.heat_cloudwatch }}
-{{- $mounts_heat_cloudwatch_init := .Values.mounts.heat_cloudwatch.init_container }}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: heat-cloudwatch
 spec:
   replicas: {{ .Values.replicas.cloudwatch }}
-  revisionHistoryLimit: {{ .Values.upgrades.revision_history }}
-  strategy:
-    type: {{ .Values.upgrades.pod_replacement_strategy }}
-    {{ if eq .Values.upgrades.pod_replacement_strategy "RollingUpdate" }}
-    rollingUpdate:
-      maxUnavailable: {{ .Values.upgrades.rolling_update.max_unavailable }}
-      maxSurge: {{ .Values.upgrades.rolling_update.max_surge }}
-    {{ end }}
   template:
     metadata:
       labels:
         app: heat-cloudwatch
       annotations:
-        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.utils.hash" }}
-        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.utils.hash" }}
         pod.beta.kubernetes.io/init-containers: '[
-{{ tuple $envAll $dependencies $mounts_heat_cloudwatch_init | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 10 }}
+{{ tuple $envAll $dependencies "[]" | include "helm-toolkit.kubernetes_entrypoint_init_container" | indent 10 }}
         ]'
     spec:
       nodeSelector:
@@ -59,36 +47,40 @@ spec:
           command:
             - heat-api-cloudwatch
             - --config-dir
-            - /etc/heat
+            - /etc/heat/conf
           ports:
-            - containerPort: {{ .Values.conf.heat.heat_api_cloudwatch.heat.common.wsgi.bind_port }}
+            - containerPort: {{ .Values.network.cloudwatch.port }}
           readinessProbe:
             tcpSocket:
-              port: {{ .Values.conf.heat.heat_api_cloudwatch.heat.common.wsgi.bind_port }}
+              port: {{ .Values.network.cloudwatch.port }}
           volumeMounts:
             - name: pod-etc-heat
               mountPath: /etc/heat
             - name: pod-var-cache-heat
               mountPath: /var/cache/heat
-            - name: heat-etc
-              mountPath: /etc/heat/heat.conf
+            - name: heatconf
+              mountPath: /etc/heat/conf/heat.conf
               subPath: heat.conf
               readOnly: true
-            - name: heat-etc
+            - name: heatpaste
               mountPath: /etc/heat/api-paste.ini
               subPath: api-paste.ini
               readOnly: true
-            - name: heat-etc
+            - name: heatpolicy
               mountPath: /etc/heat/policy.json
               subPath: policy.json
               readOnly: true
-{{ if $mounts_heat_cloudwatch.volumeMounts }}{{ toYaml $mounts_heat_cloudwatch.volumeMounts | indent 12 }}{{ end }}
       volumes:
         - name: pod-etc-heat
           emptyDir: {}
         - name: pod-var-cache-heat
           emptyDir: {}
-        - name: heat-etc
+        - name: heatconf
           configMap:
             name: heat-etc
-{{ if $mounts_heat_cloudwatch.volumes }}{{ toYaml $mounts_heat_cloudwatch.volumes | indent 8 }}{{ end }}
+        - name: heatpaste
+          configMap:
+            name: heat-etc
+        - name: heatpolicy
+          configMap:
+            name: heat-etc

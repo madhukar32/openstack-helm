@@ -14,31 +14,19 @@
 
 {{- $envAll := . }}
 {{- $dependencies := .Values.dependencies.api }}
-{{- $mounts_heat_api := .Values.mounts.heat_api.heat_api }}
-{{- $mounts_heat_api_init := .Values.mounts.heat_api.init_container }}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: heat-api
 spec:
   replicas: {{ .Values.replicas.api }}
-  revisionHistoryLimit: {{ .Values.upgrades.revision_history }}
-  strategy:
-    type: {{ .Values.upgrades.pod_replacement_strategy }}
-    {{ if eq .Values.upgrades.pod_replacement_strategy "RollingUpdate" }}
-    rollingUpdate:
-      maxUnavailable: {{ .Values.upgrades.rolling_update.max_unavailable }}
-      maxSurge: {{ .Values.upgrades.rolling_update.max_surge }}
-    {{ end }}
   template:
     metadata:
       labels:
         app: heat-api
       annotations:
-        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.utils.hash" }}
-        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.utils.hash" }}
         pod.beta.kubernetes.io/init-containers: '[
-{{ tuple $envAll $dependencies $mounts_heat_api_init | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 10 }}
+{{ tuple $envAll $dependencies "[]" | include "helm-toolkit.kubernetes_entrypoint_init_container" | indent 10 }}
         ]'
     spec:
       nodeSelector:
@@ -59,36 +47,40 @@ spec:
           command:
             - heat-api
             - --config-dir
-            - /etc/heat
+            - /etc/heat/conf
           ports:
-            - containerPort: {{ .Values.conf.heat.heat_api.heat.common.wsgi.bind_port }}
+            - containerPort: {{ .Values.network.api.port }}
           readinessProbe:
             tcpSocket:
-              port: {{ .Values.conf.heat.heat_api.heat.common.wsgi.bind_port }}
+              port: {{ .Values.network.api.port }}
           volumeMounts:
             - name: pod-etc-heat
               mountPath: /etc/heat
             - name: pod-var-cache-heat
               mountPath: /var/cache/heat
-            - name: heat-etc
-              mountPath: /etc/heat/heat.conf
+            - name: heatconf
+              mountPath: /etc/heat/conf/heat.conf
               subPath: heat.conf
               readOnly: true
-            - name: heat-etc
+            - name: heatpaste
               mountPath: /etc/heat/api-paste.ini
               subPath: api-paste.ini
               readOnly: true
-            - name: heat-etc
+            - name: heatpolicy
               mountPath: /etc/heat/policy.json
               subPath: policy.json
               readOnly: true
-{{ if $mounts_heat_api.volumeMounts }}{{ toYaml $mounts_heat_api.volumeMounts | indent 12 }}{{ end }}
       volumes:
         - name: pod-etc-heat
           emptyDir: {}
         - name: pod-var-cache-heat
           emptyDir: {}
-        - name: heat-etc
+        - name: heatconf
           configMap:
             name: heat-etc
-{{ if $mounts_heat_api.volumes }}{{ toYaml $mounts_heat_api.volumes | indent 8 }}{{ end }}
+        - name: heatpaste
+          configMap:
+            name: heat-etc
+        - name: heatpolicy
+          configMap:
+            name: heat-etc

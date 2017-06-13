@@ -18,12 +18,6 @@ metadata:
   name: neutron-server
 spec:
   ports:
-    - port: {{ .Values.network.server.port }}
-    {{ if .Values.network.server.node_port.enabled }}
-      nodePort: {{ .Values.network.server.node_port.port }}
-    {{ end }}
+    - port: {{ .Values.network.port.server }}
   selector:
     app: neutron-server
-  {{ if .Values.network.server.node_port.enabled }}
-  type: NodePort
-  {{ end }}

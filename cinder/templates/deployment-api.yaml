@@ -33,10 +33,10 @@ spec:
       labels:
         app: cinder-api
       annotations:
-        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.utils.hash" }}
-        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.utils.hash" }}
+        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.hash" }}
+        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.hash" }}
         pod.beta.kubernetes.io/init-containers: '[
-{{ tuple $envAll $dependencies "[]" | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 10 }}
+{{ tuple $envAll $dependencies "[]" | include "helm-toolkit.kubernetes_entrypoint_init_container" | indent 10 }}
         ]'
     spec:
       nodeSelector:
@@ -60,24 +60,24 @@ spec:
           - /etc/cinder/conf
           ports:
             - name: c-api
-              containerPort: {{ .Values.network.api.port }}
+              containerPort: {{ .Values.network.port.api }}
           readinessProbe:
             tcpSocket:
-              port: {{ .Values.network.api.port }}
+              port: {{ .Values.network.port.api }}
           volumeMounts:
             - name: pod-etc-cinder
               mountPath: /etc/cinder
             - name: pod-var-cache-cinder
               mountPath: /var/cache/cinder
-            - name: cinder-etc
+            - name: cinderconf
               mountPath: /etc/cinder/conf/cinder.conf
               subPath: cinder.conf
               readOnly: true
-            - name: cinder-etc
+            - name: cinderpaste
               mountPath: /etc/cinder/api-paste.ini
               subPath: api-paste.ini
               readOnly: true
-            - name: cinder-etc
+            - name: cinderpolicy
               mountPath: /etc/cinder/policy.json
               subPath: policy.json
               readOnly: true
@@ -86,6 +86,12 @@ spec:
           emptyDir: {}
         - name: pod-var-cache-cinder
           emptyDir: {}
-        - name: cinder-etc
+        - name: cinderconf
+          configMap:
+            name: cinder-etc
+        - name: cinderpaste
+          configMap:
+            name: cinder-etc
+        - name: cinderpolicy
           configMap:
             name: cinder-etc

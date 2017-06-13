@@ -14,23 +14,25 @@
 
 {{- $envAll := . }}
 {{- $dependencies := .Values.dependencies.registry }}
-{{- $mounts_glance_registry := .Values.mounts.glance_registry.glance_registry }}
-{{- $mounts_glance_registry_init := .Values.mounts.glance_registry.init_container }}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: glance-registry
 spec:
+{{- if .Values.development.enabled }}
+  replicas: 1
+{{- else }}
   replicas: {{ .Values.replicas.registry }}
+{{- end }}
   template:
     metadata:
       labels:
         app: glance-registry
       annotations:
-        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.utils.hash" }}
-        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.utils.hash" }}
+        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.hash" }}
+        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.hash" }}
         pod.beta.kubernetes.io/init-containers: '[
-{{ tuple $envAll $dependencies $mounts_glance_registry_init | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 10 }}
+{{ tuple $envAll $dependencies "[]" | include "helm-toolkit.kubernetes_entrypoint_init_container" | indent 10 }}
         ]'
     spec:
       nodeSelector:
@@ -39,7 +41,7 @@ spec:
         - name: glance-registry
           image: {{ .Values.images.registry }}
           imagePullPolicy: {{ .Values.images.pull_policy }}
-          {{- if .Values.resources.enabled }}
+          {{- if .Values.resources.enabled }}  
           resources:
             limits:
               cpu: {{ .Values.resources.registry.limits.cpu | quote }}
@@ -53,30 +55,34 @@ spec:
           - --config-file
           - /etc/glance/glance-registry.conf
           ports:
-            - containerPort: {{ .Values.conf.glance_registry.default.glance.registry.bind_port }}
+            - containerPort: {{ .Values.network.port.registry }}
           readinessProbe:
             tcpSocket:
-              port: {{ .Values.conf.glance_registry.default.glance.registry.bind_port }}
+              port: {{ .Values.network.port.registry }}
           volumeMounts:
             - name: etcglance
               mountPath: /etc/glance
-            - name: glance-etc
+            - name: glanceregistryconf
               mountPath: /etc/glance/glance-registry.conf
               subPath: glance-registry.conf
               readOnly: true
-            - name: glance-etc
+            - name: glanceregistrypaste
               mountPath: /etc/glance/glance-registry-paste.ini
               subPath: glance-registry-paste.ini
               readOnly: true
-            - name: glance-etc
+            - name: glancepolicy
               mountPath: /etc/glance/policy.json
               subPath: policy.json
               readOnly: true
-{{ if $mounts_glance_registry.volumeMounts }}{{ toYaml $mounts_glance_registry.volumeMounts | indent 12 }}{{ end }}
       volumes:
         - name: etcglance
           emptyDir: {}
-        - name: glance-etc
+        - name: glanceregistryconf
           configMap:
             name: glance-etc
-{{ if $mounts_glance_registry.volumes }}{{ toYaml $mounts_glance_registry.volumes | indent 8 }}{{ end }}
+        - name: glanceregistrypaste
+          configMap:
+            name: glance-etc
+        - name: glancepolicy
+          configMap:
+            name: glance-etc

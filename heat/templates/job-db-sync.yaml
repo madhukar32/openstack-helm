@@ -23,7 +23,7 @@ spec:
     metadata:
       annotations:
         pod.beta.kubernetes.io/init-containers: '[
-{{ tuple $envAll $dependencies "[]" | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 10 }}
+{{ tuple $envAll $dependencies "[]" | include "helm-toolkit.kubernetes_entrypoint_init_container" | indent 10 }}
         ]'
     spec:
       restartPolicy: OnFailure
@@ -43,25 +43,21 @@ spec:
               cpu: {{ .Values.resources.heat_db_sync.limits.cpu | quote }}
           {{- end }}
           command:
-            - bash
-            - /tmp/db-sync.sh
+            - heat-manage
+          args:
+            - --config-dir
+            - /etc/heat/conf
+            - db_sync
           volumeMounts:
-            - name: heat-bin
-              mountPath: /tmp/db-sync.sh
-              subPath: db-sync.sh
-              readOnly: true
-            - name: etcheat
+            - name: pod-etc-heat
               mountPath: /etc/heat
-            - name: heat-etc
-              mountPath: /etc/heat/heat.conf
+            - name: heatconf
+              mountPath: /etc/heat/conf/heat.conf
               subPath: heat.conf
               readOnly: true
       volumes:
-        - name: etcheat
+        - name: pod-etc-heat
           emptyDir: {}
-        - name: heat-etc
+        - name: heatconf
           configMap:
             name: heat-etc
-        - name: heat-bin
-          configMap:
-            name: heat-bin

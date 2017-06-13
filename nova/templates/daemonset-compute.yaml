@@ -14,9 +14,6 @@
 
 {{- $envAll := . }}
 {{- $dependencies := .Values.dependencies.compute }}
-{{- $mounts_nova_compute := .Values.mounts.nova_compute.nova_compute }}
-{{- $mounts_nova_compute_init := .Values.mounts.nova_compute.init_container }}
-
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
@@ -27,14 +24,14 @@ spec:
       labels:
         app: nova-compute
       annotations:
-        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.utils.hash" }}
-        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.utils.hash" }}
+        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.hash" }}
+        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.hash" }}
         pod.beta.kubernetes.io/init-containers: '[
-{{ tuple $envAll $dependencies $mounts_nova_compute_init | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 10 }}
+{{ tuple $envAll $dependencies "[]" | include "helm-toolkit.kubernetes_entrypoint_init_container" | indent 10 }}
         ]'
     spec:
       nodeSelector:
-        {{ .Values.labels.agent.compute.node_selector_key }}: {{ .Values.labels.agent.compute.node_selector_value }}
+        {{ .Values.labels.compute_node_selector_key }}: {{ .Values.labels.compute_node_selector_value }}
       securityContext:
         runAsUser: 0
       hostNetwork: true
@@ -56,52 +53,48 @@ spec:
           securityContext:
             privileged: true
           command:
-            - bash
-            - /tmp/nova-compute.sh
+            - nova-compute
+            - --config-file
+            - /etc/nova/nova.conf
           volumeMounts:
-            - name: nova-bin
-              mountPath: /tmp/nova-compute.sh
-              subPath: nova-compute.sh
-              readOnly: true
-            - name: nova-etc
+            - name: novaconf
               mountPath: /etc/nova/nova.conf
               subPath: nova.conf
-              readOnly: true
-            - name: nova-etc
-              mountPath: /etc/nova/api-paste.ini
-              subPath: api-paste.ini
-              readOnly: true
-            - name: nova-etc
-              mountPath: /etc/resolv.conf
-              subPath: resolv.conf
-              readOnly: true
-            - name: nova-etc
-              mountPath: /etc/ceph/ceph.conf
-              subPath: ceph.conf
-              readOnly: true
-            - name: nova-etc
-              mountPath: /etc/ceph/ceph.client.keyring
-              subPath: ceph.client.keyring
-              readOnly: true
             - mountPath: /lib/modules
               name: libmodules
               readOnly: true
-            - name: varlibnova
-              mountPath: /var/lib/nova
-            - name: varliblibvirt
-              mountPath: /var/lib/libvirt
-            - name: run
-              mountPath: /run
-            - name: cgroup
-              mountPath: /sys/fs/cgroup
-{{ if $mounts_nova_compute.volumeMounts }}{{ toYaml $mounts_nova_compute.volumeMounts | indent 12 }}{{ end }}
+            - mountPath: /var/lib/nova
+              name: varlibnova
+            - mountPath: /var/lib/libvirt
+              name: varliblibvirt
+            - mountPath: /run
+              name: run
+            - mountPath: /sys/fs/cgroup
+              name: cgroup
+            - mountPath: /etc/resolv.conf
+              name: resolvconf
+              subPath: resolv.conf
+            {{- if .Values.ceph.enabled }}
+            - name: cephconf
+              mountPath: /etc/ceph/ceph.conf
+              subPath: ceph.conf
+            - name: cephclientcinderkeyring
+              mountPath: /etc/ceph/ceph.client.{{ .Values.ceph.cinder_user }}.keyring
+              subPath: ceph.client.{{ .Values.ceph.cinder_user }}.keyring
+            {{- end }}
       volumes:
-        - name: nova-bin
-          configMap:
-            name: nova-bin
-        - name: nova-etc
+        - name: novaconf
           configMap:
             name: nova-etc
+            items:
+            - key: nova.conf
+              path: nova.conf
+        - name: resolvconf
+          configMap:
+            name: nova-etc
+            items:
+            - key: resolv.conf
+              path: resolv.conf
         - name: libmodules
           hostPath:
             path: /lib/modules
@@ -117,4 +110,17 @@ spec:
         - name: cgroup
           hostPath:
             path: /sys/fs/cgroup
-{{ if $mounts_nova_compute.volumes }}{{ toYaml $mounts_nova_compute.volumes | indent 8 }}{{ end }}
+        {{- if .Values.ceph.enabled }}
+        - name: cephconf
+          configMap:
+            name: nova-etc
+            items:
+            - key: ceph.conf
+              path: ceph.conf
+        - name: cephclientcinderkeyring
+          configMap:
+            name: nova-etc
+            items:
+            - key: ceph.client.cinder.keyring.yaml
+              path: ceph.client.cinder.keyring.yaml
+        {{- end }}

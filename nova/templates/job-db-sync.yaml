@@ -23,12 +23,12 @@ spec:
     metadata:
       annotations:
         pod.beta.kubernetes.io/init-containers: '[
-{{ tuple $envAll $dependencies "[]" | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 10 }}
+{{ tuple $envAll $dependencies "[]" | include "helm-toolkit.kubernetes_entrypoint_init_container" | indent 10 }}
         ]'
     spec:
       restartPolicy: OnFailure
       nodeSelector:
-        {{ .Values.labels.job.node_selector_key }}: {{ .Values.labels.job.node_selector_value }}
+        {{ .Values.labels.control_node_selector_key }}: {{ .Values.labels.control_node_selector_value }}
       containers:
         - name: nova-db-sync
           image: {{ .Values.images.db_sync }}
@@ -46,20 +46,14 @@ spec:
             - bash
             - /tmp/db-sync.sh
           volumeMounts:
+            - name: novaconf
+              mountPath: /etc/nova/nova.conf
+              subPath: nova.conf
             - name: nova-bin
               mountPath: /tmp/db-sync.sh
               subPath: db-sync.sh
-              readOnly: true
-            - name: etcnova
-              mountPath: /etc/nova
-            - name: nova-etc
-              mountPath: /etc/nova/nova.conf
-              subPath: nova.conf
-              readOnly: true
       volumes:
-        - name: etcnova
-          emptyDir: {}
-        - name: nova-etc
+        - name: novaconf
           configMap:
             name: nova-etc
         - name: nova-bin

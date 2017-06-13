@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+{{- if not .Values.sdn.opencontrail.enabled }}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
@@ -22,8 +23,8 @@ spec:
       labels:
         app: ovs-vswitchd
       annotations:
-        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.utils.hash" }}
-        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.utils.hash" }}
+        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.hash" }}
+        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.hash" }}
     spec:
       nodeSelector:
         {{ .Values.labels.ovs.node_selector_key }}: {{ .Values.labels.ovs.node_selector_value }}
@@ -57,21 +58,22 @@ spec:
             - bash
             - /tmp/openvswitch-vswitchd.sh
           volumeMounts:
-            - name: neutron-bin
+            - name: openvswitchvswitchdsh
               mountPath: /tmp/openvswitch-vswitchd.sh
               subPath: openvswitch-vswitchd.sh
-              readOnly: true
-            - name: neutron-bin
+            - name: openvswitchensureconfiguredsh
               mountPath: /tmp/openvswitch-ensure-configured.sh
               subPath: openvswitch-ensure-configured.sh
-              readOnly: true
             - name: libmodules
               mountPath: /lib/modules
               readOnly: true
             - name: run
               mountPath: /run
       volumes:
-        - name: neutron-bin
+        - name: openvswitchvswitchdsh
+          configMap:
+            name: neutron-bin
+        - name: openvswitchensureconfiguredsh
           configMap:
             name: neutron-bin
         - name: libmodules
@@ -80,3 +82,4 @@ spec:
         - name: run
           hostPath:
             path: /run
+{{- end }}

@@ -19,12 +19,6 @@ metadata:
 spec:
   ports:
   - name: nova-metadata
-    port: {{ .Values.network.metadata.port }}
-    {{ if .Values.network.metadata.node_port.enabled }}
-      nodePort: {{ .Values.network.metadata.node_port.port }}
-    {{ end }}
+    port: {{ .Values.network.port.metadata }}
   selector:
-    app: nova-api-metadata
-  {{ if .Values.network.metadata.node_port.enabled }}
-  type: NodePort
-  {{ end }}
+    app: nova-api

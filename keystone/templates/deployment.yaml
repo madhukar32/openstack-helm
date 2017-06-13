@@ -35,10 +35,10 @@ spec:
       labels:
         app: keystone-api
       annotations:
-        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.utils.hash" }}
-        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.utils.hash" }}
+        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.hash" }}
+        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.hash" }}
         pod.beta.kubernetes.io/init-containers: '[
-{{ tuple $envAll $dependencies $mounts_keystone_api_init | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 10 }}
+{{ tuple $envAll $dependencies $mounts_keystone_api_init | include "helm-toolkit.kubernetes_entrypoint_init_container" | indent 10 }}
         ]'
     spec:
       nodeSelector:
@@ -61,9 +61,9 @@ spec:
             - /tmp/start.sh
           ports:
             - name: api-public
-              containerPort: {{ .Values.network.api.port }}
+              containerPort: {{ .Values.network.port.api }}
             - name: api-admin
-              containerPort: {{ .Values.network.admin.port }}
+              containerPort: {{ .Values.network.port.admin }}
           lifecycle:
             preStop:
               exec:
@@ -73,46 +73,8 @@ spec:
                   - graceful-stop
           readinessProbe:
             tcpSocket:
-              port: {{ .Values.network.api.port }}
-          volumeMounts:
-          - name: etckeystone
-            mountPath: /etc/keystone
-          - name: keystone-etc
-            mountPath: /etc/keystone/keystone.conf
-            subPath: keystone.conf
-            readOnly: true
-          - name: keystone-etc
-            mountPath: /etc/keystone/keystone-paste.ini
-            subPath: keystone-paste.ini
-            readOnly: true
-          - name: keystone-etc
-            mountPath: /etc/keystone/policy.json
-            subPath: policy.json
-            readOnly: true
-          - name: keystone-etc
-            mountPath: /etc/keystone/sso_callback_template.html
-            subPath: sso_callback_template.html
-            readOnly: true
-          - name: keystone-etc
-            mountPath: /etc/apache2/conf-enabled/wsgi-keystone.conf
-            subPath: wsgi-keystone.conf
-            readOnly: true
-          - name: keystone-etc
-            mountPath: /etc/apache2/mods-available/mpm_event.conf
-            subPath: mpm_event.conf
-            readOnly: true
-          - name: keystone-bin
-            mountPath: /tmp/start.sh
-            subPath: start.sh
-            readOnly: true
-{{ if $mounts_keystone_api.volumeMounts }}{{ toYaml $mounts_keystone_api.volumeMounts | indent 10 }}{{ end }}
+              port: {{ .Values.network.port.api }}
+          volumeMounts:            
+{{ toYaml $mounts_keystone_api.volumeMounts | indent 12 }}
       volumes:
-      - name: etckeystone
-        emptyDir: {}
-      - name: keystone-etc
-        configMap:
-          name: keystone-etc
-      - name: keystone-bin
-        configMap:
-          name: keystone-bin
-{{ if $mounts_keystone_api.volumes }}{{ toYaml $mounts_keystone_api.volumes | indent 6 }}{{ end }}
+{{ toYaml $mounts_keystone_api.volumes | indent 8 }}

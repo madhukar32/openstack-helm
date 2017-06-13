@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Default values for cinder.
+# Default values for keystone.
 # This is a YAML-formatted file.
 # Declare name/value pairs to be passed into your templates.
 # name: value
@@ -27,15 +27,15 @@ labels:
   node_selector_value: enabled
 
 images:
-  db_init: docker.io/kolla/ubuntu-source-cinder-api:3.0.3
-  db_sync: docker.io/kolla/ubuntu-source-cinder-api:3.0.3
-  ks_user: docker.io/kolla/ubuntu-source-kolla-toolbox:3.0.3
-  ks_service: docker.io/kolla/ubuntu-source-kolla-toolbox:3.0.3
-  ks_endpoints: docker.io/kolla/ubuntu-source-kolla-toolbox:3.0.3
-  api: docker.io/kolla/ubuntu-source-cinder-api:3.0.3
-  scheduler: docker.io/kolla/ubuntu-source-cinder-scheduler:3.0.3
-  volume: docker.io/kolla/ubuntu-source-cinder-volume:3.0.3
-  dep_check: docker.io/kolla/ubuntu-source-kubernetes-entrypoint:4.0.0
+  dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.1.1
+  ks_user: quay.io/stackanetes/stackanetes-kolla-toolbox:newton
+  ks_service: quay.io/stackanetes/stackanetes-kolla-toolbox:newton
+  ks_endpoints: quay.io/stackanetes/stackanetes-kolla-toolbox:newton
+  db_init: quay.io/stackanetes/stackanetes-kolla-toolbox:newton
+  db_sync: quay.io/stackanetes/stackanetes-cinder-api:newton
+  api: quay.io/stackanetes/stackanetes-cinder-api:newton
+  scheduler: quay.io/stackanetes/stackanetes-cinder-scheduler:newton
+  volume: quay.io/stackanetes/stackanetes-cinder-volume:newton
   pull_policy: "IfNotPresent"
 
 upgrades:
@@ -44,10 +44,6 @@ upgrades:
   rolling_update:
     max_unavailable: 1
     max_surge: 3
-
-pod_disruption_budget:
-  api:
-    min_available: 0
 
 keystone:
   admin_user: "admin"
@@ -66,12 +62,17 @@ keystone:
   cinder_region_name: "RegionOne"
 
 network:
-  api:
-    name: "cinder-api"
-    port: 8776
-    node_port:
-      enabled: false
-      port: 30877
+  port:
+    api: 8776
+
+database:
+  address: mariadb
+  port: 3306
+  root_user: root
+  root_password: password
+  cinder_database_name: cinder
+  cinder_password: password
+  cinder_user: cinder
 
 ceph:
   enabled: true
@@ -107,6 +108,8 @@ misc:
 
 dependencies:
   db_init:
+    jobs:
+    - mariadb-seed
     service:
     - mariadb
   db_sync:
@@ -196,20 +199,6 @@ endpoints:
     scheme: 'http'
     port:
       api: 8776
-  oslo_db:
-    auth:
-      admin:
-        username: root
-        password: password
-      user:
-        username: cinder
-        password: password
-    hosts:
-      default: mariadb
-    path: /cinder
-    scheme: mysql+pymysql
-    port:
-      mysql: 3306
 
 resources:
   enabled: false

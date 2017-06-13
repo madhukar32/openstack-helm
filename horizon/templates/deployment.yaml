@@ -14,8 +14,6 @@
 
 {{- $envAll := . }}
 {{- $dependencies := .Values.dependencies.dashboard }}
-{{- $mounts_horizon := .Values.mounts.horizon.horizon }}
-{{- $mounts_horizon_init := .Values.mounts.horizon.init_container }}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -29,16 +27,16 @@ spec:
     rollingUpdate:
       maxUnavailable: {{ .Values.upgrades.rolling_update.max_unavailable }}
       maxSurge: {{ .Values.upgrades.rolling_update.max_surge }}
-    {{ end }}
+    {{ end }}  
   template:
     metadata:
       labels:
         app: horizon
       annotations:
-        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.utils.hash" }}
-        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.utils.hash" }}
+        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.hash" }}
+        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.hash" }}
         pod.beta.kubernetes.io/init-containers: '[
-{{ tuple $envAll $dependencies $mounts_horizon_init | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 10 }}
+{{ tuple $envAll $dependencies "[]" | include "helm-toolkit.kubernetes_entrypoint_init_container" | indent 10 }}
         ]'
     spec:
       nodeSelector:
@@ -68,20 +66,21 @@ spec:
             - name: startsh
               mountPath: /tmp/start.sh
               subPath: start.sh
-            - name: horizon-etc
+            - name: horizonconf
               mountPath: /etc/apache2/sites-enabled/000-default.conf
               subPath: horizon.conf
-            - name: horizon-etc
+            - name: localsettings
               mountPath: /etc/openstack-dashboard/local_settings
               subPath: local_settings
-{{ if $mounts_horizon.volumeMounts }}{{ toYaml $mounts_horizon.volumeMounts | indent 12 }}{{ end }}
           securityContext:
-            runAsUser: 0
+            runAsUser: 0              
       volumes:
         - name: startsh
           configMap:
             name: horizon-bin
-        - name: horizon-etc
+        - name: horizonconf
           configMap:
             name: horizon-etc
-{{ if $mounts_horizon.volumes }}{{ toYaml $mounts_horizon.volumes | indent 8 }}{{ end }}
+        - name: localsettings
+          configMap:
+            name: horizon-etc

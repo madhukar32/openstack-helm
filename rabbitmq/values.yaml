@@ -69,7 +69,6 @@ endpoints:
 autocluster:
   log_level: info
   delay: 15
-  node_type: disc
 
 probes_delay: 180
 probes_timeout: 10
