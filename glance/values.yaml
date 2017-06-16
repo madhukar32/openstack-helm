@@ -22,7 +22,7 @@ replicas:
   registry: 1
 
 # ceph or pvc
-storage: ceph
+storage: file
 
 labels:
   node_selector_key: openstack-control-plane
@@ -30,14 +30,14 @@ labels:
 
 images:
   test: docker.io/kolla/ubuntu-binary-rally:4.0.0
-  db_init: docker.io/kolla/ubuntu-source-glance-api:3.0.3
-  db_sync: docker.io/kolla/ubuntu-source-glance-api:3.0.3
-  ks_user: docker.io/kolla/ubuntu-source-kolla-toolbox:3.0.3
-  ks_service: docker.io/kolla/ubuntu-source-kolla-toolbox:3.0.3
-  ks_endpoints: docker.io/kolla/ubuntu-source-kolla-toolbox:3.0.3
-  api: docker.io/kolla/ubuntu-source-glance-api:3.0.3
-  registry: docker.io/kolla/ubuntu-source-glance-registry:3.0.3
-  bootstrap: docker.io/kolla/ubuntu-source-kolla-toolbox:3.0.3
+  db_init: docker.io/kolla/ubuntu-source-glance-api:4.0.0
+  db_sync: docker.io/kolla/ubuntu-source-glance-api:4.0.0
+  ks_user: docker.io/kolla/ubuntu-source-kolla-toolbox:4.0.0
+  ks_service: docker.io/kolla/ubuntu-source-kolla-toolbox:4.0.0
+  ks_endpoints: docker.io/kolla/ubuntu-source-kolla-toolbox:4.0.0
+  api: docker.io/kolla/ubuntu-source-glance-api:4.0.0
+  registry: docker.io/kolla/ubuntu-source-glance-registry:4.0.0
+  bootstrap: docker.io/kolla/ubuntu-source-kolla-toolbox:4.0.0
   dep_check: docker.io/kolla/ubuntu-source-kubernetes-entrypoint:4.0.0
   pull_policy: "IfNotPresent"
 
@@ -95,7 +95,7 @@ conf:
       container_format: bare
   ceph:
     monitors: []
-    keyring: null
+    keyring: foo
     override:
     append:
   ceph_client:
@@ -128,13 +128,13 @@ conf:
     glance_store:
       glance:
         store:
-          stores: file, http, rbd
-          default_store: rbd
-          rbd_store_chunk_size: 8
-          rbd_store_pool: images
-          rbd_store_user: admin
-          rbd_store_ceph_conf: /etc/ceph/ceph.conf
-          filesystem_store_datadir: /var/lib/glance/images
+          stores: file
+          default_store: file
+          #rbd_store_chunk_size: 8
+          #rbd_store_pool: images
+          #rbd_store_user: admin
+          #rbd_store_ceph_conf: /etc/ceph/ceph.conf
+          #filesystem_store_datadir: /var/lib/glance/images
   paste_registry:
     override:
     append:

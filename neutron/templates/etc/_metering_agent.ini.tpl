@@ -1,4 +1,3 @@
-
 # Copyright 2017 The Openstack-Helm Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,22 +15,53 @@
 {{ include "neutron.conf.metering_agent_values_skeleton" .Values.conf.metering_agent | trunc 0 }}
 {{ include "neutron.conf.metering_agent" .Values.conf.metering_agent }}
 
-
 {{- define "neutron.conf.metering_agent_values_skeleton" -}}
 
 {{- if not .default -}}{{- set . "default" dict -}}{{- end -}}
 {{- if not .default.neutron -}}{{- set .default "neutron" dict -}}{{- end -}}
+{{- if not .default.neutron.base -}}{{- set .default.neutron "base" dict -}}{{- end -}}
+{{- if not .default.neutron.base.agent -}}{{- set .default.neutron.base "agent" dict -}}{{- end -}}
 {{- if not .default.neutron.metering -}}{{- set .default.neutron "metering" dict -}}{{- end -}}
 {{- if not .default.neutron.metering.agent -}}{{- set .default.neutron.metering "agent" dict -}}{{- end -}}
 {{- if not .default.oslo -}}{{- set .default "oslo" dict -}}{{- end -}}
 {{- if not .default.oslo.log -}}{{- set .default.oslo "log" dict -}}{{- end -}}
+{{- if not .agent -}}{{- set . "agent" dict -}}{{- end -}}
+{{- if not .agent.neutron -}}{{- set .agent "neutron" dict -}}{{- end -}}
+{{- if not .agent.neutron.base -}}{{- set .agent.neutron "base" dict -}}{{- end -}}
+{{- if not .agent.neutron.base.agent -}}{{- set .agent.neutron.base "agent" dict -}}{{- end -}}
+{{- if not .ovs -}}{{- set . "ovs" dict -}}{{- end -}}
+{{- if not .ovs.neutron -}}{{- set .ovs "neutron" dict -}}{{- end -}}
+{{- if not .ovs.neutron.base -}}{{- set .ovs.neutron "base" dict -}}{{- end -}}
+{{- if not .ovs.neutron.base.agent -}}{{- set .ovs.neutron.base "agent" dict -}}{{- end -}}
 
 {{- end -}}
-
 
 {{- define "neutron.conf.metering_agent" -}}
 
 [DEFAULT]
+
+#
+# From neutron.base.agent
+#
+
+# Name of Open vSwitch bridge to use (string value)
+# from .default.neutron.base.agent.ovs_integration_bridge
+{{ if not .default.neutron.base.agent.ovs_integration_bridge }}#{{ end }}ovs_integration_bridge = {{ .default.neutron.base.agent.ovs_integration_bridge | default "br-int" }}
+
+# Uses veth for an OVS interface or not. Support kernels with limited namespace
+# support (e.g. RHEL 6.5) so long as ovs_use_veth is set to True. (boolean
+# value)
+# from .default.neutron.base.agent.ovs_use_veth
+{{ if not .default.neutron.base.agent.ovs_use_veth }}#{{ end }}ovs_use_veth = {{ .default.neutron.base.agent.ovs_use_veth | default "false" }}
+
+# The driver used to manage the virtual interface. (string value)
+# from .default.neutron.base.agent.interface_driver
+{{ if not .default.neutron.base.agent.interface_driver }}#{{ end }}interface_driver = {{ .default.neutron.base.agent.interface_driver | default "<None>" }}
+
+# Timeout in seconds for ovs-vsctl commands. If the timeout expires, ovs
+# commands will fail with ALARMCLOCK error. (integer value)
+# from .default.neutron.base.agent.ovs_vsctl_timeout
+{{ if not .default.neutron.base.agent.ovs_vsctl_timeout }}#{{ end }}ovs_vsctl_timeout = {{ .default.neutron.base.agent.ovs_vsctl_timeout | default "10" }}
 
 #
 # From neutron.metering.agent
@@ -48,10 +78,6 @@
 # Interval between two metering reports (integer value)
 # from .default.neutron.metering.agent.report_interval
 {{ if not .default.neutron.metering.agent.report_interval }}#{{ end }}report_interval = {{ .default.neutron.metering.agent.report_interval | default "300" }}
-
-# The driver used to manage the virtual interface. (string value)
-# from .default.neutron.metering.agent.interface_driver
-{{ if not .default.neutron.metering.agent.interface_driver }}#{{ end }}interface_driver = {{ .default.neutron.metering.agent.interface_driver | default "<None>" }}
 
 #
 # From oslo.log
@@ -122,7 +148,7 @@
 # Log output to standard error. This option is ignored if log_config_append is
 # set. (boolean value)
 # from .default.oslo.log.use_stderr
-{{ if not .default.oslo.log.use_stderr }}#{{ end }}use_stderr = {{ .default.oslo.log.use_stderr | default "true" }}
+{{ if not .default.oslo.log.use_stderr }}#{{ end }}use_stderr = {{ .default.oslo.log.use_stderr | default "false" }}
 
 # Format string to use for log messages with context. (string value)
 # from .default.oslo.log.logging_context_format_string
@@ -166,8 +192,59 @@
 # from .default.oslo.log.instance_uuid_format
 {{ if not .default.oslo.log.instance_uuid_format }}#{{ end }}instance_uuid_format = {{ .default.oslo.log.instance_uuid_format | default "\"[instance: %(uuid)s] \"" }}
 
+# Interval, number of seconds, of log rate limiting. (integer value)
+# from .default.oslo.log.rate_limit_interval
+{{ if not .default.oslo.log.rate_limit_interval }}#{{ end }}rate_limit_interval = {{ .default.oslo.log.rate_limit_interval | default "0" }}
+
+# Maximum number of logged messages per rate_limit_interval. (integer value)
+# from .default.oslo.log.rate_limit_burst
+{{ if not .default.oslo.log.rate_limit_burst }}#{{ end }}rate_limit_burst = {{ .default.oslo.log.rate_limit_burst | default "0" }}
+
+# Log level name used by rate limiting: CRITICAL, ERROR, INFO, WARNING, DEBUG
+# or empty string. Logs with level greater or equal to rate_limit_except_level
+# are not filtered. An empty string means that all levels are filtered. (string
+# value)
+# from .default.oslo.log.rate_limit_except_level
+{{ if not .default.oslo.log.rate_limit_except_level }}#{{ end }}rate_limit_except_level = {{ .default.oslo.log.rate_limit_except_level | default "CRITICAL" }}
+
 # Enables or disables fatal status of deprecations. (boolean value)
 # from .default.oslo.log.fatal_deprecations
 {{ if not .default.oslo.log.fatal_deprecations }}#{{ end }}fatal_deprecations = {{ .default.oslo.log.fatal_deprecations | default "false" }}
 
+
+[agent]
+
+#
+# From neutron.base.agent
+#
+
+# Seconds between nodes reporting state to server; should be less than
+# agent_down_time, best if it is half or less than agent_down_time. (floating
+# point value)
+# from .agent.neutron.base.agent.report_interval
+{{ if not .agent.neutron.base.agent.report_interval }}#{{ end }}report_interval = {{ .agent.neutron.base.agent.report_interval | default "30" }}
+
+# Log agent heartbeats (boolean value)
+# from .agent.neutron.base.agent.log_agent_heartbeats
+{{ if not .agent.neutron.base.agent.log_agent_heartbeats }}#{{ end }}log_agent_heartbeats = {{ .agent.neutron.base.agent.log_agent_heartbeats | default "false" }}
+
+
+[ovs]
+
+#
+# From neutron.base.agent
+#
+
+# The interface for interacting with the OVSDB (string value)
+# Allowed values: vsctl, native
+# from .ovs.neutron.base.agent.ovsdb_interface
+{{ if not .ovs.neutron.base.agent.ovsdb_interface }}#{{ end }}ovsdb_interface = {{ .ovs.neutron.base.agent.ovsdb_interface | default "native" }}
+
+# The connection string for the OVSDB backend. Will be used by ovsdb-client
+# when monitoring and used for the all ovsdb commands when native
+# ovsdb_interface is enabled (string value)
+# from .ovs.neutron.base.agent.ovsdb_connection
+{{ if not .ovs.neutron.base.agent.ovsdb_connection }}#{{ end }}ovsdb_connection = {{ .ovs.neutron.base.agent.ovsdb_connection | default "tcp:127.0.0.1:6640" }}
+
 {{- end -}}
+

@@ -24,11 +24,11 @@ labels:
   node_selector_value: enabled
 
 images:
-  bootstrap: docker.io/kolla/ubuntu-source-keystone:3.0.3
+  bootstrap: docker.io/kolla/ubuntu-source-keystone:4.0.0
   test: docker.io/kolla/ubuntu-binary-rally:4.0.0
-  db_init: docker.io/kolla/ubuntu-source-keystone:3.0.3
-  db_sync: docker.io/kolla/ubuntu-source-keystone:3.0.3
-  api: docker.io/kolla/ubuntu-source-keystone:3.0.3
+  db_init: docker.io/kolla/ubuntu-source-keystone:4.0.0
+  db_sync: docker.io/kolla/ubuntu-source-keystone:4.0.0
+  api: docker.io/kolla/ubuntu-source-keystone:4.0.0
   dep_check: docker.io/kolla/ubuntu-source-kubernetes-entrypoint:4.0.0
   pull_policy: "IfNotPresent"
 

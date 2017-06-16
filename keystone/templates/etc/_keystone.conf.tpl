@@ -55,6 +55,9 @@
 {{- if not .federation.keystone -}}{{- set .federation "keystone" dict -}}{{- end -}}
 {{- if not .fernet_tokens -}}{{- set . "fernet_tokens" dict -}}{{- end -}}
 {{- if not .fernet_tokens.keystone -}}{{- set .fernet_tokens "keystone" dict -}}{{- end -}}
+{{- if not .healthcheck -}}{{- set . "healthcheck" dict -}}{{- end -}}
+{{- if not .healthcheck.oslo -}}{{- set .healthcheck "oslo" dict -}}{{- end -}}
+{{- if not .healthcheck.oslo.middleware -}}{{- set .healthcheck.oslo "middleware" dict -}}{{- end -}}
 {{- if not .identity -}}{{- set . "identity" dict -}}{{- end -}}
 {{- if not .identity.keystone -}}{{- set .identity "keystone" dict -}}{{- end -}}
 {{- if not .identity_mapping -}}{{- set . "identity_mapping" dict -}}{{- end -}}
@@ -70,11 +73,12 @@
 {{- if not .memcache.keystone -}}{{- set .memcache "keystone" dict -}}{{- end -}}
 {{- if not .oauth1 -}}{{- set . "oauth1" dict -}}{{- end -}}
 {{- if not .oauth1.keystone -}}{{- set .oauth1 "keystone" dict -}}{{- end -}}
-{{- if not .os_inherit -}}{{- set . "os_inherit" dict -}}{{- end -}}
-{{- if not .os_inherit.keystone -}}{{- set .os_inherit "keystone" dict -}}{{- end -}}
 {{- if not .oslo_messaging_amqp -}}{{- set . "oslo_messaging_amqp" dict -}}{{- end -}}
 {{- if not .oslo_messaging_amqp.oslo -}}{{- set .oslo_messaging_amqp "oslo" dict -}}{{- end -}}
 {{- if not .oslo_messaging_amqp.oslo.messaging -}}{{- set .oslo_messaging_amqp.oslo "messaging" dict -}}{{- end -}}
+{{- if not .oslo_messaging_kafka -}}{{- set . "oslo_messaging_kafka" dict -}}{{- end -}}
+{{- if not .oslo_messaging_kafka.oslo -}}{{- set .oslo_messaging_kafka "oslo" dict -}}{{- end -}}
+{{- if not .oslo_messaging_kafka.oslo.messaging -}}{{- set .oslo_messaging_kafka.oslo "messaging" dict -}}{{- end -}}
 {{- if not .oslo_messaging_notifications -}}{{- set . "oslo_messaging_notifications" dict -}}{{- end -}}
 {{- if not .oslo_messaging_notifications.oslo -}}{{- set .oslo_messaging_notifications "oslo" dict -}}{{- end -}}
 {{- if not .oslo_messaging_notifications.oslo.messaging -}}{{- set .oslo_messaging_notifications.oslo "messaging" dict -}}{{- end -}}
@@ -148,7 +152,7 @@
 # automatically treated as `http://server:5000`. You should only need to set
 # option if either the value of the base URL contains a path that keystone does
 # not automatically infer (`/prefix/v3`), or if the endpoint should be found on
-# a different host. (string value)
+# a different host. (uri value)
 # from .default.keystone.public_endpoint
 {{ if not .default.keystone.public_endpoint }}#{{ end }}public_endpoint = {{ .default.keystone.public_endpoint | default "<None>" }}
 
@@ -159,7 +163,7 @@
 # treated as `http://server:35357`. You should only need to set option if
 # either the value of the base URL contains a path that keystone does not
 # automatically infer (`/prefix/v3`), or if the endpoint should be found on a
-# different host. (string value)
+# different host. (uri value)
 # from .default.keystone.admin_endpoint
 {{ if not .default.keystone.admin_endpoint }}#{{ end }}admin_endpoint = {{ .default.keystone.admin_endpoint | default "<None>" }}
 
@@ -174,12 +178,10 @@
 {{ if not .default.keystone.max_param_size }}#{{ end }}max_param_size = {{ .default.keystone.max_param_size | default "64" }}
 
 # Similar to `[DEFAULT] max_param_size`, but provides an exception for token
-# values. With PKI / PKIZ tokens, this needs to be set close to 8192 (any
-# higher, and other HTTP implementations may break), depending on the size of
-# your service catalog and other factors. With Fernet tokens, this can be set
-# as low as 255. With UUID tokens, this should be set to 32). (integer value)
+# values. With Fernet tokens, this can be set as low as 255. With UUID tokens,
+# this should be set to 32). (integer value)
 # from .default.keystone.max_token_size
-{{ if not .default.keystone.max_token_size }}#{{ end }}max_token_size = {{ .default.keystone.max_token_size | default "8192" }}
+{{ if not .default.keystone.max_token_size }}#{{ end }}max_token_size = {{ .default.keystone.max_token_size | default "255" }}
 
 # Similar to the `[DEFAULT] member_role_name` option, this represents the
 # default role ID used to associate users with their default projects in the v2
@@ -220,20 +222,6 @@
 # from .default.keystone.list_limit
 {{ if not .default.keystone.list_limit }}#{{ end }}list_limit = {{ .default.keystone.list_limit | default "<None>" }}
 
-# DEPRECATED: Set this to false if you want to enable the ability for user,
-# group and project entities to be moved between domains by updating their
-# `domain_id` attribute. Allowing such movement is not recommended if the scope
-# of a domain admin is being restricted by use of an appropriate policy file
-# (see `etc/policy.v3cloudsample.json` as an example). This feature is
-# deprecated and will be removed in a future release, in favor of strictly
-# immutable domain IDs. (boolean value)
-# This option is deprecated for removal since M.
-# Its value may be silently ignored in the future.
-# Reason: The option to set domain_id_immutable to false has been deprecated in
-# the M release and will be removed in the O release.
-# from .default.keystone.domain_id_immutable
-{{ if not .default.keystone.domain_id_immutable }}#{{ end }}domain_id_immutable = {{ .default.keystone.domain_id_immutable | default "true" }}
-
 # If set to true, strict password length checking is performed for password
 # manipulation. If a password exceeds the maximum length, the operation will
 # fail with an HTTP 403 Forbidden error. If set to false, passwords are
@@ -271,17 +259,23 @@
 # recommended for auditing use cases. (string value)
 # Allowed values: basic, cadf
 # from .default.keystone.notification_format
-{{ if not .default.keystone.notification_format }}#{{ end }}notification_format = {{ .default.keystone.notification_format | default "basic" }}
+{{ if not .default.keystone.notification_format }}#{{ end }}notification_format = {{ .default.keystone.notification_format | default "cadf" }}
 
-# If left undefined, keystone will emit notifications for all types of events.
-# You can reduce the number of notifications keystone emits by using this
-# option to enumerate notification topics that should be suppressed. Values are
-# expected to be in the form `identity.<resource_type>.<operation>`. This field
-# can be set multiple times in order to opt-out of multiple notification
-# topics. For example: notification_opt_out=identity.user.create
+# You can reduce the number of notifications keystone emits by explicitly
+# opting out. Keystone will not emit notifications that match the patterns
+# expressed in this list. Values are expected to be in the form of
+# `identity.<resource_type>.<operation>`. By default, all notifications related
+# to authentication are automatically suppressed. This field can be set
+# multiple times in order to opt-out of multiple notification topics. For
+# example, the following suppresses notifications describing user creation or
+# successful authentication events: notification_opt_out=identity.user.create
 # notification_opt_out=identity.authenticate.success (multi valued)
 # from .default.keystone.notification_opt_out (multiopt)
-{{ if not .default.keystone.notification_opt_out }}#notification_opt_out = {{ .default.keystone.notification_opt_out | default "" }}{{ else }}{{ range .default.keystone.notification_opt_out }}notification_opt_out = {{ . }}{{ end }}{{ end }}
+{{ if not .default.keystone.notification_opt_out }}#notification_opt_out = {{ .default.keystone.notification_opt_out | default "identity.authenticate.success" }}{{ else }}{{ range .default.keystone.notification_opt_out }}notification_opt_out = {{ . }}{{ end }}{{ end }}
+# from .default.keystone.notification_opt_out (multiopt)
+{{ if not .default.keystone.notification_opt_out }}#notification_opt_out = {{ .default.keystone.notification_opt_out | default "identity.authenticate.pending" }}{{ else }}{{ range .default.keystone.notification_opt_out }}notification_opt_out = {{ . }}{{ end }}{{ end }}
+# from .default.keystone.notification_opt_out (multiopt)
+{{ if not .default.keystone.notification_opt_out }}#notification_opt_out = {{ .default.keystone.notification_opt_out | default "identity.authenticate.failed" }}{{ else }}{{ range .default.keystone.notification_opt_out }}notification_opt_out = {{ . }}{{ end }}{{ end }}
 
 #
 # From oslo.log
@@ -352,7 +346,7 @@
 # Log output to standard error. This option is ignored if log_config_append is
 # set. (boolean value)
 # from .default.oslo.log.use_stderr
-{{ if not .default.oslo.log.use_stderr }}#{{ end }}use_stderr = {{ .default.oslo.log.use_stderr | default "true" }}
+{{ if not .default.oslo.log.use_stderr }}#{{ end }}use_stderr = {{ .default.oslo.log.use_stderr | default "false" }}
 
 # Format string to use for log messages with context. (string value)
 # from .default.oslo.log.logging_context_format_string
@@ -396,6 +390,21 @@
 # from .default.oslo.log.instance_uuid_format
 {{ if not .default.oslo.log.instance_uuid_format }}#{{ end }}instance_uuid_format = {{ .default.oslo.log.instance_uuid_format | default "\"[instance: %(uuid)s] \"" }}
 
+# Interval, number of seconds, of log rate limiting. (integer value)
+# from .default.oslo.log.rate_limit_interval
+{{ if not .default.oslo.log.rate_limit_interval }}#{{ end }}rate_limit_interval = {{ .default.oslo.log.rate_limit_interval | default "0" }}
+
+# Maximum number of logged messages per rate_limit_interval. (integer value)
+# from .default.oslo.log.rate_limit_burst
+{{ if not .default.oslo.log.rate_limit_burst }}#{{ end }}rate_limit_burst = {{ .default.oslo.log.rate_limit_burst | default "0" }}
+
+# Log level name used by rate limiting: CRITICAL, ERROR, INFO, WARNING, DEBUG
+# or empty string. Logs with level greater or equal to rate_limit_except_level
+# are not filtered. An empty string means that all levels are filtered. (string
+# value)
+# from .default.oslo.log.rate_limit_except_level
+{{ if not .default.oslo.log.rate_limit_except_level }}#{{ end }}rate_limit_except_level = {{ .default.oslo.log.rate_limit_except_level | default "CRITICAL" }}
+
 # Enables or disables fatal status of deprecations. (boolean value)
 # from .default.oslo.log.fatal_deprecations
 {{ if not .default.oslo.log.fatal_deprecations }}#{{ end }}fatal_deprecations = {{ .default.oslo.log.fatal_deprecations | default "false" }}
@@ -424,7 +433,7 @@
 {{ if not .default.oslo.messaging.rpc_zmq_bind_address }}#{{ end }}rpc_zmq_bind_address = {{ .default.oslo.messaging.rpc_zmq_bind_address | default "*" }}
 
 # MatchMaker driver. (string value)
-# Allowed values: redis, dummy
+# Allowed values: redis, sentinel, dummy
 # Deprecated group/name - [DEFAULT]/rpc_zmq_matchmaker
 # from .default.oslo.messaging.rpc_zmq_matchmaker
 {{ if not .default.oslo.messaging.rpc_zmq_matchmaker }}#{{ end }}rpc_zmq_matchmaker = {{ .default.oslo.messaging.rpc_zmq_matchmaker | default "redis" }}
@@ -451,13 +460,14 @@
 # from .default.oslo.messaging.rpc_zmq_host
 {{ if not .default.oslo.messaging.rpc_zmq_host }}#{{ end }}rpc_zmq_host = {{ .default.oslo.messaging.rpc_zmq_host | default "localhost" }}
 
-# Seconds to wait before a cast expires (TTL). The default value of -1
-# specifies an infinite linger period. The value of 0 specifies no linger
-# period. Pending messages shall be discarded immediately when the socket is
-# closed. Only supported by impl_zmq. (integer value)
+# Number of seconds to wait before all pending messages will be sent after
+# closing a socket. The default value of -1 specifies an infinite linger
+# period. The value of 0 specifies no linger period. Pending messages shall be
+# discarded immediately when the socket is closed. Positive values specify an
+# upper bound for the linger period. (integer value)
 # Deprecated group/name - [DEFAULT]/rpc_cast_timeout
-# from .default.oslo.messaging.rpc_cast_timeout
-{{ if not .default.oslo.messaging.rpc_cast_timeout }}#{{ end }}rpc_cast_timeout = {{ .default.oslo.messaging.rpc_cast_timeout | default "-1" }}
+# from .default.oslo.messaging.zmq_linger
+{{ if not .default.oslo.messaging.zmq_linger }}#{{ end }}zmq_linger = {{ .default.oslo.messaging.zmq_linger | default "-1" }}
 
 # The default number of seconds that poll should wait. Poll raises timeout
 # exception when timeout expired. (integer value)
@@ -481,12 +491,23 @@
 # value)
 # Deprecated group/name - [DEFAULT]/use_pub_sub
 # from .default.oslo.messaging.use_pub_sub
-{{ if not .default.oslo.messaging.use_pub_sub }}#{{ end }}use_pub_sub = {{ .default.oslo.messaging.use_pub_sub | default "true" }}
+{{ if not .default.oslo.messaging.use_pub_sub }}#{{ end }}use_pub_sub = {{ .default.oslo.messaging.use_pub_sub | default "false" }}
 
 # Use ROUTER remote proxy. (boolean value)
 # Deprecated group/name - [DEFAULT]/use_router_proxy
 # from .default.oslo.messaging.use_router_proxy
-{{ if not .default.oslo.messaging.use_router_proxy }}#{{ end }}use_router_proxy = {{ .default.oslo.messaging.use_router_proxy | default "true" }}
+{{ if not .default.oslo.messaging.use_router_proxy }}#{{ end }}use_router_proxy = {{ .default.oslo.messaging.use_router_proxy | default "false" }}
+
+# This option makes direct connections dynamic or static. It makes sense only
+# with use_router_proxy=False which means to use direct connections for direct
+# message types (ignored otherwise). (boolean value)
+# from .default.oslo.messaging.use_dynamic_connections
+{{ if not .default.oslo.messaging.use_dynamic_connections }}#{{ end }}use_dynamic_connections = {{ .default.oslo.messaging.use_dynamic_connections | default "false" }}
+
+# How many additional connections to a host will be made for failover reasons.
+# This option is actual only in dynamic connections mode. (integer value)
+# from .default.oslo.messaging.zmq_failover_connections
+{{ if not .default.oslo.messaging.zmq_failover_connections }}#{{ end }}zmq_failover_connections = {{ .default.oslo.messaging.zmq_failover_connections | default "2" }}
 
 # Minimal port number for random ports range. (port value)
 # Minimum value: 0
@@ -520,7 +541,74 @@
 # even if server is disconnected, when the server appears we send all
 # accumulated messages to it. (boolean value)
 # from .default.oslo.messaging.zmq_immediate
-{{ if not .default.oslo.messaging.zmq_immediate }}#{{ end }}zmq_immediate = {{ .default.oslo.messaging.zmq_immediate | default "false" }}
+{{ if not .default.oslo.messaging.zmq_immediate }}#{{ end }}zmq_immediate = {{ .default.oslo.messaging.zmq_immediate | default "true" }}
+
+# Enable/disable TCP keepalive (KA) mechanism. The default value of -1 (or any
+# other negative value) means to skip any overrides and leave it to OS default;
+# 0 and 1 (or any other positive value) mean to disable and enable the option
+# respectively. (integer value)
+# from .default.oslo.messaging.zmq_tcp_keepalive
+{{ if not .default.oslo.messaging.zmq_tcp_keepalive }}#{{ end }}zmq_tcp_keepalive = {{ .default.oslo.messaging.zmq_tcp_keepalive | default "-1" }}
+
+# The duration between two keepalive transmissions in idle condition. The unit
+# is platform dependent, for example, seconds in Linux, milliseconds in Windows
+# etc. The default value of -1 (or any other negative value and 0) means to
+# skip any overrides and leave it to OS default. (integer value)
+# from .default.oslo.messaging.zmq_tcp_keepalive_idle
+{{ if not .default.oslo.messaging.zmq_tcp_keepalive_idle }}#{{ end }}zmq_tcp_keepalive_idle = {{ .default.oslo.messaging.zmq_tcp_keepalive_idle | default "-1" }}
+
+# The number of retransmissions to be carried out before declaring that remote
+# end is not available. The default value of -1 (or any other negative value
+# and 0) means to skip any overrides and leave it to OS default. (integer
+# value)
+# from .default.oslo.messaging.zmq_tcp_keepalive_cnt
+{{ if not .default.oslo.messaging.zmq_tcp_keepalive_cnt }}#{{ end }}zmq_tcp_keepalive_cnt = {{ .default.oslo.messaging.zmq_tcp_keepalive_cnt | default "-1" }}
+
+# The duration between two successive keepalive retransmissions, if
+# acknowledgement to the previous keepalive transmission is not received. The
+# unit is platform dependent, for example, seconds in Linux, milliseconds in
+# Windows etc. The default value of -1 (or any other negative value and 0)
+# means to skip any overrides and leave it to OS default. (integer value)
+# from .default.oslo.messaging.zmq_tcp_keepalive_intvl
+{{ if not .default.oslo.messaging.zmq_tcp_keepalive_intvl }}#{{ end }}zmq_tcp_keepalive_intvl = {{ .default.oslo.messaging.zmq_tcp_keepalive_intvl | default "-1" }}
+
+# Maximum number of (green) threads to work concurrently. (integer value)
+# from .default.oslo.messaging.rpc_thread_pool_size
+{{ if not .default.oslo.messaging.rpc_thread_pool_size }}#{{ end }}rpc_thread_pool_size = {{ .default.oslo.messaging.rpc_thread_pool_size | default "100" }}
+
+# Expiration timeout in seconds of a sent/received message after which it is
+# not tracked anymore by a client/server. (integer value)
+# from .default.oslo.messaging.rpc_message_ttl
+{{ if not .default.oslo.messaging.rpc_message_ttl }}#{{ end }}rpc_message_ttl = {{ .default.oslo.messaging.rpc_message_ttl | default "300" }}
+
+# Wait for message acknowledgements from receivers. This mechanism works only
+# via proxy without PUB/SUB. (boolean value)
+# from .default.oslo.messaging.rpc_use_acks
+{{ if not .default.oslo.messaging.rpc_use_acks }}#{{ end }}rpc_use_acks = {{ .default.oslo.messaging.rpc_use_acks | default "false" }}
+
+# Number of seconds to wait for an ack from a cast/call. After each retry
+# attempt this timeout is multiplied by some specified multiplier. (integer
+# value)
+# from .default.oslo.messaging.rpc_ack_timeout_base
+{{ if not .default.oslo.messaging.rpc_ack_timeout_base }}#{{ end }}rpc_ack_timeout_base = {{ .default.oslo.messaging.rpc_ack_timeout_base | default "15" }}
+
+# Number to multiply base ack timeout by after each retry attempt. (integer
+# value)
+# from .default.oslo.messaging.rpc_ack_timeout_multiplier
+{{ if not .default.oslo.messaging.rpc_ack_timeout_multiplier }}#{{ end }}rpc_ack_timeout_multiplier = {{ .default.oslo.messaging.rpc_ack_timeout_multiplier | default "2" }}
+
+# Default number of message sending attempts in case of any problems occurred:
+# positive value N means at most N retries, 0 means no retries, None or -1 (or
+# any other negative values) mean to retry forever. This option is used only if
+# acknowledgments are enabled. (integer value)
+# from .default.oslo.messaging.rpc_retry_attempts
+{{ if not .default.oslo.messaging.rpc_retry_attempts }}#{{ end }}rpc_retry_attempts = {{ .default.oslo.messaging.rpc_retry_attempts | default "3" }}
+
+# List of publisher hosts SubConsumer can subscribe on. This option has higher
+# priority then the default publishers list taken from the matchmaker. (list
+# value)
+# from .default.oslo.messaging.subscribe_on
+{{ if not .default.oslo.messaging.subscribe_on }}#{{ end }}subscribe_on = {{ .default.oslo.messaging.subscribe_on | default "" }}
 
 # Size of executor thread pool. (integer value)
 # Deprecated group/name - [DEFAULT]/rpc_thread_pool_size
@@ -558,13 +646,10 @@
 
 # Entry point for the assignment backend driver (where role assignments are
 # stored) in the `keystone.assignment` namespace. Only a SQL driver is supplied
-# by keystone itself. If an assignment driver is not specified, the identity
-# driver will choose the assignment driver based on the deprecated
-# `[identity]/driver` option (the behavior will be removed in the "O" release).
-# Unless you are writing proprietary drivers for keystone, you do not need to
-# set this option. (string value)
+# by keystone itself. Unless you are writing proprietary drivers for keystone,
+# you do not need to set this option. (string value)
 # from .assignment.keystone.driver
-{{ if not .assignment.keystone.driver }}#{{ end }}driver = {{ .assignment.keystone.driver | default "<None>" }}
+{{ if not .assignment.keystone.driver }}#{{ end }}driver = {{ .assignment.keystone.driver | default "sql" }}
 
 # A list of role names which are prohibited from being an implied role. (list
 # value)
@@ -578,9 +663,13 @@
 # From keystone
 #
 
-# Allowed authentication methods. (list value)
+# Allowed authentication methods. Note: You should disable the `external` auth
+# method if you are currently using federation. External auth and federation
+# both use the REMOTE_USER variable. Since both the mapped and external plugin
+# are being invoked to validate attributes in the request environment, it can
+# cause conflicts. (list value)
 # from .auth.keystone.methods
-{{ if not .auth.keystone.methods }}#{{ end }}methods = {{ .auth.keystone.methods | default "external,password,token,oauth1" }}
+{{ if not .auth.keystone.methods }}#{{ end }}methods = {{ .auth.keystone.methods | default "external,password,token,oauth1,mapped" }}
 
 # Entry point for the password auth plugin module in the
 # `keystone.auth.password` namespace. You do not need to set this unless you
@@ -613,6 +702,12 @@
 # overriding keystone's own `oauth1` authentication plugin. (string value)
 # from .auth.keystone.oauth1
 {{ if not .auth.keystone.oauth1 }}#{{ end }}oauth1 = {{ .auth.keystone.oauth1 | default "<None>" }}
+
+# Entry point for the mapped auth plugin module in the `keystone.auth.mapped`
+# namespace. You do not need to set this unless you are overriding keystone's
+# own `mapped` authentication plugin. (string value)
+# from .auth.keystone.mapped
+{{ if not .auth.keystone.mapped }}#{{ end }}mapped = {{ .auth.keystone.mapped | default "<None>" }}
 
 
 [cache]
@@ -1016,17 +1111,6 @@
 # From keystone
 #
 
-# DEPRECATED: Enable endpoint-policy functionality, which allows policies to be
-# associated with either specific endpoints, or endpoints of a given service
-# type. (boolean value)
-# This option is deprecated for removal since M.
-# Its value may be silently ignored in the future.
-# Reason: The option to enable the OS-ENDPOINT-POLICY API extension has been
-# deprecated in the M release and will be removed in the O release. The OS-
-# ENDPOINT-POLICY API extension will be enabled by default.
-# from .endpoint_policy.keystone.enabled
-{{ if not .endpoint_policy.keystone.enabled }}#{{ end }}enabled = {{ .endpoint_policy.keystone.enabled | default "true" }}
-
 # Entry point for the endpoint policy driver in the `keystone.endpoint_policy`
 # namespace. Only a `sql` driver is provided by keystone, so there is no reason
 # to set this unless you are providing a custom entry point. (string value)
@@ -1184,6 +1268,39 @@
 {{ if not .fernet_tokens.keystone.max_active_keys }}#{{ end }}max_active_keys = {{ .fernet_tokens.keystone.max_active_keys | default "3" }}
 
 
+[healthcheck]
+
+#
+# From oslo.middleware
+#
+
+# DEPRECATED: The path to respond to healtcheck requests on. (string value)
+# This option is deprecated for removal.
+# Its value may be silently ignored in the future.
+# from .healthcheck.oslo.middleware.path
+{{ if not .healthcheck.oslo.middleware.path }}#{{ end }}path = {{ .healthcheck.oslo.middleware.path | default "/healthcheck" }}
+
+# Show more detailed information as part of the response (boolean value)
+# from .healthcheck.oslo.middleware.detailed
+{{ if not .healthcheck.oslo.middleware.detailed }}#{{ end }}detailed = {{ .healthcheck.oslo.middleware.detailed | default "false" }}
+
+# Additional backends that can perform health checks and report that
+# information back as part of a request. (list value)
+# from .healthcheck.oslo.middleware.backends
+{{ if not .healthcheck.oslo.middleware.backends }}#{{ end }}backends = {{ .healthcheck.oslo.middleware.backends | default "" }}
+
+# Check the presence of a file to determine if an application is running on a
+# port. Used by DisableByFileHealthcheck plugin. (string value)
+# from .healthcheck.oslo.middleware.disable_by_file_path
+{{ if not .healthcheck.oslo.middleware.disable_by_file_path }}#{{ end }}disable_by_file_path = {{ .healthcheck.oslo.middleware.disable_by_file_path | default "<None>" }}
+
+# Check the presence of a file based on a port to determine if an application
+# is running on a port. Expects a "port:path" list of strings. Used by
+# DisableByFilesPortsHealthcheck plugin. (list value)
+# from .healthcheck.oslo.middleware.disable_by_file_paths
+{{ if not .healthcheck.oslo.middleware.disable_by_file_paths }}#{{ end }}disable_by_file_paths = {{ .healthcheck.oslo.middleware.disable_by_file_paths | default "" }}
+
+
 [identity]
 
 #
@@ -1307,34 +1424,51 @@
 # From keystone
 #
 
-# Extra `dogpile.cache` backend modules to register with the `dogpile.cache`
-# library. It is not necessary to set this value unless you are providing a
-# custom KVS backend beyond what `dogpile.cache` already supports. (list value)
+# DEPRECATED: Extra `dogpile.cache` backend modules to register with the
+# `dogpile.cache` library. It is not necessary to set this value unless you are
+# providing a custom KVS backend beyond what `dogpile.cache` already supports.
+# (list value)
+# This option is deprecated for removal since O.
+# Its value may be silently ignored in the future.
+# Reason: This option has been deprecated in the O release and will be removed
+# in the P release. Use SQL backends instead.
 # from .kvs.keystone.backends
 {{ if not .kvs.keystone.backends }}#{{ end }}backends = {{ .kvs.keystone.backends | default "" }}
 
-# Prefix for building the configuration dictionary for the KVS region. This
-# should not need to be changed unless there is another `dogpile.cache` region
-# with the same configuration name. (string value)
+# DEPRECATED: Prefix for building the configuration dictionary for the KVS
+# region. This should not need to be changed unless there is another
+# `dogpile.cache` region with the same configuration name. (string value)
+# This option is deprecated for removal since O.
+# Its value may be silently ignored in the future.
+# Reason: This option has been deprecated in the O release and will be removed
+# in the P release. Use SQL backends instead.
 # from .kvs.keystone.config_prefix
 {{ if not .kvs.keystone.config_prefix }}#{{ end }}config_prefix = {{ .kvs.keystone.config_prefix | default "keystone.kvs" }}
 
-# Set to false to disable using a key-mangling function, which ensures fixed-
-# length keys are used in the KVS store. This is configurable for debugging
-# purposes, and it is therefore highly recommended to always leave this set to
-# true. (boolean value)
+# DEPRECATED: Set to false to disable using a key-mangling function, which
+# ensures fixed-length keys are used in the KVS store. This is configurable for
+# debugging purposes, and it is therefore highly recommended to always leave
+# this set to true. (boolean value)
+# This option is deprecated for removal since O.
+# Its value may be silently ignored in the future.
+# Reason: This option has been deprecated in the O release and will be removed
+# in the P release. Use SQL backends instead.
 # from .kvs.keystone.enable_key_mangler
 {{ if not .kvs.keystone.enable_key_mangler }}#{{ end }}enable_key_mangler = {{ .kvs.keystone.enable_key_mangler | default "true" }}
 
-# Number of seconds after acquiring a distributed lock that the backend should
-# consider the lock to be expired. This option should be tuned relative to the
-# longest amount of time that it takes to perform a successful operation. If
-# this value is set too low, then a cluster will end up performing work
-# redundantly. If this value is set too high, then a cluster will not be able
-# to efficiently recover and retry after a failed operation. A non-zero value
-# is recommended if the backend supports lock timeouts, as zero prevents locks
-# from expiring altogether. (integer value)
+# DEPRECATED: Number of seconds after acquiring a distributed lock that the
+# backend should consider the lock to be expired. This option should be tuned
+# relative to the longest amount of time that it takes to perform a successful
+# operation. If this value is set too low, then a cluster will end up
+# performing work redundantly. If this value is set too high, then a cluster
+# will not be able to efficiently recover and retry after a failed operation. A
+# non-zero value is recommended if the backend supports lock timeouts, as zero
+# prevents locks from expiring altogether. (integer value)
 # Minimum value: 0
+# This option is deprecated for removal since O.
+# Its value may be silently ignored in the future.
+# Reason: This option has been deprecated in the O release and will be removed
+# in the P release. Use SQL backends instead.
 # from .kvs.keystone.default_lock_timeout
 {{ if not .kvs.keystone.default_lock_timeout }}#{{ end }}default_lock_timeout = {{ .kvs.keystone.default_lock_timeout | default "5" }}
 
@@ -1365,36 +1499,6 @@
 # `[ldap] user_tree_dn` or `[ldap] group_tree_dn`. (string value)
 # from .ldap.keystone.suffix
 {{ if not .ldap.keystone.suffix }}#{{ end }}suffix = {{ .ldap.keystone.suffix | default "cn=example,cn=com" }}
-
-# DEPRECATED: If true, keystone will add a dummy member based on the `[ldap]
-# dumb_member` option when creating new groups. This is required if the object
-# class for groups requires the `member` attribute. This option is only used
-# for write operations. (boolean value)
-# This option is deprecated for removal since M.
-# Its value may be silently ignored in the future.
-# Reason: Write support for the LDAP identity backend has been deprecated in
-# the Mitaka release and will be removed in the Ocata release.
-# from .ldap.keystone.use_dumb_member
-{{ if not .ldap.keystone.use_dumb_member }}#{{ end }}use_dumb_member = {{ .ldap.keystone.use_dumb_member | default "false" }}
-
-# DEPRECATED: DN of the "dummy member" to use when `[ldap] use_dumb_member` is
-# enabled. This option is only used for write operations. (string value)
-# This option is deprecated for removal since M.
-# Its value may be silently ignored in the future.
-# Reason: Write support for the LDAP identity backend has been deprecated in
-# the Mitaka release and will be removed in the Ocata release.
-# from .ldap.keystone.dumb_member
-{{ if not .ldap.keystone.dumb_member }}#{{ end }}dumb_member = {{ .ldap.keystone.dumb_member | default "cn=dumb,dc=nonexistent" }}
-
-# DEPRECATED: Delete subtrees using the subtree delete control. Only enable
-# this option if your LDAP server supports subtree deletion. This option is
-# only used for write operations. (boolean value)
-# This option is deprecated for removal since M.
-# Its value may be silently ignored in the future.
-# Reason: Write support for the LDAP identity backend has been deprecated in
-# the Mitaka release and will be removed in the Ocata release.
-# from .ldap.keystone.allow_subtree_delete
-{{ if not .ldap.keystone.allow_subtree_delete }}#{{ end }}allow_subtree_delete = {{ .ldap.keystone.allow_subtree_delete | default "false" }}
 
 # The search scope which defines how deep to search within the search base. A
 # value of `one` (representing `oneLevel` or `singleLevel`) indicates a search
@@ -1507,12 +1611,8 @@
 # from .ldap.keystone.user_enabled_default
 {{ if not .ldap.keystone.user_enabled_default }}#{{ end }}user_enabled_default = {{ .ldap.keystone.user_enabled_default | default "True" }}
 
-# DEPRECATED: List of user attributes to ignore on create and update. This is
-# only used for write operations. (list value)
-# This option is deprecated for removal since M.
-# Its value may be silently ignored in the future.
-# Reason: Write support for the LDAP identity backend has been deprecated in
-# the Mitaka release and will be removed in the Ocata release.
+# List of user attributes to ignore on create and update, or whether a specific
+# user attribute should be filtered for list or show user. (list value)
 # from .ldap.keystone.user_attribute_ignore
 {{ if not .ldap.keystone.user_attribute_ignore }}#{{ end }}user_attribute_ignore = {{ .ldap.keystone.user_attribute_ignore | default "default_project_id" }}
 
@@ -1520,33 +1620,6 @@
 # most commonly used when keystone has write access to LDAP. (string value)
 # from .ldap.keystone.user_default_project_id_attribute
 {{ if not .ldap.keystone.user_default_project_id_attribute }}#{{ end }}user_default_project_id_attribute = {{ .ldap.keystone.user_default_project_id_attribute | default "<None>" }}
-
-# DEPRECATED: If enabled, keystone is allowed to create users in the LDAP
-# server. (boolean value)
-# This option is deprecated for removal since M.
-# Its value may be silently ignored in the future.
-# Reason: Write support for the LDAP identity backend has been deprecated in
-# the Mitaka release and will be removed in the Ocata release.
-# from .ldap.keystone.user_allow_create
-{{ if not .ldap.keystone.user_allow_create }}#{{ end }}user_allow_create = {{ .ldap.keystone.user_allow_create | default "true" }}
-
-# DEPRECATED: If enabled, keystone is allowed to update users in the LDAP
-# server. (boolean value)
-# This option is deprecated for removal since M.
-# Its value may be silently ignored in the future.
-# Reason: Write support for the LDAP identity backend has been deprecated in
-# the Mitaka release and will be removed in the Ocata release.
-# from .ldap.keystone.user_allow_update
-{{ if not .ldap.keystone.user_allow_update }}#{{ end }}user_allow_update = {{ .ldap.keystone.user_allow_update | default "true" }}
-
-# DEPRECATED: If enabled, keystone is allowed to delete users in the LDAP
-# server. (boolean value)
-# This option is deprecated for removal since M.
-# Its value may be silently ignored in the future.
-# Reason: Write support for the LDAP identity backend has been deprecated in
-# the Mitaka release and will be removed in the Ocata release.
-# from .ldap.keystone.user_allow_delete
-{{ if not .ldap.keystone.user_allow_delete }}#{{ end }}user_allow_delete = {{ .ldap.keystone.user_allow_delete | default "true" }}
 
 # If enabled, keystone uses an alternative method to determine if a user is
 # enabled or not by checking if they are a member of the group defined by the
@@ -1618,41 +1691,11 @@
 # from .ldap.keystone.group_desc_attribute
 {{ if not .ldap.keystone.group_desc_attribute }}#{{ end }}group_desc_attribute = {{ .ldap.keystone.group_desc_attribute | default "description" }}
 
-# DEPRECATED: List of group attributes to ignore on create and update. This is
-# only used for write operations. (list value)
-# This option is deprecated for removal since M.
-# Its value may be silently ignored in the future.
-# Reason: Write support for the LDAP identity backend has been deprecated in
-# the Mitaka release and will be removed in the Ocata release.
+# List of group attributes to ignore on create and update. or whether a
+# specific group attribute should be filtered for list or show group. (list
+# value)
 # from .ldap.keystone.group_attribute_ignore
 {{ if not .ldap.keystone.group_attribute_ignore }}#{{ end }}group_attribute_ignore = {{ .ldap.keystone.group_attribute_ignore | default "" }}
-
-# DEPRECATED: If enabled, keystone is allowed to create groups in the LDAP
-# server. (boolean value)
-# This option is deprecated for removal since M.
-# Its value may be silently ignored in the future.
-# Reason: Write support for the LDAP identity backend has been deprecated in
-# the Mitaka release and will be removed in the Ocata release.
-# from .ldap.keystone.group_allow_create
-{{ if not .ldap.keystone.group_allow_create }}#{{ end }}group_allow_create = {{ .ldap.keystone.group_allow_create | default "true" }}
-
-# DEPRECATED: If enabled, keystone is allowed to update groups in the LDAP
-# server. (boolean value)
-# This option is deprecated for removal since M.
-# Its value may be silently ignored in the future.
-# Reason: Write support for the LDAP identity backend has been deprecated in
-# the Mitaka release and will be removed in the Ocata release.
-# from .ldap.keystone.group_allow_update
-{{ if not .ldap.keystone.group_allow_update }}#{{ end }}group_allow_update = {{ .ldap.keystone.group_allow_update | default "true" }}
-
-# DEPRECATED: If enabled, keystone is allowed to delete groups in the LDAP
-# server. (boolean value)
-# This option is deprecated for removal since M.
-# Its value may be silently ignored in the future.
-# Reason: Write support for the LDAP identity backend has been deprecated in
-# the Mitaka release and will be removed in the Ocata release.
-# from .ldap.keystone.group_allow_delete
-{{ if not .ldap.keystone.group_allow_delete }}#{{ end }}group_allow_delete = {{ .ldap.keystone.group_allow_delete | default "true" }}
 
 # A list of LDAP attribute to keystone group attribute pairs used for mapping
 # additional attributes to groups in keystone. The expected format is
@@ -1662,7 +1705,7 @@
 # from .ldap.keystone.group_additional_attribute_mapping
 {{ if not .ldap.keystone.group_additional_attribute_mapping }}#{{ end }}group_additional_attribute_mapping = {{ .ldap.keystone.group_additional_attribute_mapping | default "" }}
 
-# If enabled, groups queries will use Active Directory specific filters for
+# If enabled, group queries will use Active Directory specific filters for
 # nested groups. (boolean value)
 # from .ldap.keystone.group_ad_nesting
 {{ if not .ldap.keystone.group_ad_nesting }}#{{ end }}group_ad_nesting = {{ .ldap.keystone.group_ad_nesting | default "false" }}
@@ -1695,6 +1738,12 @@
 # from .ldap.keystone.tls_req_cert
 {{ if not .ldap.keystone.tls_req_cert }}#{{ end }}tls_req_cert = {{ .ldap.keystone.tls_req_cert | default "demand" }}
 
+# The connection timeout to use with the LDAP server. A value of `-1` means
+# that connections will never timeout. (integer value)
+# Minimum value: -1
+# from .ldap.keystone.connection_timeout
+{{ if not .ldap.keystone.connection_timeout }}#{{ end }}connection_timeout = {{ .ldap.keystone.connection_timeout | default "-1" }}
+
 # Enable LDAP connection pooling for queries to the LDAP server. There is
 # typically no reason to disable this. (boolean value)
 # from .ldap.keystone.use_pool
@@ -1719,9 +1768,9 @@
 # from .ldap.keystone.pool_retry_delay
 {{ if not .ldap.keystone.pool_retry_delay }}#{{ end }}pool_retry_delay = {{ .ldap.keystone.pool_retry_delay | default "0.1" }}
 
-# The connection timeout to use with the LDAP server. A value of `-1` means
-# that connections will never timeout. This option has no effect unless `[ldap]
-# use_pool` is also enabled. (integer value)
+# The connection timeout to use when pooling LDAP connections. A value of `-1`
+# means that connections will never timeout. This option has no effect unless
+# `[ldap] use_pool` is also enabled. (integer value)
 # Minimum value: -1
 # from .ldap.keystone.pool_connection_timeout
 {{ if not .ldap.keystone.pool_connection_timeout }}#{{ end }}pool_connection_timeout = {{ .ldap.keystone.pool_connection_timeout | default "-1" }}
@@ -1784,7 +1833,7 @@
 # from .matchmaker_redis.oslo.messaging.password
 {{ if not .matchmaker_redis.oslo.messaging.password }}#{{ end }}password = {{ .matchmaker_redis.oslo.messaging.password | default "" }}
 
-# DEPRECATED: List of Redis Sentinel hosts (fault tolerance mode) e.g.
+# DEPRECATED: List of Redis Sentinel hosts (fault tolerance mode), e.g.,
 # [host:port, host1:port ... ] (list value)
 # This option is deprecated for removal.
 # Its value may be silently ignored in the future.
@@ -1804,7 +1853,7 @@
 # from .matchmaker_redis.oslo.messaging.check_timeout
 {{ if not .matchmaker_redis.oslo.messaging.check_timeout }}#{{ end }}check_timeout = {{ .matchmaker_redis.oslo.messaging.check_timeout | default "20000" }}
 
-# Timeout in ms on blocking socket operations (integer value)
+# Timeout in ms on blocking socket operations. (integer value)
 # from .matchmaker_redis.oslo.messaging.socket_timeout
 {{ if not .matchmaker_redis.oslo.messaging.socket_timeout }}#{{ end }}socket_timeout = {{ .matchmaker_redis.oslo.messaging.socket_timeout | default "10000" }}
 
@@ -1815,7 +1864,7 @@
 # From keystone
 #
 
-# Comma-separated list of memcached servers in the format of
+# DEPRECATED: Comma-separated list of memcached servers in the format of
 # `host:port,host:port` that keystone should use for the `memcache` token
 # persistence provider and other memcache-backed KVS drivers. This
 # configuration value is NOT used for intermediary caching between keystone and
@@ -1823,39 +1872,35 @@
 # Multiple keystone servers in the same deployment should use the same set of
 # memcached servers to ensure that data (such as UUID tokens) created by one
 # node is available to the others. (list value)
+# This option is deprecated for removal since O.
+# Its value may be silently ignored in the future.
+# Reason: This option has been deprecated in the O release and will be removed
+# in the P release. Use oslo.cache instead.
 # from .memcache.keystone.servers
 {{ if not .memcache.keystone.servers }}#{{ end }}servers = {{ .memcache.keystone.servers | default "localhost:11211" }}
 
 # Number of seconds memcached server is considered dead before it is tried
-# again. This is used by the key value store system (including, the `memcache`
-# and `memcache_pool` options for the `[token] driver` persistence backend).
-# (integer value)
+# again. This is used by the key value store system. (integer value)
 # from .memcache.keystone.dead_retry
 {{ if not .memcache.keystone.dead_retry }}#{{ end }}dead_retry = {{ .memcache.keystone.dead_retry | default "300" }}
 
 # Timeout in seconds for every call to a server. This is used by the key value
-# store system (including, the `memcache` and `memcache_pool` options for the
-# `[token] driver` persistence backend). (integer value)
+# store system. (integer value)
 # from .memcache.keystone.socket_timeout
 {{ if not .memcache.keystone.socket_timeout }}#{{ end }}socket_timeout = {{ .memcache.keystone.socket_timeout | default "3" }}
 
 # Max total number of open connections to every memcached server. This is used
-# by the key value store system (including, the `memcache` and `memcache_pool`
-# options for the `[token] driver` persistence backend). (integer value)
+# by the key value store system. (integer value)
 # from .memcache.keystone.pool_maxsize
 {{ if not .memcache.keystone.pool_maxsize }}#{{ end }}pool_maxsize = {{ .memcache.keystone.pool_maxsize | default "10" }}
 
 # Number of seconds a connection to memcached is held unused in the pool before
-# it is closed. This is used by the key value store system (including, the
-# `memcache` and `memcache_pool` options for the `[token] driver` persistence
-# backend). (integer value)
+# it is closed. This is used by the key value store system. (integer value)
 # from .memcache.keystone.pool_unused_timeout
 {{ if not .memcache.keystone.pool_unused_timeout }}#{{ end }}pool_unused_timeout = {{ .memcache.keystone.pool_unused_timeout | default "60" }}
 
 # Number of seconds that an operation will wait to get a memcache client
-# connection. This is used by the key value store system (including, the
-# `memcache` and `memcache_pool` options for the `[token] driver` persistence
-# backend). (integer value)
+# connection. This is used by the key value store system. (integer value)
 # from .memcache.keystone.pool_connection_get_timeout
 {{ if not .memcache.keystone.pool_connection_get_timeout }}#{{ end }}pool_connection_get_timeout = {{ .memcache.keystone.pool_connection_get_timeout | default "10" }}
 
@@ -1889,25 +1934,6 @@
 {{ if not .oauth1.keystone.access_token_duration }}#{{ end }}access_token_duration = {{ .oauth1.keystone.access_token_duration | default "86400" }}
 
 
-[os_inherit]
-
-#
-# From keystone
-#
-
-# DEPRECATED: This allows domain-based role assignments to be inherited to
-# projects owned by that domain, or from parent projects to child projects.
-# (boolean value)
-# This option is deprecated for removal since M.
-# Its value may be silently ignored in the future.
-# Reason: The option to disable the OS-INHERIT functionality has been
-# deprecated in the Mitaka release and will be removed in the Ocata release.
-# Starting in the Ocata release, OS-INHERIT functionality will always be
-# enabled.
-# from .os_inherit.keystone.enabled
-{{ if not .os_inherit.keystone.enabled }}#{{ end }}enabled = {{ .os_inherit.keystone.enabled | default "true" }}
-
-
 [oslo_messaging_amqp]
 
 #
@@ -1930,17 +1956,20 @@
 # from .oslo_messaging_amqp.oslo.messaging.trace
 {{ if not .oslo_messaging_amqp.oslo.messaging.trace }}#{{ end }}trace = {{ .oslo_messaging_amqp.oslo.messaging.trace | default "false" }}
 
-# CA certificate PEM file to verify server certificate (string value)
+# CA certificate PEM file used to verify the server's certificate (string
+# value)
 # Deprecated group/name - [amqp1]/ssl_ca_file
 # from .oslo_messaging_amqp.oslo.messaging.ssl_ca_file
 {{ if not .oslo_messaging_amqp.oslo.messaging.ssl_ca_file }}#{{ end }}ssl_ca_file = {{ .oslo_messaging_amqp.oslo.messaging.ssl_ca_file | default "" }}
 
-# Identifying certificate PEM file to present to clients (string value)
+# Self-identifying certificate PEM file for client authentication (string
+# value)
 # Deprecated group/name - [amqp1]/ssl_cert_file
 # from .oslo_messaging_amqp.oslo.messaging.ssl_cert_file
 {{ if not .oslo_messaging_amqp.oslo.messaging.ssl_cert_file }}#{{ end }}ssl_cert_file = {{ .oslo_messaging_amqp.oslo.messaging.ssl_cert_file | default "" }}
 
-# Private key PEM file used to sign cert_file certificate (string value)
+# Private key PEM file used to sign ssl_cert_file certificate (optional)
+# (string value)
 # Deprecated group/name - [amqp1]/ssl_key_file
 # from .oslo_messaging_amqp.oslo.messaging.ssl_key_file
 {{ if not .oslo_messaging_amqp.oslo.messaging.ssl_key_file }}#{{ end }}ssl_key_file = {{ .oslo_messaging_amqp.oslo.messaging.ssl_key_file | default "" }}
@@ -1950,8 +1979,11 @@
 # from .oslo_messaging_amqp.oslo.messaging.ssl_key_password
 {{ if not .oslo_messaging_amqp.oslo.messaging.ssl_key_password }}#{{ end }}ssl_key_password = {{ .oslo_messaging_amqp.oslo.messaging.ssl_key_password | default "<None>" }}
 
-# Accept clients using either SSL or plain TCP (boolean value)
+# DEPRECATED: Accept clients using either SSL or plain TCP (boolean value)
 # Deprecated group/name - [amqp1]/allow_insecure_clients
+# This option is deprecated for removal.
+# Its value may be silently ignored in the future.
+# Reason: Not applicable - not a SSL server
 # from .oslo_messaging_amqp.oslo.messaging.allow_insecure_clients
 {{ if not .oslo_messaging_amqp.oslo.messaging.allow_insecure_clients }}#{{ end }}allow_insecure_clients = {{ .oslo_messaging_amqp.oslo.messaging.allow_insecure_clients | default "false" }}
 
@@ -2003,8 +2035,13 @@
 # from .oslo_messaging_amqp.oslo.messaging.link_retry_delay
 {{ if not .oslo_messaging_amqp.oslo.messaging.link_retry_delay }}#{{ end }}link_retry_delay = {{ .oslo_messaging_amqp.oslo.messaging.link_retry_delay | default "10" }}
 
-# The deadline for an rpc reply message delivery. Only used when caller does
-# not provide a timeout expiry. (integer value)
+# The maximum number of attempts to re-send a reply message which failed due to
+# a recoverable error. (integer value)
+# Minimum value: -1
+# from .oslo_messaging_amqp.oslo.messaging.default_reply_retry
+{{ if not .oslo_messaging_amqp.oslo.messaging.default_reply_retry }}#{{ end }}default_reply_retry = {{ .oslo_messaging_amqp.oslo.messaging.default_reply_retry | default "0" }}
+
+# The deadline for an rpc reply message delivery. (integer value)
 # Minimum value: 5
 # from .oslo_messaging_amqp.oslo.messaging.default_reply_timeout
 {{ if not .oslo_messaging_amqp.oslo.messaging.default_reply_timeout }}#{{ end }}default_reply_timeout = {{ .oslo_messaging_amqp.oslo.messaging.default_reply_timeout | default "30" }}
@@ -2020,6 +2057,12 @@
 # Minimum value: 5
 # from .oslo_messaging_amqp.oslo.messaging.default_notify_timeout
 {{ if not .oslo_messaging_amqp.oslo.messaging.default_notify_timeout }}#{{ end }}default_notify_timeout = {{ .oslo_messaging_amqp.oslo.messaging.default_notify_timeout | default "30" }}
+
+# The duration to schedule a purge of idle sender links. Detach link after
+# expiry. (integer value)
+# Minimum value: 1
+# from .oslo_messaging_amqp.oslo.messaging.default_sender_link_timeout
+{{ if not .oslo_messaging_amqp.oslo.messaging.default_sender_link_timeout }}#{{ end }}default_sender_link_timeout = {{ .oslo_messaging_amqp.oslo.messaging.default_sender_link_timeout | default "600" }}
 
 # Indicates the addressing mode used by the driver.
 # Permitted values:
@@ -2102,6 +2145,78 @@
 # Minimum value: 1
 # from .oslo_messaging_amqp.oslo.messaging.notify_server_credit
 {{ if not .oslo_messaging_amqp.oslo.messaging.notify_server_credit }}#{{ end }}notify_server_credit = {{ .oslo_messaging_amqp.oslo.messaging.notify_server_credit | default "100" }}
+
+# Send messages of this type pre-settled.
+# Pre-settled messages will not receive acknowledgement
+# from the peer. Note well: pre-settled messages may be
+# silently discarded if the delivery fails.
+# Permitted values:
+# 'rpc-call' - send RPC Calls pre-settled
+# 'rpc-reply'- send RPC Replies pre-settled
+# 'rpc-cast' - Send RPC Casts pre-settled
+# 'notify'   - Send Notifications pre-settled
+#  (multi valued)
+# from .oslo_messaging_amqp.oslo.messaging.pre_settled (multiopt)
+{{ if not .oslo_messaging_amqp.oslo.messaging.pre_settled }}#pre_settled = {{ .oslo_messaging_amqp.oslo.messaging.pre_settled | default "rpc-cast" }}{{ else }}{{ range .oslo_messaging_amqp.oslo.messaging.pre_settled }}pre_settled = {{ . }}{{ end }}{{ end }}
+# from .oslo_messaging_amqp.oslo.messaging.pre_settled (multiopt)
+{{ if not .oslo_messaging_amqp.oslo.messaging.pre_settled }}#pre_settled = {{ .oslo_messaging_amqp.oslo.messaging.pre_settled | default "rpc-reply" }}{{ else }}{{ range .oslo_messaging_amqp.oslo.messaging.pre_settled }}pre_settled = {{ . }}{{ end }}{{ end }}
+
+
+[oslo_messaging_kafka]
+
+#
+# From oslo.messaging
+#
+
+# DEPRECATED: Default Kafka broker Host (string value)
+# This option is deprecated for removal.
+# Its value may be silently ignored in the future.
+# Reason: Replaced by [DEFAULT]/transport_url
+# from .oslo_messaging_kafka.oslo.messaging.kafka_default_host
+{{ if not .oslo_messaging_kafka.oslo.messaging.kafka_default_host }}#{{ end }}kafka_default_host = {{ .oslo_messaging_kafka.oslo.messaging.kafka_default_host | default "localhost" }}
+
+# DEPRECATED: Default Kafka broker Port (port value)
+# Minimum value: 0
+# Maximum value: 65535
+# This option is deprecated for removal.
+# Its value may be silently ignored in the future.
+# Reason: Replaced by [DEFAULT]/transport_url
+# from .oslo_messaging_kafka.oslo.messaging.kafka_default_port
+{{ if not .oslo_messaging_kafka.oslo.messaging.kafka_default_port }}#{{ end }}kafka_default_port = {{ .oslo_messaging_kafka.oslo.messaging.kafka_default_port | default "9092" }}
+
+# Max fetch bytes of Kafka consumer (integer value)
+# from .oslo_messaging_kafka.oslo.messaging.kafka_max_fetch_bytes
+{{ if not .oslo_messaging_kafka.oslo.messaging.kafka_max_fetch_bytes }}#{{ end }}kafka_max_fetch_bytes = {{ .oslo_messaging_kafka.oslo.messaging.kafka_max_fetch_bytes | default "1048576" }}
+
+# Default timeout(s) for Kafka consumers (integer value)
+# from .oslo_messaging_kafka.oslo.messaging.kafka_consumer_timeout
+{{ if not .oslo_messaging_kafka.oslo.messaging.kafka_consumer_timeout }}#{{ end }}kafka_consumer_timeout = {{ .oslo_messaging_kafka.oslo.messaging.kafka_consumer_timeout | default "1.0" }}
+
+# Pool Size for Kafka Consumers (integer value)
+# from .oslo_messaging_kafka.oslo.messaging.pool_size
+{{ if not .oslo_messaging_kafka.oslo.messaging.pool_size }}#{{ end }}pool_size = {{ .oslo_messaging_kafka.oslo.messaging.pool_size | default "10" }}
+
+# The pool size limit for connections expiration policy (integer value)
+# from .oslo_messaging_kafka.oslo.messaging.conn_pool_min_size
+{{ if not .oslo_messaging_kafka.oslo.messaging.conn_pool_min_size }}#{{ end }}conn_pool_min_size = {{ .oslo_messaging_kafka.oslo.messaging.conn_pool_min_size | default "2" }}
+
+# The time-to-live in sec of idle connections in the pool (integer value)
+# from .oslo_messaging_kafka.oslo.messaging.conn_pool_ttl
+{{ if not .oslo_messaging_kafka.oslo.messaging.conn_pool_ttl }}#{{ end }}conn_pool_ttl = {{ .oslo_messaging_kafka.oslo.messaging.conn_pool_ttl | default "1200" }}
+
+# Group id for Kafka consumer. Consumers in one group will coordinate message
+# consumption (string value)
+# from .oslo_messaging_kafka.oslo.messaging.consumer_group
+{{ if not .oslo_messaging_kafka.oslo.messaging.consumer_group }}#{{ end }}consumer_group = {{ .oslo_messaging_kafka.oslo.messaging.consumer_group | default "oslo_messaging_consumer" }}
+
+# Upper bound on the delay for KafkaProducer batching in seconds (floating
+# point value)
+# from .oslo_messaging_kafka.oslo.messaging.producer_batch_timeout
+{{ if not .oslo_messaging_kafka.oslo.messaging.producer_batch_timeout }}#{{ end }}producer_batch_timeout = {{ .oslo_messaging_kafka.oslo.messaging.producer_batch_timeout | default "0.0" }}
+
+# Size of batch for the producer async send (integer value)
+# from .oslo_messaging_kafka.oslo.messaging.producer_batch_size
+{{ if not .oslo_messaging_kafka.oslo.messaging.producer_batch_size }}#{{ end }}producer_batch_size = {{ .oslo_messaging_kafka.oslo.messaging.producer_batch_size | default "16384" }}
 
 
 [oslo_messaging_notifications]
@@ -2242,6 +2357,7 @@
 {{ if not .oslo_messaging_rabbit.oslo.messaging.rabbit_password }}#{{ end }}rabbit_password = {{ .oslo_messaging_rabbit.oslo.messaging.rabbit_password | default "guest" }}
 
 # The RabbitMQ login method. (string value)
+# Allowed values: PLAIN, AMQPLAIN, RABBIT-CR-DEMO
 # Deprecated group/name - [DEFAULT]/rabbit_login_method
 # from .oslo_messaging_rabbit.oslo.messaging.rabbit_login_method
 {{ if not .oslo_messaging_rabbit.oslo.messaging.rabbit_login_method }}#{{ end }}rabbit_login_method = {{ .oslo_messaging_rabbit.oslo.messaging.rabbit_login_method | default "AMQPLAIN" }}
@@ -2280,7 +2396,7 @@
 # Try to use HA queues in RabbitMQ (x-ha-policy: all). If you change this
 # option, you must wipe the RabbitMQ database. In RabbitMQ 3.0, queue mirroring
 # is no longer controlled by the x-ha-policy argument when declaring a queue.
-# If you just want to make sure that all queues (except  those with auto-
+# If you just want to make sure that all queues (except those with auto-
 # generated names) are mirrored across all nodes, run: "rabbitmqctl set_policy
 # HA '^(?!amq\.).*' '{"ha-mode": "all"}' " (boolean value)
 # Deprecated group/name - [DEFAULT]/rabbit_ha_queues
@@ -2379,6 +2495,12 @@
 # from .oslo_messaging_rabbit.oslo.messaging.pool_stale
 {{ if not .oslo_messaging_rabbit.oslo.messaging.pool_stale }}#{{ end }}pool_stale = {{ .oslo_messaging_rabbit.oslo.messaging.pool_stale | default "60" }}
 
+# Default serialization mechanism for serializing/deserializing
+# outgoing/incoming messages (string value)
+# Allowed values: json, msgpack
+# from .oslo_messaging_rabbit.oslo.messaging.default_serializer_type
+{{ if not .oslo_messaging_rabbit.oslo.messaging.default_serializer_type }}#{{ end }}default_serializer_type = {{ .oslo_messaging_rabbit.oslo.messaging.default_serializer_type | default "json" }}
+
 # Persist notification messages. (boolean value)
 # from .oslo_messaging_rabbit.oslo.messaging.notification_persistence
 {{ if not .oslo_messaging_rabbit.oslo.messaging.notification_persistence }}#{{ end }}notification_persistence = {{ .oslo_messaging_rabbit.oslo.messaging.notification_persistence | default "false" }}
@@ -2436,7 +2558,7 @@
 
 # Reconnecting retry count in case of connectivity problem during sending RPC
 # message, -1 means infinite retry. If actual retry attempts in not 0 the rpc
-# request could be processed more then one time (integer value)
+# request could be processed more than one time (integer value)
 # from .oslo_messaging_rabbit.oslo.messaging.default_rpc_retry_attempts
 {{ if not .oslo_messaging_rabbit.oslo.messaging.default_rpc_retry_attempts }}#{{ end }}default_rpc_retry_attempts = {{ .oslo_messaging_rabbit.oslo.messaging.default_rpc_retry_attempts | default "-1" }}
 
@@ -2459,7 +2581,7 @@
 {{ if not .oslo_messaging_zmq.oslo.messaging.rpc_zmq_bind_address }}#{{ end }}rpc_zmq_bind_address = {{ .oslo_messaging_zmq.oslo.messaging.rpc_zmq_bind_address | default "*" }}
 
 # MatchMaker driver. (string value)
-# Allowed values: redis, dummy
+# Allowed values: redis, sentinel, dummy
 # Deprecated group/name - [DEFAULT]/rpc_zmq_matchmaker
 # from .oslo_messaging_zmq.oslo.messaging.rpc_zmq_matchmaker
 {{ if not .oslo_messaging_zmq.oslo.messaging.rpc_zmq_matchmaker }}#{{ end }}rpc_zmq_matchmaker = {{ .oslo_messaging_zmq.oslo.messaging.rpc_zmq_matchmaker | default "redis" }}
@@ -2486,13 +2608,14 @@
 # from .oslo_messaging_zmq.oslo.messaging.rpc_zmq_host
 {{ if not .oslo_messaging_zmq.oslo.messaging.rpc_zmq_host }}#{{ end }}rpc_zmq_host = {{ .oslo_messaging_zmq.oslo.messaging.rpc_zmq_host | default "localhost" }}
 
-# Seconds to wait before a cast expires (TTL). The default value of -1
-# specifies an infinite linger period. The value of 0 specifies no linger
-# period. Pending messages shall be discarded immediately when the socket is
-# closed. Only supported by impl_zmq. (integer value)
+# Number of seconds to wait before all pending messages will be sent after
+# closing a socket. The default value of -1 specifies an infinite linger
+# period. The value of 0 specifies no linger period. Pending messages shall be
+# discarded immediately when the socket is closed. Positive values specify an
+# upper bound for the linger period. (integer value)
 # Deprecated group/name - [DEFAULT]/rpc_cast_timeout
-# from .oslo_messaging_zmq.oslo.messaging.rpc_cast_timeout
-{{ if not .oslo_messaging_zmq.oslo.messaging.rpc_cast_timeout }}#{{ end }}rpc_cast_timeout = {{ .oslo_messaging_zmq.oslo.messaging.rpc_cast_timeout | default "-1" }}
+# from .oslo_messaging_zmq.oslo.messaging.zmq_linger
+{{ if not .oslo_messaging_zmq.oslo.messaging.zmq_linger }}#{{ end }}zmq_linger = {{ .oslo_messaging_zmq.oslo.messaging.zmq_linger | default "-1" }}
 
 # The default number of seconds that poll should wait. Poll raises timeout
 # exception when timeout expired. (integer value)
@@ -2516,12 +2639,23 @@
 # value)
 # Deprecated group/name - [DEFAULT]/use_pub_sub
 # from .oslo_messaging_zmq.oslo.messaging.use_pub_sub
-{{ if not .oslo_messaging_zmq.oslo.messaging.use_pub_sub }}#{{ end }}use_pub_sub = {{ .oslo_messaging_zmq.oslo.messaging.use_pub_sub | default "true" }}
+{{ if not .oslo_messaging_zmq.oslo.messaging.use_pub_sub }}#{{ end }}use_pub_sub = {{ .oslo_messaging_zmq.oslo.messaging.use_pub_sub | default "false" }}
 
 # Use ROUTER remote proxy. (boolean value)
 # Deprecated group/name - [DEFAULT]/use_router_proxy
 # from .oslo_messaging_zmq.oslo.messaging.use_router_proxy
-{{ if not .oslo_messaging_zmq.oslo.messaging.use_router_proxy }}#{{ end }}use_router_proxy = {{ .oslo_messaging_zmq.oslo.messaging.use_router_proxy | default "true" }}
+{{ if not .oslo_messaging_zmq.oslo.messaging.use_router_proxy }}#{{ end }}use_router_proxy = {{ .oslo_messaging_zmq.oslo.messaging.use_router_proxy | default "false" }}
+
+# This option makes direct connections dynamic or static. It makes sense only
+# with use_router_proxy=False which means to use direct connections for direct
+# message types (ignored otherwise). (boolean value)
+# from .oslo_messaging_zmq.oslo.messaging.use_dynamic_connections
+{{ if not .oslo_messaging_zmq.oslo.messaging.use_dynamic_connections }}#{{ end }}use_dynamic_connections = {{ .oslo_messaging_zmq.oslo.messaging.use_dynamic_connections | default "false" }}
+
+# How many additional connections to a host will be made for failover reasons.
+# This option is actual only in dynamic connections mode. (integer value)
+# from .oslo_messaging_zmq.oslo.messaging.zmq_failover_connections
+{{ if not .oslo_messaging_zmq.oslo.messaging.zmq_failover_connections }}#{{ end }}zmq_failover_connections = {{ .oslo_messaging_zmq.oslo.messaging.zmq_failover_connections | default "2" }}
 
 # Minimal port number for random ports range. (port value)
 # Minimum value: 0
@@ -2555,7 +2689,74 @@
 # even if server is disconnected, when the server appears we send all
 # accumulated messages to it. (boolean value)
 # from .oslo_messaging_zmq.oslo.messaging.zmq_immediate
-{{ if not .oslo_messaging_zmq.oslo.messaging.zmq_immediate }}#{{ end }}zmq_immediate = {{ .oslo_messaging_zmq.oslo.messaging.zmq_immediate | default "false" }}
+{{ if not .oslo_messaging_zmq.oslo.messaging.zmq_immediate }}#{{ end }}zmq_immediate = {{ .oslo_messaging_zmq.oslo.messaging.zmq_immediate | default "true" }}
+
+# Enable/disable TCP keepalive (KA) mechanism. The default value of -1 (or any
+# other negative value) means to skip any overrides and leave it to OS default;
+# 0 and 1 (or any other positive value) mean to disable and enable the option
+# respectively. (integer value)
+# from .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive
+{{ if not .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive }}#{{ end }}zmq_tcp_keepalive = {{ .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive | default "-1" }}
+
+# The duration between two keepalive transmissions in idle condition. The unit
+# is platform dependent, for example, seconds in Linux, milliseconds in Windows
+# etc. The default value of -1 (or any other negative value and 0) means to
+# skip any overrides and leave it to OS default. (integer value)
+# from .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive_idle
+{{ if not .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive_idle }}#{{ end }}zmq_tcp_keepalive_idle = {{ .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive_idle | default "-1" }}
+
+# The number of retransmissions to be carried out before declaring that remote
+# end is not available. The default value of -1 (or any other negative value
+# and 0) means to skip any overrides and leave it to OS default. (integer
+# value)
+# from .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive_cnt
+{{ if not .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive_cnt }}#{{ end }}zmq_tcp_keepalive_cnt = {{ .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive_cnt | default "-1" }}
+
+# The duration between two successive keepalive retransmissions, if
+# acknowledgement to the previous keepalive transmission is not received. The
+# unit is platform dependent, for example, seconds in Linux, milliseconds in
+# Windows etc. The default value of -1 (or any other negative value and 0)
+# means to skip any overrides and leave it to OS default. (integer value)
+# from .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive_intvl
+{{ if not .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive_intvl }}#{{ end }}zmq_tcp_keepalive_intvl = {{ .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive_intvl | default "-1" }}
+
+# Maximum number of (green) threads to work concurrently. (integer value)
+# from .oslo_messaging_zmq.oslo.messaging.rpc_thread_pool_size
+{{ if not .oslo_messaging_zmq.oslo.messaging.rpc_thread_pool_size }}#{{ end }}rpc_thread_pool_size = {{ .oslo_messaging_zmq.oslo.messaging.rpc_thread_pool_size | default "100" }}
+
+# Expiration timeout in seconds of a sent/received message after which it is
+# not tracked anymore by a client/server. (integer value)
+# from .oslo_messaging_zmq.oslo.messaging.rpc_message_ttl
+{{ if not .oslo_messaging_zmq.oslo.messaging.rpc_message_ttl }}#{{ end }}rpc_message_ttl = {{ .oslo_messaging_zmq.oslo.messaging.rpc_message_ttl | default "300" }}
+
+# Wait for message acknowledgements from receivers. This mechanism works only
+# via proxy without PUB/SUB. (boolean value)
+# from .oslo_messaging_zmq.oslo.messaging.rpc_use_acks
+{{ if not .oslo_messaging_zmq.oslo.messaging.rpc_use_acks }}#{{ end }}rpc_use_acks = {{ .oslo_messaging_zmq.oslo.messaging.rpc_use_acks | default "false" }}
+
+# Number of seconds to wait for an ack from a cast/call. After each retry
+# attempt this timeout is multiplied by some specified multiplier. (integer
+# value)
+# from .oslo_messaging_zmq.oslo.messaging.rpc_ack_timeout_base
+{{ if not .oslo_messaging_zmq.oslo.messaging.rpc_ack_timeout_base }}#{{ end }}rpc_ack_timeout_base = {{ .oslo_messaging_zmq.oslo.messaging.rpc_ack_timeout_base | default "15" }}
+
+# Number to multiply base ack timeout by after each retry attempt. (integer
+# value)
+# from .oslo_messaging_zmq.oslo.messaging.rpc_ack_timeout_multiplier
+{{ if not .oslo_messaging_zmq.oslo.messaging.rpc_ack_timeout_multiplier }}#{{ end }}rpc_ack_timeout_multiplier = {{ .oslo_messaging_zmq.oslo.messaging.rpc_ack_timeout_multiplier | default "2" }}
+
+# Default number of message sending attempts in case of any problems occurred:
+# positive value N means at most N retries, 0 means no retries, None or -1 (or
+# any other negative values) mean to retry forever. This option is used only if
+# acknowledgments are enabled. (integer value)
+# from .oslo_messaging_zmq.oslo.messaging.rpc_retry_attempts
+{{ if not .oslo_messaging_zmq.oslo.messaging.rpc_retry_attempts }}#{{ end }}rpc_retry_attempts = {{ .oslo_messaging_zmq.oslo.messaging.rpc_retry_attempts | default "3" }}
+
+# List of publisher hosts SubConsumer can subscribe on. This option has higher
+# priority then the default publishers list taken from the matchmaker. (list
+# value)
+# from .oslo_messaging_zmq.oslo.messaging.subscribe_on
+{{ if not .oslo_messaging_zmq.oslo.messaging.subscribe_on }}#{{ end }}subscribe_on = {{ .oslo_messaging_zmq.oslo.messaging.subscribe_on | default "" }}
 
 
 [oslo_middleware]
@@ -2590,7 +2791,7 @@
 # From oslo.policy
 #
 
-# The JSON file that defines policies. (string value)
+# The file that defines policies. (string value)
 # Deprecated group/name - [DEFAULT]/policy_file
 # from .oslo_policy.oslo.policy.policy_file
 {{ if not .oslo_policy.oslo.policy.policy_file }}#{{ end }}policy_file = {{ .oslo_policy.oslo.policy.policy_file | default "policy.json" }}
@@ -2705,9 +2906,49 @@
 # Examples of possible values:
 #
 # * messaging://: use oslo_messaging driver for sending notifications.
+# * mongodb://127.0.0.1:27017 : use mongodb driver for sending notifications.
+# * elasticsearch://127.0.0.1:9200 : use elasticsearch driver for sending
+# notifications.
 #  (string value)
 # from .profiler.osprofiler.connection_string
 {{ if not .profiler.osprofiler.connection_string }}#{{ end }}connection_string = {{ .profiler.osprofiler.connection_string | default "messaging://" }}
+
+#
+# Document type for notification indexing in elasticsearch.
+#  (string value)
+# from .profiler.osprofiler.es_doc_type
+{{ if not .profiler.osprofiler.es_doc_type }}#{{ end }}es_doc_type = {{ .profiler.osprofiler.es_doc_type | default "notification" }}
+
+#
+# This parameter is a time value parameter (for example: es_scroll_time=2m),
+# indicating for how long the nodes that participate in the search will
+# maintain
+# relevant resources in order to continue and support it.
+#  (string value)
+# from .profiler.osprofiler.es_scroll_time
+{{ if not .profiler.osprofiler.es_scroll_time }}#{{ end }}es_scroll_time = {{ .profiler.osprofiler.es_scroll_time | default "2m" }}
+
+#
+# Elasticsearch splits large requests in batches. This parameter defines
+# maximum size of each batch (for example: es_scroll_size=10000).
+#  (integer value)
+# from .profiler.osprofiler.es_scroll_size
+{{ if not .profiler.osprofiler.es_scroll_size }}#{{ end }}es_scroll_size = {{ .profiler.osprofiler.es_scroll_size | default "10000" }}
+
+#
+# Redissentinel provides a timeout option on the connections.
+# This parameter defines that timeout (for example: socket_timeout=0.1).
+#  (floating point value)
+# from .profiler.osprofiler.socket_timeout
+{{ if not .profiler.osprofiler.socket_timeout }}#{{ end }}socket_timeout = {{ .profiler.osprofiler.socket_timeout | default "0.1" }}
+
+#
+# Redissentinel uses a service name to identify a master redis service.
+# This parameter defines the name (for example:
+# sentinal_service_name=mymaster).
+#  (string value)
+# from .profiler.osprofiler.sentinel_service_name
+{{ if not .profiler.osprofiler.sentinel_service_name }}#{{ end }}sentinel_service_name = {{ .profiler.osprofiler.sentinel_service_name | default "mymaster" }}
 
 
 [resource]
@@ -2717,11 +2958,11 @@
 #
 
 # Entry point for the resource driver in the `keystone.resource` namespace.
-# Only a `sql` driver is supplied by keystone. If a resource driver is not
-# specified, the assignment driver will choose the resource driver to maintain
-# backwards compatibility with older configuration files. (string value)
+# Only a `sql` driver is supplied by keystone. Unless you are writing
+# proprietary drivers for keystone, you do not need to set this option. (string
+# value)
 # from .resource.keystone.driver
-{{ if not .resource.keystone.driver }}#{{ end }}driver = {{ .resource.keystone.driver | default "<None>" }}
+{{ if not .resource.keystone.driver }}#{{ end }}driver = {{ .resource.keystone.driver | default "sql" }}
 
 # Toggle for resource caching. This has no effect unless global caching is
 # enabled. (boolean value)
@@ -2991,10 +3232,18 @@
 # from .security_compliance.keystone.password_expires_days
 {{ if not .security_compliance.keystone.password_expires_days }}#{{ end }}password_expires_days = {{ .security_compliance.keystone.password_expires_days | default "<None>" }}
 
-# Comma separated list of user IDs to be ignored when checking if a password is
-# expired. Passwords for users in this list will not expire. This feature will
-# only be enabled if `[security_compliance] password_expires_days` is set.
-# (list value)
+# DEPRECATED: Comma separated list of user IDs to be ignored when checking if a
+# password is expired. Passwords for users in this list will not expire. This
+# feature will only be enabled if `[security_compliance] password_expires_days`
+# is set. (list value)
+# This option is deprecated for removal since O.
+# Its value may be silently ignored in the future.
+# Reason: Functionality added as a per-user option "ignore_password_expiry" in
+# Ocata. Each user that should ignore password expiry should have the value set
+# to "true" in the user's `options` attribute (e.g.
+# `user['options']['ignore_password_expiry'] = True`) with an "update_user"
+# call. This avoids the need to restart keystone to adjust the users that
+# ignore password expiry. This option will be removed in the Pike release.
 # from .security_compliance.keystone.password_expires_ignore_user_ids
 {{ if not .security_compliance.keystone.password_expires_ignore_user_ids }}#{{ end }}password_expires_ignore_user_ids = {{ .security_compliance.keystone.password_expires_ignore_user_ids | default "" }}
 
@@ -3034,6 +3283,17 @@
 # from .security_compliance.keystone.password_regex_description
 {{ if not .security_compliance.keystone.password_regex_description }}#{{ end }}password_regex_description = {{ .security_compliance.keystone.password_regex_description | default "<None>" }}
 
+# Enabling this option requires users to change their password when the user is
+# created, or upon administrative reset. Before accessing any services,
+# affected users will have to change their password. To ignore this requirement
+# for specific users, such as service users, set the `options` attribute
+# `ignore_change_password_upon_first_use` to `True` for the desired user via
+# the update user API. This feature is disabled by default. This feature is
+# only applicable with the `sql` backend for the `[identity] driver`. (boolean
+# value)
+# from .security_compliance.keystone.change_password_upon_first_use
+{{ if not .security_compliance.keystone.change_password_upon_first_use }}#{{ end }}change_password_upon_first_use = {{ .security_compliance.keystone.change_password_upon_first_use | default "false" }}
+
 
 [shadow_users]
 
@@ -3057,90 +3317,57 @@
 # From keystone
 #
 
-# DEPRECATED: Absolute path to the public certificate file to use for signing
-# PKI and PKIZ tokens. Set this together with `[signing] keyfile`. For non-
-# production environments, you may be interested in using `keystone-manage
-# pki_setup` to generate self-signed certificates. There is no reason to set
-# this option unless you are using either a `pki` or `pkiz` `[token] provider`.
-# (string value)
-# This option is deprecated for removal since M.
-# Its value may be silently ignored in the future.
-# Reason: PKI token support has been deprecated in the M release and will be
-# removed in the O release. Fernet or UUID tokens are recommended.
+# Absolute path to the public certificate file to use for signing responses to
+# revocation lists requests. Set this together with `[signing] keyfile`. For
+# non-production environments, you may be interested in using `keystone-manage
+# pki_setup` to generate self-signed certificates. (string value)
 # from .signing.keystone.certfile
 {{ if not .signing.keystone.certfile }}#{{ end }}certfile = {{ .signing.keystone.certfile | default "/etc/keystone/ssl/certs/signing_cert.pem" }}
 
-# DEPRECATED: Absolute path to the private key file to use for signing PKI and
-# PKIZ tokens. Set this together with `[signing] certfile`. There is no reason
-# to set this option unless you are using either a `pki` or `pkiz` `[token]
-# provider`. (string value)
-# This option is deprecated for removal since M.
-# Its value may be silently ignored in the future.
-# Reason: PKI token support has been deprecated in the M release and will be
-# removed in the O release. Fernet or UUID tokens are recommended.
+# Absolute path to the private key file to use for signing responses to
+# revocation lists requests. Set this together with `[signing] certfile`.
+# (string value)
 # from .signing.keystone.keyfile
 {{ if not .signing.keystone.keyfile }}#{{ end }}keyfile = {{ .signing.keystone.keyfile | default "/etc/keystone/ssl/private/signing_key.pem" }}
 
-# DEPRECATED: Absolute path to the public certificate authority (CA) file to
-# use when creating self-signed certificates with `keystone-manage pki_setup`.
-# Set this together with `[signing] ca_key`. There is no reason to set this
-# option unless you are using a `pki` or `pkiz` `[token] provider` value in a
-# non-production environment. Use a `[signing] certfile` issued from a trusted
-# certificate authority instead. (string value)
-# This option is deprecated for removal since M.
-# Its value may be silently ignored in the future.
-# Reason: PKI token support has been deprecated in the M release and will be
-# removed in the O release. Fernet or UUID tokens are recommended.
+# Absolute path to the public certificate authority (CA) file to use when
+# creating self-signed certificates with `keystone-manage pki_setup`. Set this
+# together with `[signing] ca_key`. There is no reason to set this option
+# unless you are requesting revocation lists in a non-production environment.
+# Use a `[signing] certfile` issued from a trusted certificate authority
+# instead. (string value)
 # from .signing.keystone.ca_certs
 {{ if not .signing.keystone.ca_certs }}#{{ end }}ca_certs = {{ .signing.keystone.ca_certs | default "/etc/keystone/ssl/certs/ca.pem" }}
 
-# DEPRECATED: Absolute path to the private certificate authority (CA) key file
-# to use when creating self-signed certificates with `keystone-manage
-# pki_setup`. Set this together with `[signing] ca_certs`. There is no reason
-# to set this option unless you are using a `pki` or `pkiz` `[token] provider`
-# value in a non-production environment. Use a `[signing] certfile` issued from
-# a trusted certificate authority instead. (string value)
-# This option is deprecated for removal since M.
-# Its value may be silently ignored in the future.
-# Reason: PKI token support has been deprecated in the M release and will be
-# removed in the O release. Fernet or UUID tokens are recommended.
+# Absolute path to the private certificate authority (CA) key file to use when
+# creating self-signed certificates with `keystone-manage pki_setup`. Set this
+# together with `[signing] ca_certs`. There is no reason to set this option
+# unless you are requesting revocation lists in a non-production environment.
+# Use a `[signing] certfile` issued from a trusted certificate authority
+# instead. (string value)
 # from .signing.keystone.ca_key
 {{ if not .signing.keystone.ca_key }}#{{ end }}ca_key = {{ .signing.keystone.ca_key | default "/etc/keystone/ssl/private/cakey.pem" }}
 
-# DEPRECATED: Key size (in bits) to use when generating a self-signed token
-# signing certificate. There is no reason to set this option unless you are
-# using a `pki` or `pkiz` `[token] provider` value in a non-production
-# environment. Use a `[signing] certfile` issued from a trusted certificate
-# authority instead. (integer value)
+# Key size (in bits) to use when generating a self-signed token signing
+# certificate. There is no reason to set this option unless you are requesting
+# revocation lists in a non-production environment. Use a `[signing] certfile`
+# issued from a trusted certificate authority instead. (integer value)
 # Minimum value: 1024
-# This option is deprecated for removal since M.
-# Its value may be silently ignored in the future.
-# Reason: PKI token support has been deprecated in the M release and will be
-# removed in the O release. Fernet or UUID tokens are recommended.
 # from .signing.keystone.key_size
 {{ if not .signing.keystone.key_size }}#{{ end }}key_size = {{ .signing.keystone.key_size | default "2048" }}
 
-# DEPRECATED: The validity period (in days) to use when generating a self-
-# signed token signing certificate. There is no reason to set this option
-# unless you are using a `pki` or `pkiz` `[token] provider` value in a non-
-# production environment. Use a `[signing] certfile` issued from a trusted
-# certificate authority instead. (integer value)
-# This option is deprecated for removal since M.
-# Its value may be silently ignored in the future.
-# Reason: PKI token support has been deprecated in the M release and will be
-# removed in the O release. Fernet or UUID tokens are recommended.
+# The validity period (in days) to use when generating a self-signed token
+# signing certificate. There is no reason to set this option unless you are
+# requesting revocation lists in a non-production environment. Use a `[signing]
+# certfile` issued from a trusted certificate authority instead. (integer
+# value)
 # from .signing.keystone.valid_days
 {{ if not .signing.keystone.valid_days }}#{{ end }}valid_days = {{ .signing.keystone.valid_days | default "3650" }}
 
-# DEPRECATED: The certificate subject to use when generating a self-signed
-# token signing certificate. There is no reason to set this option unless you
-# are using a `pki` or `pkiz` `[token] provider` value in a non-production
-# environment. Use a `[signing] certfile` issued from a trusted certificate
-# authority instead. (string value)
-# This option is deprecated for removal since M.
-# Its value may be silently ignored in the future.
-# Reason: PKI token support has been deprecated in the M release and will be
-# removed in the O release. Fernet or UUID tokens are recommended.
+# The certificate subject to use when generating a self-signed token signing
+# certificate. There is no reason to set this option unless you are requesting
+# revocation lists in a non-production environment. Use a `[signing] certfile`
+# issued from a trusted certificate authority instead. (string value)
 # from .signing.keystone.cert_subject
 {{ if not .signing.keystone.cert_subject }}#{{ end }}cert_subject = {{ .signing.keystone.cert_subject | default "/C=US/ST=Unset/L=Unset/O=Unset/CN=www.example.com" }}
 
@@ -3184,26 +3411,21 @@
 
 # Entry point for the token provider in the `keystone.token.provider`
 # namespace. The token provider controls the token construction, validation,
-# and revocation operations. Keystone includes `fernet`, `pkiz`, `pki`, and
-# `uuid` token providers. `uuid` tokens must be persisted (using the backend
-# specified in the `[token] driver` option), but do not require any extra
-# configuration or setup. `fernet` tokens do not need to be persisted at all,
-# but require that you run `keystone-manage fernet_setup` (also see the
-# `keystone-manage fernet_rotate` command). `pki` and `pkiz` tokens can be
-# validated offline, without making HTTP calls to keystone, but require that
-# certificates be installed and distributed to facilitate signing tokens and
-# later validating those signatures. (string value)
+# and revocation operations. Keystone includes `fernet` and `uuid` token
+# providers. `uuid` tokens must be persisted (using the backend specified in
+# the `[token] driver` option), but do not require any extra configuration or
+# setup. `fernet` tokens do not need to be persisted at all, but require that
+# you run `keystone-manage fernet_setup` (also see the `keystone-manage
+# fernet_rotate` command). (string value)
 # from .token.keystone.provider
-{{ if not .token.keystone.provider }}#{{ end }}provider = {{ .token.keystone.provider | default "uuid" }}
+{{ if not .token.keystone.provider }}#{{ end }}provider = {{ .token.keystone.provider | default "fernet" }}
 
 # Entry point for the token persistence backend driver in the
-# `keystone.token.persistence` namespace. Keystone provides `kvs`, `memcache`,
-# `memcache_pool`, and `sql` drivers. The `kvs` backend depends on the
-# configuration in the `[kvs]` section. The `memcache` and `memcache_pool`
-# options depend on the configuration in the `[memcache]` section. The `sql`
-# option (default) depends on the options in your `[database]` section. If
-# you're using the `fernet` `[token] provider`, this backend will not be
-# utilized to persist tokens at all. (string value)
+# `keystone.token.persistence` namespace. Keystone provides `kvs` and `sql`
+# drivers. The `kvs` backend depends on the configuration in the `[kvs]`
+# section. The `sql` option (default) depends on the options in your
+# `[database]` section. If you're using the `fernet` `[token] provider`, this
+# backend will not be utilized to persist tokens at all. (string value)
 # from .token.keystone.driver
 {{ if not .token.keystone.driver }}#{{ end }}driver = {{ .token.keystone.driver | default "sql" }}
 
@@ -3238,21 +3460,6 @@
 # from .token.keystone.allow_rescope_scoped_token
 {{ if not .token.keystone.allow_rescope_scoped_token }}#{{ end }}allow_rescope_scoped_token = {{ .token.keystone.allow_rescope_scoped_token | default "true" }}
 
-# DEPRECATED: This controls the hash algorithm to use to uniquely identify PKI
-# tokens without having to transmit the entire token to keystone (which may be
-# several kilobytes). This can be set to any algorithm that hashlib supports.
-# WARNING: Before changing this value, the `auth_token` middleware protecting
-# all other services must be configured with the set of hash algorithms to
-# expect from keystone (both your old and new value for this option), otherwise
-# token revocation will not be processed correctly. (string value)
-# Allowed values: md5, sha1, sha224, sha256, sha384, sha512
-# This option is deprecated for removal since M.
-# Its value may be silently ignored in the future.
-# Reason: PKI token support has been deprecated in the M release and will be
-# removed in the O release. Fernet or UUID tokens are recommended.
-# from .token.keystone.hash_algorithm
-{{ if not .token.keystone.hash_algorithm }}#{{ end }}hash_algorithm = {{ .token.keystone.hash_algorithm | default "md5" }}
-
 # This controls whether roles should be included with tokens that are not
 # directly assigned to the token's scope, but are instead linked implicitly to
 # other role assignments. (boolean value)
@@ -3260,10 +3467,17 @@
 {{ if not .token.keystone.infer_roles }}#{{ end }}infer_roles = {{ .token.keystone.infer_roles | default "true" }}
 
 # Enable storing issued token data to token validation cache so that first
-# token validation doesn't actually cause full validation cycle. (boolean
+# token validation doesn't actually cause full validation cycle. This option
+# has no effect unless global caching and token caching are enabled. (boolean
 # value)
 # from .token.keystone.cache_on_issue
-{{ if not .token.keystone.cache_on_issue }}#{{ end }}cache_on_issue = {{ .token.keystone.cache_on_issue | default "false" }}
+{{ if not .token.keystone.cache_on_issue }}#{{ end }}cache_on_issue = {{ .token.keystone.cache_on_issue | default "true" }}
+
+# This controls the number of seconds that a token can be retrieved for beyond
+# the built-in expiry time. This allows long running operations to succeed.
+# Defaults to two days. (integer value)
+# from .token.keystone.allow_expired_window
+{{ if not .token.keystone.allow_expired_window }}#{{ end }}allow_expired_window = {{ .token.keystone.allow_expired_window | default "172800" }}
 
 
 [tokenless_auth]

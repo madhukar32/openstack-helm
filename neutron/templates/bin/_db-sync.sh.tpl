@@ -18,5 +18,9 @@ set -ex
 
 neutron-db-manage \
   --config-file /etc/neutron/neutron.conf \
+{{- if .Values.sdn.opencontrail.enabled }}
+  --config-file /etc/neutron/plugins/opencontrail_plugin.ini \
+{{- else }}
   --config-file /etc/neutron/plugins/ml2/ml2_conf.ini \
+{{- end }}
   upgrade head

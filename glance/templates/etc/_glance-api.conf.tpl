@@ -54,6 +54,9 @@
 {{- if not .oslo_messaging_amqp -}}{{- set . "oslo_messaging_amqp" dict -}}{{- end -}}
 {{- if not .oslo_messaging_amqp.oslo -}}{{- set .oslo_messaging_amqp "oslo" dict -}}{{- end -}}
 {{- if not .oslo_messaging_amqp.oslo.messaging -}}{{- set .oslo_messaging_amqp.oslo "messaging" dict -}}{{- end -}}
+{{- if not .oslo_messaging_kafka -}}{{- set . "oslo_messaging_kafka" dict -}}{{- end -}}
+{{- if not .oslo_messaging_kafka.oslo -}}{{- set .oslo_messaging_kafka "oslo" dict -}}{{- end -}}
+{{- if not .oslo_messaging_kafka.oslo.messaging -}}{{- set .oslo_messaging_kafka.oslo "messaging" dict -}}{{- end -}}
 {{- if not .oslo_messaging_notifications -}}{{- set . "oslo_messaging_notifications" dict -}}{{- end -}}
 {{- if not .oslo_messaging_notifications.oslo -}}{{- set .oslo_messaging_notifications "oslo" dict -}}{{- end -}}
 {{- if not .oslo_messaging_notifications.oslo.messaging -}}{{- set .oslo_messaging_notifications.oslo "messaging" dict -}}{{- end -}}
@@ -428,8 +431,8 @@
 #  (boolean value)
 # This option is deprecated for removal since Newton.
 # Its value may be silently ignored in the future.
-# Reason: This option will be removed in the Ocata release because the same
-# functionality can be achieved with greater granularity by using policies.
+# Reason: This option will be removed in the Pike release or later because the
+# same functionality can be achieved with greater granularity by using policies.
 # Please see the Newton release notes for more information.
 # from .default.glance.api.show_multiple_locations
 {{ if not .default.glance.api.show_multiple_locations }}#{{ end }}show_multiple_locations = {{ .default.glance.api.show_multiple_locations | default "false" }}
@@ -1668,7 +1671,7 @@
 # Log output to standard error. This option is ignored if log_config_append is
 # set. (boolean value)
 # from .default.oslo.log.use_stderr
-{{ if not .default.oslo.log.use_stderr }}#{{ end }}use_stderr = {{ .default.oslo.log.use_stderr | default "true" }}
+{{ if not .default.oslo.log.use_stderr }}#{{ end }}use_stderr = {{ .default.oslo.log.use_stderr | default "false" }}
 
 # Format string to use for log messages with context. (string value)
 # from .default.oslo.log.logging_context_format_string
@@ -1711,6 +1714,21 @@
 # from .default.oslo.log.instance_uuid_format
 {{ if not .default.oslo.log.instance_uuid_format }}#{{ end }}instance_uuid_format = {{ .default.oslo.log.instance_uuid_format | default "\"[instance: %(uuid)s] \"" }}
 
+# Interval, number of seconds, of log rate limiting. (integer value)
+# from .default.oslo.log.rate_limit_interval
+{{ if not .default.oslo.log.rate_limit_interval }}#{{ end }}rate_limit_interval = {{ .default.oslo.log.rate_limit_interval | default "0" }}
+
+# Maximum number of logged messages per rate_limit_interval. (integer value)
+# from .default.oslo.log.rate_limit_burst
+{{ if not .default.oslo.log.rate_limit_burst }}#{{ end }}rate_limit_burst = {{ .default.oslo.log.rate_limit_burst | default "0" }}
+
+# Log level name used by rate limiting: CRITICAL, ERROR, INFO, WARNING, DEBUG or
+# empty string. Logs with level greater or equal to rate_limit_except_level are
+# not filtered. An empty string means that all levels are filtered. (string
+# value)
+# from .default.oslo.log.rate_limit_except_level
+{{ if not .default.oslo.log.rate_limit_except_level }}#{{ end }}rate_limit_except_level = {{ .default.oslo.log.rate_limit_except_level | default "CRITICAL" }}
+
 # Enables or disables fatal status of deprecations. (boolean value)
 # from .default.oslo.log.fatal_deprecations
 {{ if not .default.oslo.log.fatal_deprecations }}#{{ end }}fatal_deprecations = {{ .default.oslo.log.fatal_deprecations | default "false" }}
@@ -1739,7 +1757,7 @@
 {{ if not .default.oslo.messaging.rpc_zmq_bind_address }}#{{ end }}rpc_zmq_bind_address = {{ .default.oslo.messaging.rpc_zmq_bind_address | default "*" }}
 
 # MatchMaker driver. (string value)
-# Allowed values: redis, dummy
+# Allowed values: redis, sentinel, dummy
 # Deprecated group/name - [DEFAULT]/rpc_zmq_matchmaker
 # from .default.oslo.messaging.rpc_zmq_matchmaker
 {{ if not .default.oslo.messaging.rpc_zmq_matchmaker }}#{{ end }}rpc_zmq_matchmaker = {{ .default.oslo.messaging.rpc_zmq_matchmaker | default "redis" }}
@@ -1766,13 +1784,14 @@
 # from .default.oslo.messaging.rpc_zmq_host
 {{ if not .default.oslo.messaging.rpc_zmq_host }}#{{ end }}rpc_zmq_host = {{ .default.oslo.messaging.rpc_zmq_host | default "localhost" }}
 
-# Seconds to wait before a cast expires (TTL). The default value of -1 specifies
-# an infinite linger period. The value of 0 specifies no linger period. Pending
-# messages shall be discarded immediately when the socket is closed. Only
-# supported by impl_zmq. (integer value)
+# Number of seconds to wait before all pending messages will be sent after
+# closing a socket. The default value of -1 specifies an infinite linger period.
+# The value of 0 specifies no linger period. Pending messages shall be discarded
+# immediately when the socket is closed. Positive values specify an upper bound
+# for the linger period. (integer value)
 # Deprecated group/name - [DEFAULT]/rpc_cast_timeout
-# from .default.oslo.messaging.rpc_cast_timeout
-{{ if not .default.oslo.messaging.rpc_cast_timeout }}#{{ end }}rpc_cast_timeout = {{ .default.oslo.messaging.rpc_cast_timeout | default "-1" }}
+# from .default.oslo.messaging.zmq_linger
+{{ if not .default.oslo.messaging.zmq_linger }}#{{ end }}zmq_linger = {{ .default.oslo.messaging.zmq_linger | default "-1" }}
 
 # The default number of seconds that poll should wait. Poll raises timeout
 # exception when timeout expired. (integer value)
@@ -1796,12 +1815,23 @@
 # value)
 # Deprecated group/name - [DEFAULT]/use_pub_sub
 # from .default.oslo.messaging.use_pub_sub
-{{ if not .default.oslo.messaging.use_pub_sub }}#{{ end }}use_pub_sub = {{ .default.oslo.messaging.use_pub_sub | default "true" }}
+{{ if not .default.oslo.messaging.use_pub_sub }}#{{ end }}use_pub_sub = {{ .default.oslo.messaging.use_pub_sub | default "false" }}
 
 # Use ROUTER remote proxy. (boolean value)
 # Deprecated group/name - [DEFAULT]/use_router_proxy
 # from .default.oslo.messaging.use_router_proxy
-{{ if not .default.oslo.messaging.use_router_proxy }}#{{ end }}use_router_proxy = {{ .default.oslo.messaging.use_router_proxy | default "true" }}
+{{ if not .default.oslo.messaging.use_router_proxy }}#{{ end }}use_router_proxy = {{ .default.oslo.messaging.use_router_proxy | default "false" }}
+
+# This option makes direct connections dynamic or static. It makes sense only
+# with use_router_proxy=False which means to use direct connections for direct
+# message types (ignored otherwise). (boolean value)
+# from .default.oslo.messaging.use_dynamic_connections
+{{ if not .default.oslo.messaging.use_dynamic_connections }}#{{ end }}use_dynamic_connections = {{ .default.oslo.messaging.use_dynamic_connections | default "false" }}
+
+# How many additional connections to a host will be made for failover reasons.
+# This option is actual only in dynamic connections mode. (integer value)
+# from .default.oslo.messaging.zmq_failover_connections
+{{ if not .default.oslo.messaging.zmq_failover_connections }}#{{ end }}zmq_failover_connections = {{ .default.oslo.messaging.zmq_failover_connections | default "2" }}
 
 # Minimal port number for random ports range. (port value)
 # Minimum value: 0
@@ -1835,7 +1865,73 @@
 # even if server is disconnected, when the server appears we send all
 # accumulated messages to it. (boolean value)
 # from .default.oslo.messaging.zmq_immediate
-{{ if not .default.oslo.messaging.zmq_immediate }}#{{ end }}zmq_immediate = {{ .default.oslo.messaging.zmq_immediate | default "false" }}
+{{ if not .default.oslo.messaging.zmq_immediate }}#{{ end }}zmq_immediate = {{ .default.oslo.messaging.zmq_immediate | default "true" }}
+
+# Enable/disable TCP keepalive (KA) mechanism. The default value of -1 (or any
+# other negative value) means to skip any overrides and leave it to OS default;
+# 0 and 1 (or any other positive value) mean to disable and enable the option
+# respectively. (integer value)
+# from .default.oslo.messaging.zmq_tcp_keepalive
+{{ if not .default.oslo.messaging.zmq_tcp_keepalive }}#{{ end }}zmq_tcp_keepalive = {{ .default.oslo.messaging.zmq_tcp_keepalive | default "-1" }}
+
+# The duration between two keepalive transmissions in idle condition. The unit
+# is platform dependent, for example, seconds in Linux, milliseconds in Windows
+# etc. The default value of -1 (or any other negative value and 0) means to skip
+# any overrides and leave it to OS default. (integer value)
+# from .default.oslo.messaging.zmq_tcp_keepalive_idle
+{{ if not .default.oslo.messaging.zmq_tcp_keepalive_idle }}#{{ end }}zmq_tcp_keepalive_idle = {{ .default.oslo.messaging.zmq_tcp_keepalive_idle | default "-1" }}
+
+# The number of retransmissions to be carried out before declaring that remote
+# end is not available. The default value of -1 (or any other negative value and
+# 0) means to skip any overrides and leave it to OS default. (integer value)
+# from .default.oslo.messaging.zmq_tcp_keepalive_cnt
+{{ if not .default.oslo.messaging.zmq_tcp_keepalive_cnt }}#{{ end }}zmq_tcp_keepalive_cnt = {{ .default.oslo.messaging.zmq_tcp_keepalive_cnt | default "-1" }}
+
+# The duration between two successive keepalive retransmissions, if
+# acknowledgement to the previous keepalive transmission is not received. The
+# unit is platform dependent, for example, seconds in Linux, milliseconds in
+# Windows etc. The default value of -1 (or any other negative value and 0) means
+# to skip any overrides and leave it to OS default. (integer value)
+# from .default.oslo.messaging.zmq_tcp_keepalive_intvl
+{{ if not .default.oslo.messaging.zmq_tcp_keepalive_intvl }}#{{ end }}zmq_tcp_keepalive_intvl = {{ .default.oslo.messaging.zmq_tcp_keepalive_intvl | default "-1" }}
+
+# Maximum number of (green) threads to work concurrently. (integer value)
+# from .default.oslo.messaging.rpc_thread_pool_size
+{{ if not .default.oslo.messaging.rpc_thread_pool_size }}#{{ end }}rpc_thread_pool_size = {{ .default.oslo.messaging.rpc_thread_pool_size | default "100" }}
+
+# Expiration timeout in seconds of a sent/received message after which it is not
+# tracked anymore by a client/server. (integer value)
+# from .default.oslo.messaging.rpc_message_ttl
+{{ if not .default.oslo.messaging.rpc_message_ttl }}#{{ end }}rpc_message_ttl = {{ .default.oslo.messaging.rpc_message_ttl | default "300" }}
+
+# Wait for message acknowledgements from receivers. This mechanism works only
+# via proxy without PUB/SUB. (boolean value)
+# from .default.oslo.messaging.rpc_use_acks
+{{ if not .default.oslo.messaging.rpc_use_acks }}#{{ end }}rpc_use_acks = {{ .default.oslo.messaging.rpc_use_acks | default "false" }}
+
+# Number of seconds to wait for an ack from a cast/call. After each retry
+# attempt this timeout is multiplied by some specified multiplier. (integer
+# value)
+# from .default.oslo.messaging.rpc_ack_timeout_base
+{{ if not .default.oslo.messaging.rpc_ack_timeout_base }}#{{ end }}rpc_ack_timeout_base = {{ .default.oslo.messaging.rpc_ack_timeout_base | default "15" }}
+
+# Number to multiply base ack timeout by after each retry attempt. (integer
+# value)
+# from .default.oslo.messaging.rpc_ack_timeout_multiplier
+{{ if not .default.oslo.messaging.rpc_ack_timeout_multiplier }}#{{ end }}rpc_ack_timeout_multiplier = {{ .default.oslo.messaging.rpc_ack_timeout_multiplier | default "2" }}
+
+# Default number of message sending attempts in case of any problems occurred:
+# positive value N means at most N retries, 0 means no retries, None or -1 (or
+# any other negative values) mean to retry forever. This option is used only if
+# acknowledgments are enabled. (integer value)
+# from .default.oslo.messaging.rpc_retry_attempts
+{{ if not .default.oslo.messaging.rpc_retry_attempts }}#{{ end }}rpc_retry_attempts = {{ .default.oslo.messaging.rpc_retry_attempts | default "3" }}
+
+# List of publisher hosts SubConsumer can subscribe on. This option has higher
+# priority then the default publishers list taken from the matchmaker. (list
+# value)
+# from .default.oslo.messaging.subscribe_on
+{{ if not .default.oslo.messaging.subscribe_on }}#{{ end }}subscribe_on = {{ .default.oslo.messaging.subscribe_on | default "" }}
 
 # Size of executor thread pool. (integer value)
 # Deprecated group/name - [DEFAULT]/rpc_thread_pool_size
@@ -2155,7 +2251,7 @@
 # /store-capabilities.html
 #
 # For more information on setting up a particular store in your
-# deplyment and help with the usage of this feature, please contact
+# deployment and help with the usage of this feature, please contact
 # the storage driver maintainers listed here:
 # http://docs.openstack.org/developer/glance_store/drivers/index.html
 #
@@ -2170,6 +2266,556 @@
 # Minimum value: 0
 # from .glance_store.glance.store.store_capabilities_update_min_interval
 {{ if not .glance_store.glance.store.store_capabilities_update_min_interval }}#{{ end }}store_capabilities_update_min_interval = {{ .glance_store.glance.store.store_capabilities_update_min_interval | default "0" }}
+
+#
+# Information to match when looking for cinder in the service catalog.
+#
+# When the ``cinder_endpoint_template`` is not set and any of
+# ``cinder_store_auth_address``, ``cinder_store_user_name``,
+# ``cinder_store_project_name``, ``cinder_store_password`` is not set,
+# cinder store uses this information to lookup cinder endpoint from the service
+# catalog in the current context. ``cinder_os_region_name``, if set, is taken
+# into consideration to fetch the appropriate endpoint.
+#
+# The service catalog can be listed by the ``openstack catalog list`` command.
+#
+# Possible values:
+#     * A string of of the following form:
+#       ``<service_type>:<service_name>:<interface>``
+#       At least ``service_type`` and ``interface`` should be specified.
+#       ``service_name`` can be omitted.
+#
+# Related options:
+#     * cinder_os_region_name
+#     * cinder_endpoint_template
+#     * cinder_store_auth_address
+#     * cinder_store_user_name
+#     * cinder_store_project_name
+#     * cinder_store_password
+#
+#  (string value)
+# from .glance_store.glance.store.cinder_catalog_info
+{{ if not .glance_store.glance.store.cinder_catalog_info }}#{{ end }}cinder_catalog_info = {{ .glance_store.glance.store.cinder_catalog_info | default "volumev2::publicURL" }}
+
+#
+# Override service catalog lookup with template for cinder endpoint.
+#
+# When this option is set, this value is used to generate cinder endpoint,
+# instead of looking up from the service catalog.
+# This value is ignored if ``cinder_store_auth_address``,
+# ``cinder_store_user_name``, ``cinder_store_project_name``, and
+# ``cinder_store_password`` are specified.
+#
+# If this configuration option is set, ``cinder_catalog_info`` will be ignored.
+#
+# Possible values:
+#     * URL template string for cinder endpoint, where ``%%(tenant)s`` is
+#       replaced with the current tenant (project) name.
+#       For example: ``http://cinder.openstack.example.org/v2/%%(tenant)s``
+#
+# Related options:
+#     * cinder_store_auth_address
+#     * cinder_store_user_name
+#     * cinder_store_project_name
+#     * cinder_store_password
+#     * cinder_catalog_info
+#
+#  (string value)
+# from .glance_store.glance.store.cinder_endpoint_template
+{{ if not .glance_store.glance.store.cinder_endpoint_template }}#{{ end }}cinder_endpoint_template = {{ .glance_store.glance.store.cinder_endpoint_template | default "<None>" }}
+
+#
+# Region name to lookup cinder service from the service catalog.
+#
+# This is used only when ``cinder_catalog_info`` is used for determining the
+# endpoint. If set, the lookup for cinder endpoint by this node is filtered to
+# the specified region. It is useful when multiple regions are listed in the
+# catalog. If this is not set, the endpoint is looked up from every region.
+#
+# Possible values:
+#     * A string that is a valid region name.
+#
+# Related options:
+#     * cinder_catalog_info
+#
+#  (string value)
+# Deprecated group/name - [glance_store]/os_region_name
+# from .glance_store.glance.store.cinder_os_region_name
+{{ if not .glance_store.glance.store.cinder_os_region_name }}#{{ end }}cinder_os_region_name = {{ .glance_store.glance.store.cinder_os_region_name | default "<None>" }}
+
+#
+# Location of a CA certificates file used for cinder client requests.
+#
+# The specified CA certificates file, if set, is used to verify cinder
+# connections via HTTPS endpoint. If the endpoint is HTTP, this value is
+# ignored.
+# ``cinder_api_insecure`` must be set to ``True`` to enable the verification.
+#
+# Possible values:
+#     * Path to a ca certificates file
+#
+# Related options:
+#     * cinder_api_insecure
+#
+#  (string value)
+# from .glance_store.glance.store.cinder_ca_certificates_file
+{{ if not .glance_store.glance.store.cinder_ca_certificates_file }}#{{ end }}cinder_ca_certificates_file = {{ .glance_store.glance.store.cinder_ca_certificates_file | default "<None>" }}
+
+#
+# Number of cinderclient retries on failed http calls.
+#
+# When a call failed by any errors, cinderclient will retry the call up to the
+# specified times after sleeping a few seconds.
+#
+# Possible values:
+#     * A positive integer
+#
+# Related options:
+#     * None
+#
+#  (integer value)
+# Minimum value: 0
+# from .glance_store.glance.store.cinder_http_retries
+{{ if not .glance_store.glance.store.cinder_http_retries }}#{{ end }}cinder_http_retries = {{ .glance_store.glance.store.cinder_http_retries | default "3" }}
+
+#
+# Time period, in seconds, to wait for a cinder volume transition to
+# complete.
+#
+# When the cinder volume is created, deleted, or attached to the glance node to
+# read/write the volume data, the volume's state is changed. For example, the
+# newly created volume status changes from ``creating`` to ``available`` after
+# the creation process is completed. This specifies the maximum time to wait for
+# the status change. If a timeout occurs while waiting, or the status is changed
+# to an unexpected value (e.g. `error``), the image creation fails.
+#
+# Possible values:
+#     * A positive integer
+#
+# Related options:
+#     * None
+#
+#  (integer value)
+# Minimum value: 0
+# from .glance_store.glance.store.cinder_state_transition_timeout
+{{ if not .glance_store.glance.store.cinder_state_transition_timeout }}#{{ end }}cinder_state_transition_timeout = {{ .glance_store.glance.store.cinder_state_transition_timeout | default "300" }}
+
+#
+# Allow to perform insecure SSL requests to cinder.
+#
+# If this option is set to True, HTTPS endpoint connection is verified using the
+# CA certificates file specified by ``cinder_ca_certificates_file`` option.
+#
+# Possible values:
+#     * True
+#     * False
+#
+# Related options:
+#     * cinder_ca_certificates_file
+#
+#  (boolean value)
+# from .glance_store.glance.store.cinder_api_insecure
+{{ if not .glance_store.glance.store.cinder_api_insecure }}#{{ end }}cinder_api_insecure = {{ .glance_store.glance.store.cinder_api_insecure | default "false" }}
+
+#
+# The address where the cinder authentication service is listening.
+#
+# When all of ``cinder_store_auth_address``, ``cinder_store_user_name``,
+# ``cinder_store_project_name``, and ``cinder_store_password`` options are
+# specified, the specified values are always used for the authentication.
+# This is useful to hide the image volumes from users by storing them in a
+# project/tenant specific to the image service. It also enables users to share
+# the image volume among other projects under the control of glance's ACL.
+#
+# If either of these options are not set, the cinder endpoint is looked up
+# from the service catalog, and current context's user and project are used.
+#
+# Possible values:
+#     * A valid authentication service address, for example:
+#       ``http://openstack.example.org/identity/v2.0``
+#
+# Related options:
+#     * cinder_store_user_name
+#     * cinder_store_password
+#     * cinder_store_project_name
+#
+#  (string value)
+# from .glance_store.glance.store.cinder_store_auth_address
+{{ if not .glance_store.glance.store.cinder_store_auth_address }}#{{ end }}cinder_store_auth_address = {{ .glance_store.glance.store.cinder_store_auth_address | default "<None>" }}
+
+#
+# User name to authenticate against cinder.
+#
+# This must be used with all the following related options. If any of these are
+# not specified, the user of the current context is used.
+#
+# Possible values:
+#     * A valid user name
+#
+# Related options:
+#     * cinder_store_auth_address
+#     * cinder_store_password
+#     * cinder_store_project_name
+#
+#  (string value)
+# from .glance_store.glance.store.cinder_store_user_name
+{{ if not .glance_store.glance.store.cinder_store_user_name }}#{{ end }}cinder_store_user_name = {{ .glance_store.glance.store.cinder_store_user_name | default "<None>" }}
+
+#
+# Password for the user authenticating against cinder.
+#
+# This must be used with all the following related options. If any of these are
+# not specified, the user of the current context is used.
+#
+# Possible values:
+#     * A valid password for the user specified by ``cinder_store_user_name``
+#
+# Related options:
+#     * cinder_store_auth_address
+#     * cinder_store_user_name
+#     * cinder_store_project_name
+#
+#  (string value)
+# from .glance_store.glance.store.cinder_store_password
+{{ if not .glance_store.glance.store.cinder_store_password }}#{{ end }}cinder_store_password = {{ .glance_store.glance.store.cinder_store_password | default "<None>" }}
+
+#
+# Project name where the image volume is stored in cinder.
+#
+# If this configuration option is not set, the project in current context is
+# used.
+#
+# This must be used with all the following related options. If any of these are
+# not specified, the project of the current context is used.
+#
+# Possible values:
+#     * A valid project name
+#
+# Related options:
+#     * ``cinder_store_auth_address``
+#     * ``cinder_store_user_name``
+#     * ``cinder_store_password``
+#
+#  (string value)
+# from .glance_store.glance.store.cinder_store_project_name
+{{ if not .glance_store.glance.store.cinder_store_project_name }}#{{ end }}cinder_store_project_name = {{ .glance_store.glance.store.cinder_store_project_name | default "<None>" }}
+
+#
+# Path to the rootwrap configuration file to use for running commands as root.
+#
+# The cinder store requires root privileges to operate the image volumes (for
+# connecting to iSCSI/FC volumes and reading/writing the volume data, etc.).
+# The configuration file should allow the required commands by cinder store and
+# os-brick library.
+#
+# Possible values:
+#     * Path to the rootwrap config file
+#
+# Related options:
+#     * None
+#
+#  (string value)
+# from .glance_store.glance.store.rootwrap_config
+{{ if not .glance_store.glance.store.rootwrap_config }}#{{ end }}rootwrap_config = {{ .glance_store.glance.store.rootwrap_config | default "/etc/glance/rootwrap.conf" }}
+
+#
+# Volume type that will be used for volume creation in cinder.
+#
+# Some cinder backends can have several volume types to optimize storage usage.
+# Adding this option allows an operator to choose a specific volume type
+# in cinder that can be optimized for images.
+#
+# If this is not set, then the default volume type specified in the cinder
+# configuration will be used for volume creation.
+#
+# Possible values:
+#     * A valid volume type from cinder
+#
+# Related options:
+#     * None
+#
+#  (string value)
+# from .glance_store.glance.store.cinder_volume_type
+{{ if not .glance_store.glance.store.cinder_volume_type }}#{{ end }}cinder_volume_type = {{ .glance_store.glance.store.cinder_volume_type | default "<None>" }}
+
+#
+# Directory to which the filesystem backend store writes images.
+#
+# Upon start up, Glance creates the directory if it doesn't already
+# exist and verifies write access to the user under which
+# ``glance-api`` runs. If the write access isn't available, a
+# ``BadStoreConfiguration`` exception is raised and the filesystem
+# store may not be available for adding new images.
+#
+# NOTE: This directory is used only when filesystem store is used as a
+# storage backend. Either ``filesystem_store_datadir`` or
+# ``filesystem_store_datadirs`` option must be specified in
+# ``glance-api.conf``. If both options are specified, a
+# ``BadStoreConfiguration`` will be raised and the filesystem store
+# may not be available for adding new images.
+#
+# Possible values:
+#     * A valid path to a directory
+#
+# Related options:
+#     * ``filesystem_store_datadirs``
+#     * ``filesystem_store_file_perm``
+#
+#  (string value)
+# from .glance_store.glance.store.filesystem_store_datadir
+{{ if not .glance_store.glance.store.filesystem_store_datadir }}#{{ end }}filesystem_store_datadir = {{ .glance_store.glance.store.filesystem_store_datadir | default "/var/lib/glance/images" }}
+
+#
+# List of directories and their priorities to which the filesystem
+# backend store writes images.
+#
+# The filesystem store can be configured to store images in multiple
+# directories as opposed to using a single directory specified by the
+# ``filesystem_store_datadir`` configuration option. When using
+# multiple directories, each directory can be given an optional
+# priority to specify the preference order in which they should
+# be used. Priority is an integer that is concatenated to the
+# directory path with a colon where a higher value indicates higher
+# priority. When two directories have the same priority, the directory
+# with most free space is used. When no priority is specified, it
+# defaults to zero.
+#
+# More information on configuring filesystem store with multiple store
+# directories can be found at
+# http://docs.openstack.org/developer/glance/configuring.html
+#
+# NOTE: This directory is used only when filesystem store is used as a
+# storage backend. Either ``filesystem_store_datadir`` or
+# ``filesystem_store_datadirs`` option must be specified in
+# ``glance-api.conf``. If both options are specified, a
+# ``BadStoreConfiguration`` will be raised and the filesystem store
+# may not be available for adding new images.
+#
+# Possible values:
+#     * List of strings of the following form:
+#         * ``<a valid directory path>:<optional integer priority>``
+#
+# Related options:
+#     * ``filesystem_store_datadir``
+#     * ``filesystem_store_file_perm``
+#
+#  (multi valued)
+# from .glance_store.glance.store.filesystem_store_datadirs (multiopt)
+{{ if not .glance_store.glance.store.filesystem_store_datadirs }}#filesystem_store_datadirs = {{ .glance_store.glance.store.filesystem_store_datadirs | default "" }}{{ else }}{{ range .glance_store.glance.store.filesystem_store_datadirs }}filesystem_store_datadirs = {{ . }}{{ end }}{{ end }}
+
+#
+# Filesystem store metadata file.
+#
+# The path to a file which contains the metadata to be returned with
+# any location associated with the filesystem store. The file must
+# contain a valid JSON object. The object should contain the keys
+# ``id`` and ``mountpoint``. The value for both keys should be a
+# string.
+#
+# Possible values:
+#     * A valid path to the store metadata file
+#
+# Related options:
+#     * None
+#
+#  (string value)
+# from .glance_store.glance.store.filesystem_store_metadata_file
+{{ if not .glance_store.glance.store.filesystem_store_metadata_file }}#{{ end }}filesystem_store_metadata_file = {{ .glance_store.glance.store.filesystem_store_metadata_file | default "<None>" }}
+
+#
+# File access permissions for the image files.
+#
+# Set the intended file access permissions for image data. This provides
+# a way to enable other services, e.g. Nova, to consume images directly
+# from the filesystem store. The users running the services that are
+# intended to be given access to could be made a member of the group
+# that owns the files created. Assigning a value less then or equal to
+# zero for this configuration option signifies that no changes be made
+# to the  default permissions. This value will be decoded as an octal
+# digit.
+#
+# For more information, please refer the documentation at
+# http://docs.openstack.org/developer/glance/configuring.html
+#
+# Possible values:
+#     * A valid file access permission
+#     * Zero
+#     * Any negative integer
+#
+# Related options:
+#     * None
+#
+#  (integer value)
+# from .glance_store.glance.store.filesystem_store_file_perm
+{{ if not .glance_store.glance.store.filesystem_store_file_perm }}#{{ end }}filesystem_store_file_perm = {{ .glance_store.glance.store.filesystem_store_file_perm | default "0" }}
+
+#
+# Path to the CA bundle file.
+#
+# This configuration option enables the operator to use a custom
+# Certificate Authority file to verify the remote server certificate. If
+# this option is set, the ``https_insecure`` option will be ignored and
+# the CA file specified will be used to authenticate the server
+# certificate and establish a secure connection to the server.
+#
+# Possible values:
+#     * A valid path to a CA file
+#
+# Related options:
+#     * https_insecure
+#
+#  (string value)
+# from .glance_store.glance.store.https_ca_certificates_file
+{{ if not .glance_store.glance.store.https_ca_certificates_file }}#{{ end }}https_ca_certificates_file = {{ .glance_store.glance.store.https_ca_certificates_file | default "<None>" }}
+
+#
+# Set verification of the remote server certificate.
+#
+# This configuration option takes in a boolean value to determine
+# whether or not to verify the remote server certificate. If set to
+# True, the remote server certificate is not verified. If the option is
+# set to False, then the default CA truststore is used for verification.
+#
+# This option is ignored if ``https_ca_certificates_file`` is set.
+# The remote server certificate will then be verified using the file
+# specified using the ``https_ca_certificates_file`` option.
+#
+# Possible values:
+#     * True
+#     * False
+#
+# Related options:
+#     * https_ca_certificates_file
+#
+#  (boolean value)
+# from .glance_store.glance.store.https_insecure
+{{ if not .glance_store.glance.store.https_insecure }}#{{ end }}https_insecure = {{ .glance_store.glance.store.https_insecure | default "true" }}
+
+#
+# The http/https proxy information to be used to connect to the remote
+# server.
+#
+# This configuration option specifies the http/https proxy information
+# that should be used to connect to the remote server. The proxy
+# information should be a key value pair of the scheme and proxy, for
+# example, http:10.0.0.1:3128. You can also specify proxies for multiple
+# schemes by separating the key value pairs with a comma, for example,
+# http:10.0.0.1:3128, https:10.0.0.1:1080.
+#
+# Possible values:
+#     * A comma separated list of scheme:proxy pairs as described above
+#
+# Related options:
+#     * None
+#
+#  (dict value)
+# from .glance_store.glance.store.http_proxy_information
+{{ if not .glance_store.glance.store.http_proxy_information }}#{{ end }}http_proxy_information = {{ .glance_store.glance.store.http_proxy_information | default "" }}
+
+#
+# Size, in megabytes, to chunk RADOS images into.
+#
+# Provide an integer value representing the size in megabytes to chunk
+# Glance images into. The default chunk size is 8 megabytes. For optimal
+# performance, the value should be a power of two.
+#
+# When Ceph's RBD object storage system is used as the storage backend
+# for storing Glance images, the images are chunked into objects of the
+# size set using this option. These chunked objects are then stored
+# across the distributed block data store to use for Glance.
+#
+# Possible Values:
+#     * Any positive integer value
+#
+# Related options:
+#     * None
+#
+#  (integer value)
+# Minimum value: 1
+# from .glance_store.glance.store.rbd_store_chunk_size
+{{ if not .glance_store.glance.store.rbd_store_chunk_size }}#{{ end }}rbd_store_chunk_size = {{ .glance_store.glance.store.rbd_store_chunk_size | default "8" }}
+
+#
+# RADOS pool in which images are stored.
+#
+# When RBD is used as the storage backend for storing Glance images, the
+# images are stored by means of logical grouping of the objects (chunks
+# of images) into a ``pool``. Each pool is defined with the number of
+# placement groups it can contain. The default pool that is used is
+# 'images'.
+#
+# More information on the RBD storage backend can be found here:
+# http://ceph.com/planet/how-data-is-stored-in-ceph-cluster/
+#
+# Possible Values:
+#     * A valid pool name
+#
+# Related options:
+#     * None
+#
+#  (string value)
+# from .glance_store.glance.store.rbd_store_pool
+{{ if not .glance_store.glance.store.rbd_store_pool }}#{{ end }}rbd_store_pool = {{ .glance_store.glance.store.rbd_store_pool | default "images" }}
+
+#
+# RADOS user to authenticate as.
+#
+# This configuration option takes in the RADOS user to authenticate as.
+# This is only needed when RADOS authentication is enabled and is
+# applicable only if the user is using Cephx authentication. If the
+# value for this option is not set by the user or is set to None, a
+# default value will be chosen, which will be based on the client.
+# section in rbd_store_ceph_conf.
+#
+# Possible Values:
+#     * A valid RADOS user
+#
+# Related options:
+#     * rbd_store_ceph_conf
+#
+#  (string value)
+# from .glance_store.glance.store.rbd_store_user
+{{ if not .glance_store.glance.store.rbd_store_user }}#{{ end }}rbd_store_user = {{ .glance_store.glance.store.rbd_store_user | default "<None>" }}
+
+#
+# Ceph configuration file path.
+#
+# This configuration option takes in the path to the Ceph configuration
+# file to be used. If the value for this option is not set by the user
+# or is set to None, librados will locate the default configuration file
+# which is located at /etc/ceph/ceph.conf. If using Cephx
+# authentication, this file should include a reference to the right
+# keyring in a client.<USER> section
+#
+# Possible Values:
+#     * A valid path to a configuration file
+#
+# Related options:
+#     * rbd_store_user
+#
+#  (string value)
+# from .glance_store.glance.store.rbd_store_ceph_conf
+{{ if not .glance_store.glance.store.rbd_store_ceph_conf }}#{{ end }}rbd_store_ceph_conf = {{ .glance_store.glance.store.rbd_store_ceph_conf | default "/etc/ceph/ceph.conf" }}
+
+#
+# Timeout value for connecting to Ceph cluster.
+#
+# This configuration option takes in the timeout value in seconds used
+# when connecting to the Ceph cluster i.e. it sets the time to wait for
+# glance-api before closing the connection. This prevents glance-api
+# hangups during the connection to RBD. If the value for this option
+# is set to less than or equal to 0, no timeout is set and the default
+# librados value is used.
+#
+# Possible Values:
+#     * Any integer value
+#
+# Related options:
+#     * None
+#
+#  (integer value)
+# from .glance_store.glance.store.rados_connect_timeout
+{{ if not .glance_store.glance.store.rados_connect_timeout }}#{{ end }}rados_connect_timeout = {{ .glance_store.glance.store.rados_connect_timeout | default "0" }}
 
 #
 # Chunk size for images to be stored in Sheepdog data store.
@@ -2498,12 +3144,16 @@
 # images in its own account. More details multi-tenant store can be found at
 # https://wiki.openstack.org/wiki/GlanceSwiftTenantSpecificStorage
 #
+# NOTE: If using multi-tenant swift store, please make sure
+# that you do not set a swift configuration file with the
+# 'swift_store_config_file' option.
+#
 # Possible values:
 #     * True
 #     * False
 #
 # Related options:
-#     * None
+#     * swift_store_config_file
 #
 #  (boolean value)
 # from .glance_store.glance.store.swift_store_multi_tenant
@@ -2731,546 +3381,19 @@
 # option is highly recommended while using Swift storage backend for
 # image storage as it avoids storage of credentials in the database.
 #
+# NOTE: Please do not configure this option if you have set
+# ``swift_store_multi_tenant`` to ``True``.
+#
 # Possible values:
 #     * String value representing an absolute path on the glance-api
 #       node
 #
 # Related options:
-#     * None
+#     * swift_store_multi_tenant
 #
 #  (string value)
 # from .glance_store.glance.store.swift_store_config_file
 {{ if not .glance_store.glance.store.swift_store_config_file }}#{{ end }}swift_store_config_file = {{ .glance_store.glance.store.swift_store_config_file | default "<None>" }}
-
-#
-# Directory to which the filesystem backend store writes images.
-#
-# Upon start up, Glance creates the directory if it doesn't already
-# exist and verifies write access to the user under which
-# ``glance-api`` runs. If the write access isn't available, a
-# ``BadStoreConfiguration`` exception is raised and the filesystem
-# store may not be available for adding new images.
-#
-# NOTE: This directory is used only when filesystem store is used as a
-# storage backend. Either ``filesystem_store_datadir`` or
-# ``filesystem_store_datadirs`` option must be specified in
-# ``glance-api.conf``. If both options are specified, a
-# ``BadStoreConfiguration`` will be raised and the filesystem store
-# may not be available for adding new images.
-#
-# Possible values:
-#     * A valid path to a directory
-#
-# Related options:
-#     * ``filesystem_store_datadirs``
-#     * ``filesystem_store_file_perm``
-#
-#  (string value)
-# from .glance_store.glance.store.filesystem_store_datadir
-{{ if not .glance_store.glance.store.filesystem_store_datadir }}#{{ end }}filesystem_store_datadir = {{ .glance_store.glance.store.filesystem_store_datadir | default "/var/lib/glance/images" }}
-
-#
-# List of directories and their priorities to which the filesystem
-# backend store writes images.
-#
-# The filesystem store can be configured to store images in multiple
-# directories as opposed to using a single directory specified by the
-# ``filesystem_store_datadir`` configuration option. When using
-# multiple directories, each directory can be given an optional
-# priority to specify the preference order in which they should
-# be used. Priority is an integer that is concatenated to the
-# directory path with a colon where a higher value indicates higher
-# priority. When two directories have the same priority, the directory
-# with most free space is used. When no priority is specified, it
-# defaults to zero.
-#
-# More information on configuring filesystem store with multiple store
-# directories can be found at
-# http://docs.openstack.org/developer/glance/configuring.html
-#
-# NOTE: This directory is used only when filesystem store is used as a
-# storage backend. Either ``filesystem_store_datadir`` or
-# ``filesystem_store_datadirs`` option must be specified in
-# ``glance-api.conf``. If both options are specified, a
-# ``BadStoreConfiguration`` will be raised and the filesystem store
-# may not be available for adding new images.
-#
-# Possible values:
-#     * List of strings of the following form:
-#         * ``<a valid directory path>:<optional integer priority>``
-#
-# Related options:
-#     * ``filesystem_store_datadir``
-#     * ``filesystem_store_file_perm``
-#
-#  (multi valued)
-# from .glance_store.glance.store.filesystem_store_datadirs (multiopt)
-{{ if not .glance_store.glance.store.filesystem_store_datadirs }}#filesystem_store_datadirs = {{ .glance_store.glance.store.filesystem_store_datadirs | default "" }}{{ else }}{{ range .glance_store.glance.store.filesystem_store_datadirs }}filesystem_store_datadirs = {{ . }}{{ end }}{{ end }}
-
-#
-# Filesystem store metadata file.
-#
-# The path to a file which contains the metadata to be returned with
-# any location associated with the filesystem store. The file must
-# contain a valid JSON object. The object should contain the keys
-# ``id`` and ``mountpoint``. The value for both keys should be a
-# string.
-#
-# Possible values:
-#     * A valid path to the store metadata file
-#
-# Related options:
-#     * None
-#
-#  (string value)
-# from .glance_store.glance.store.filesystem_store_metadata_file
-{{ if not .glance_store.glance.store.filesystem_store_metadata_file }}#{{ end }}filesystem_store_metadata_file = {{ .glance_store.glance.store.filesystem_store_metadata_file | default "<None>" }}
-
-#
-# File access permissions for the image files.
-#
-# Set the intended file access permissions for image data. This provides
-# a way to enable other services, e.g. Nova, to consume images directly
-# from the filesystem store. The users running the services that are
-# intended to be given access to could be made a member of the group
-# that owns the files created. Assigning a value less then or equal to
-# zero for this configuration option signifies that no changes be made
-# to the  default permissions. This value will be decoded as an octal
-# digit.
-#
-# For more information, please refer the documentation at
-# http://docs.openstack.org/developer/glance/configuring.html
-#
-# Possible values:
-#     * A valid file access permission
-#     * Zero
-#     * Any negative integer
-#
-# Related options:
-#     * None
-#
-#  (integer value)
-# from .glance_store.glance.store.filesystem_store_file_perm
-{{ if not .glance_store.glance.store.filesystem_store_file_perm }}#{{ end }}filesystem_store_file_perm = {{ .glance_store.glance.store.filesystem_store_file_perm | default "0" }}
-
-#
-# Size, in megabytes, to chunk RADOS images into.
-#
-# Provide an integer value representing the size in megabytes to chunk
-# Glance images into. The default chunk size is 8 megabytes. For optimal
-# performance, the value should be a power of two.
-#
-# When Ceph's RBD object storage system is used as the storage backend
-# for storing Glance images, the images are chunked into objects of the
-# size set using this option. These chunked objects are then stored
-# across the distributed block data store to use for Glance.
-#
-# Possible Values:
-#     * Any positive integer value
-#
-# Related options:
-#     * None
-#
-#  (integer value)
-# Minimum value: 1
-# from .glance_store.glance.store.rbd_store_chunk_size
-{{ if not .glance_store.glance.store.rbd_store_chunk_size }}#{{ end }}rbd_store_chunk_size = {{ .glance_store.glance.store.rbd_store_chunk_size | default "8" }}
-
-#
-# RADOS pool in which images are stored.
-#
-# When RBD is used as the storage backend for storing Glance images, the
-# images are stored by means of logical grouping of the objects (chunks
-# of images) into a ``pool``. Each pool is defined with the number of
-# placement groups it can contain. The default pool that is used is
-# 'images'.
-#
-# More information on the RBD storage backend can be found here:
-# http://ceph.com/planet/how-data-is-stored-in-ceph-cluster/
-#
-# Possible Values:
-#     * A valid pool name
-#
-# Related options:
-#     * None
-#
-#  (string value)
-# from .glance_store.glance.store.rbd_store_pool
-{{ if not .glance_store.glance.store.rbd_store_pool }}#{{ end }}rbd_store_pool = {{ .glance_store.glance.store.rbd_store_pool | default "images" }}
-
-#
-# RADOS user to authenticate as.
-#
-# This configuration option takes in the RADOS user to authenticate as.
-# This is only needed when RADOS authentication is enabled and is
-# applicable only if the user is using Cephx authentication. If the
-# value for this option is not set by the user or is set to None, a
-# default value will be chosen, which will be based on the client.
-# section in rbd_store_ceph_conf.
-#
-# Possible Values:
-#     * A valid RADOS user
-#
-# Related options:
-#     * rbd_store_ceph_conf
-#
-#  (string value)
-# from .glance_store.glance.store.rbd_store_user
-{{ if not .glance_store.glance.store.rbd_store_user }}#{{ end }}rbd_store_user = {{ .glance_store.glance.store.rbd_store_user | default "<None>" }}
-
-#
-# Ceph configuration file path.
-#
-# This configuration option takes in the path to the Ceph configuration
-# file to be used. If the value for this option is not set by the user
-# or is set to None, librados will locate the default configuration file
-# which is located at /etc/ceph/ceph.conf. If using Cephx
-# authentication, this file should include a reference to the right
-# keyring in a client.<USER> section
-#
-# Possible Values:
-#     * A valid path to a configuration file
-#
-# Related options:
-#     * rbd_store_user
-#
-#  (string value)
-# from .glance_store.glance.store.rbd_store_ceph_conf
-{{ if not .glance_store.glance.store.rbd_store_ceph_conf }}#{{ end }}rbd_store_ceph_conf = {{ .glance_store.glance.store.rbd_store_ceph_conf | default "/etc/ceph/ceph.conf" }}
-
-#
-# Timeout value for connecting to Ceph cluster.
-#
-# This configuration option takes in the timeout value in seconds used
-# when connecting to the Ceph cluster i.e. it sets the time to wait for
-# glance-api before closing the connection. This prevents glance-api
-# hangups during the connection to RBD. If the value for this option
-# is set to less than or equal to 0, no timeout is set and the default
-# librados value is used.
-#
-# Possible Values:
-#     * Any integer value
-#
-# Related options:
-#     * None
-#
-#  (integer value)
-# from .glance_store.glance.store.rados_connect_timeout
-{{ if not .glance_store.glance.store.rados_connect_timeout }}#{{ end }}rados_connect_timeout = {{ .glance_store.glance.store.rados_connect_timeout | default "0" }}
-
-#
-# Path to the CA bundle file.
-#
-# This configuration option enables the operator to use a custom
-# Certificate Authority file to verify the remote server certificate. If
-# this option is set, the ``https_insecure`` option will be ignored and
-# the CA file specified will be used to authenticate the server
-# certificate and establish a secure connection to the server.
-#
-# Possible values:
-#     * A valid path to a CA file
-#
-# Related options:
-#     * https_insecure
-#
-#  (string value)
-# from .glance_store.glance.store.https_ca_certificates_file
-{{ if not .glance_store.glance.store.https_ca_certificates_file }}#{{ end }}https_ca_certificates_file = {{ .glance_store.glance.store.https_ca_certificates_file | default "<None>" }}
-
-#
-# Set verification of the remote server certificate.
-#
-# This configuration option takes in a boolean value to determine
-# whether or not to verify the remote server certificate. If set to
-# True, the remote server certificate is not verified. If the option is
-# set to False, then the default CA truststore is used for verification.
-#
-# This option is ignored if ``https_ca_certificates_file`` is set.
-# The remote server certificate will then be verified using the file
-# specified using the ``https_ca_certificates_file`` option.
-#
-# Possible values:
-#     * True
-#     * False
-#
-# Related options:
-#     * https_ca_certificates_file
-#
-#  (boolean value)
-# from .glance_store.glance.store.https_insecure
-{{ if not .glance_store.glance.store.https_insecure }}#{{ end }}https_insecure = {{ .glance_store.glance.store.https_insecure | default "true" }}
-
-#
-# The http/https proxy information to be used to connect to the remote
-# server.
-#
-# This configuration option specifies the http/https proxy information
-# that should be used to connect to the remote server. The proxy
-# information should be a key value pair of the scheme and proxy, for
-# example, http:10.0.0.1:3128. You can also specify proxies for multiple
-# schemes by separating the key value pairs with a comma, for example,
-# http:10.0.0.1:3128, https:10.0.0.1:1080.
-#
-# Possible values:
-#     * A comma separated list of scheme:proxy pairs as described above
-#
-# Related options:
-#     * None
-#
-#  (dict value)
-# from .glance_store.glance.store.http_proxy_information
-{{ if not .glance_store.glance.store.http_proxy_information }}#{{ end }}http_proxy_information = {{ .glance_store.glance.store.http_proxy_information | default "" }}
-
-#
-# Information to match when looking for cinder in the service catalog.
-#
-# When the ``cinder_endpoint_template`` is not set and any of
-# ``cinder_store_auth_address``, ``cinder_store_user_name``,
-# ``cinder_store_project_name``, ``cinder_store_password`` is not set,
-# cinder store uses this information to lookup cinder endpoint from the service
-# catalog in the current context. ``cinder_os_region_name``, if set, is taken
-# into consideration to fetch the appropriate endpoint.
-#
-# The service catalog can be listed by the ``openstack catalog list`` command.
-#
-# Possible values:
-#     * A string of of the following form:
-#       ``<service_type>:<service_name>:<endpoint_type>``
-#       At least ``service_type`` and ``endpoint_type`` should be specified.
-#       ``service_name`` can be omitted.
-#
-# Related options:
-#     * cinder_os_region_name
-#     * cinder_endpoint_template
-#     * cinder_store_auth_address
-#     * cinder_store_user_name
-#     * cinder_store_project_name
-#     * cinder_store_password
-#
-#  (string value)
-# from .glance_store.glance.store.cinder_catalog_info
-{{ if not .glance_store.glance.store.cinder_catalog_info }}#{{ end }}cinder_catalog_info = {{ .glance_store.glance.store.cinder_catalog_info | default "volumev2::publicURL" }}
-
-#
-# Override service catalog lookup with template for cinder endpoint.
-#
-# When this option is set, this value is used to generate cinder endpoint,
-# instead of looking up from the service catalog.
-# This value is ignored if ``cinder_store_auth_address``,
-# ``cinder_store_user_name``, ``cinder_store_project_name``, and
-# ``cinder_store_password`` are specified.
-#
-# If this configuration option is set, ``cinder_catalog_info`` will be ignored.
-#
-# Possible values:
-#     * URL template string for cinder endpoint, where ``%%(tenant)s`` is
-#       replaced with the current tenant (project) name.
-#       For example: ``http://cinder.openstack.example.org/v2/%%(tenant)s``
-#
-# Related options:
-#     * cinder_store_auth_address
-#     * cinder_store_user_name
-#     * cinder_store_project_name
-#     * cinder_store_password
-#     * cinder_catalog_info
-#
-#  (string value)
-# from .glance_store.glance.store.cinder_endpoint_template
-{{ if not .glance_store.glance.store.cinder_endpoint_template }}#{{ end }}cinder_endpoint_template = {{ .glance_store.glance.store.cinder_endpoint_template | default "<None>" }}
-
-#
-# Region name to lookup cinder service from the service catalog.
-#
-# This is used only when ``cinder_catalog_info`` is used for determining the
-# endpoint. If set, the lookup for cinder endpoint by this node is filtered to
-# the specified region. It is useful when multiple regions are listed in the
-# catalog. If this is not set, the endpoint is looked up from every region.
-#
-# Possible values:
-#     * A string that is a valid region name.
-#
-# Related options:
-#     * cinder_catalog_info
-#
-#  (string value)
-# Deprecated group/name - [glance_store]/os_region_name
-# from .glance_store.glance.store.cinder_os_region_name
-{{ if not .glance_store.glance.store.cinder_os_region_name }}#{{ end }}cinder_os_region_name = {{ .glance_store.glance.store.cinder_os_region_name | default "<None>" }}
-
-#
-# Location of a CA certificates file used for cinder client requests.
-#
-# The specified CA certificates file, if set, is used to verify cinder
-# connections via HTTPS endpoint. If the endpoint is HTTP, this value is
-# ignored.
-# ``cinder_api_insecure`` must be set to ``True`` to enable the verification.
-#
-# Possible values:
-#     * Path to a ca certificates file
-#
-# Related options:
-#     * cinder_api_insecure
-#
-#  (string value)
-# from .glance_store.glance.store.cinder_ca_certificates_file
-{{ if not .glance_store.glance.store.cinder_ca_certificates_file }}#{{ end }}cinder_ca_certificates_file = {{ .glance_store.glance.store.cinder_ca_certificates_file | default "<None>" }}
-
-#
-# Number of cinderclient retries on failed http calls.
-#
-# When a call failed by any errors, cinderclient will retry the call up to the
-# specified times after sleeping a few seconds.
-#
-# Possible values:
-#     * A positive integer
-#
-# Related options:
-#     * None
-#
-#  (integer value)
-# Minimum value: 0
-# from .glance_store.glance.store.cinder_http_retries
-{{ if not .glance_store.glance.store.cinder_http_retries }}#{{ end }}cinder_http_retries = {{ .glance_store.glance.store.cinder_http_retries | default "3" }}
-
-#
-# Time period, in seconds, to wait for a cinder volume transition to
-# complete.
-#
-# When the cinder volume is created, deleted, or attached to the glance node to
-# read/write the volume data, the volume's state is changed. For example, the
-# newly created volume status changes from ``creating`` to ``available`` after
-# the creation process is completed. This specifies the maximum time to wait for
-# the status change. If a timeout occurs while waiting, or the status is changed
-# to an unexpected value (e.g. `error``), the image creation fails.
-#
-# Possible values:
-#     * A positive integer
-#
-# Related options:
-#     * None
-#
-#  (integer value)
-# Minimum value: 0
-# from .glance_store.glance.store.cinder_state_transition_timeout
-{{ if not .glance_store.glance.store.cinder_state_transition_timeout }}#{{ end }}cinder_state_transition_timeout = {{ .glance_store.glance.store.cinder_state_transition_timeout | default "300" }}
-
-#
-# Allow to perform insecure SSL requests to cinder.
-#
-# If this option is set to True, HTTPS endpoint connection is verified using the
-# CA certificates file specified by ``cinder_ca_certificates_file`` option.
-#
-# Possible values:
-#     * True
-#     * False
-#
-# Related options:
-#     * cinder_ca_certificates_file
-#
-#  (boolean value)
-# from .glance_store.glance.store.cinder_api_insecure
-{{ if not .glance_store.glance.store.cinder_api_insecure }}#{{ end }}cinder_api_insecure = {{ .glance_store.glance.store.cinder_api_insecure | default "false" }}
-
-#
-# The address where the cinder authentication service is listening.
-#
-# When all of ``cinder_store_auth_address``, ``cinder_store_user_name``,
-# ``cinder_store_project_name``, and ``cinder_store_password`` options are
-# specified, the specified values are always used for the authentication.
-# This is useful to hide the image volumes from users by storing them in a
-# project/tenant specific to the image service. It also enables users to share
-# the image volume among other projects under the control of glance's ACL.
-#
-# If either of these options are not set, the cinder endpoint is looked up
-# from the service catalog, and current context's user and project are used.
-#
-# Possible values:
-#     * A valid authentication service address, for example:
-#       ``http://openstack.example.org/identity/v2.0``
-#
-# Related options:
-#     * cinder_store_user_name
-#     * cinder_store_password
-#     * cinder_store_project_name
-#
-#  (string value)
-# from .glance_store.glance.store.cinder_store_auth_address
-{{ if not .glance_store.glance.store.cinder_store_auth_address }}#{{ end }}cinder_store_auth_address = {{ .glance_store.glance.store.cinder_store_auth_address | default "<None>" }}
-
-#
-# User name to authenticate against cinder.
-#
-# This must be used with all the following related options. If any of these are
-# not specified, the user of the current context is used.
-#
-# Possible values:
-#     * A valid user name
-#
-# Related options:
-#     * cinder_store_auth_address
-#     * cinder_store_password
-#     * cinder_store_project_name
-#
-#  (string value)
-# from .glance_store.glance.store.cinder_store_user_name
-{{ if not .glance_store.glance.store.cinder_store_user_name }}#{{ end }}cinder_store_user_name = {{ .glance_store.glance.store.cinder_store_user_name | default "<None>" }}
-
-#
-# Password for the user authenticating against cinder.
-#
-# This must be used with all the following related options. If any of these are
-# not specified, the user of the current context is used.
-#
-# Possible values:
-#     * A valid password for the user specified by ``cinder_store_user_name``
-#
-# Related options:
-#     * cinder_store_auth_address
-#     * cinder_store_user_name
-#     * cinder_store_project_name
-#
-#  (string value)
-# from .glance_store.glance.store.cinder_store_password
-{{ if not .glance_store.glance.store.cinder_store_password }}#{{ end }}cinder_store_password = {{ .glance_store.glance.store.cinder_store_password | default "<None>" }}
-
-#
-# Project name where the image volume is stored in cinder.
-#
-# If this configuration option is not set, the project in current context is
-# used.
-#
-# This must be used with all the following related options. If any of these are
-# not specified, the project of the current context is used.
-#
-# Possible values:
-#     * A valid project name
-#
-# Related options:
-#     * ``cinder_store_auth_address``
-#     * ``cinder_store_user_name``
-#     * ``cinder_store_password``
-#
-#  (string value)
-# from .glance_store.glance.store.cinder_store_project_name
-{{ if not .glance_store.glance.store.cinder_store_project_name }}#{{ end }}cinder_store_project_name = {{ .glance_store.glance.store.cinder_store_project_name | default "<None>" }}
-
-#
-# Path to the rootwrap configuration file to use for running commands as root.
-#
-# The cinder store requires root privileges to operate the image volumes (for
-# connecting to iSCSI/FC volumes and reading/writing the volume data, etc.).
-# The configuration file should allow the required commands by cinder store and
-# os-brick library.
-#
-# Possible values:
-#     * Path to the rootwrap config file
-#
-# Related options:
-#     * None
-#
-#  (string value)
-# from .glance_store.glance.store.rootwrap_config
-{{ if not .glance_store.glance.store.rootwrap_config }}#{{ end }}rootwrap_config = {{ .glance_store.glance.store.rootwrap_config | default "/etc/glance/rootwrap.conf" }}
 
 #
 # Address of the ESX/ESXi or vCenter Server target system.
@@ -3474,26 +3597,10 @@
 # Supported values for the 'disk_format' image attribute (list value)
 # Deprecated group/name - [DEFAULT]/disk_formats
 # from .image_format.glance.api.disk_formats
-{{ if not .image_format.glance.api.disk_formats }}#{{ end }}disk_formats = {{ .image_format.glance.api.disk_formats | default "ami,ari,aki,vhd,vhdx,vmdk,raw,qcow2,vdi,iso" }}
+{{ if not .image_format.glance.api.disk_formats }}#{{ end }}disk_formats = {{ .image_format.glance.api.disk_formats | default "ami,ari,aki,vhd,vhdx,vmdk,raw,qcow2,vdi,iso,ploop" }}
 
 
 [keystone_authtoken]
-
-# FIXME(alanmeadows) - added the next several lines because oslo gen config refuses to generate the line items required in keystonemiddleware
-# for authentication - while it does support an "auth_section" parameter to locate these elsewhere, it would be a strange divergence
-# from how neutron keystone authentication is stored today - ocata and later appear to use a "service" user section which can house these details
-# and does successfully generate beyond newton, so likely this whole section will be removed the next time we generate this file
-
-{{ if not .keystone_authtoken.keystonemiddleware.auth_token.auth_url }}#{{ end }}auth_url = {{ .keystone_authtoken.keystonemiddleware.auth_token.auth_url | default "<None>" }}
-{{ if not .keystone_authtoken.keystonemiddleware.auth_token.region_name }}#{{ end }}region_name = {{ .keystone_authtoken.keystonemiddleware.auth_token.region_name | default "<None>" }}
-{{ if not .keystone_authtoken.keystonemiddleware.auth_token.project_name }}#{{ end }}project_name = {{ .keystone_authtoken.keystonemiddleware.auth_token.project_name | default "<None>" }}
-{{ if not .keystone_authtoken.keystonemiddleware.auth_token.project_domain_name }}#{{ end }}project_domain_name = {{ .keystone_authtoken.keystonemiddleware.auth_token.project_domain_name | default "<None>" }}
-{{ if not .keystone_authtoken.keystonemiddleware.auth_token.user_domain_name }}#{{ end }}user_domain_name = {{ .keystone_authtoken.keystonemiddleware.auth_token.user_domain_name | default "<None>" }}
-{{ if not .keystone_authtoken.keystonemiddleware.auth_token.username }}#{{ end }}username = {{ .keystone_authtoken.keystonemiddleware.auth_token.username | default "<None>" }}
-{{ if not .keystone_authtoken.keystonemiddleware.auth_token.password }}#{{ end }}password = {{ .keystone_authtoken.keystonemiddleware.auth_token.password | default "<None>" }}
-
-# FIXME(alanmeadows) - added for some newton images using older keystoneauth1 libs but are still "newton"
-{{ if not .keystone_authtoken.keystonemiddleware.auth_token.auth_url }}#{{ end }}auth_url = {{ .keystone_authtoken.keystonemiddleware.auth_token.auth_url | default "<None>" }}
 
 #
 # From keystonemiddleware.auth_token
@@ -3556,7 +3663,12 @@
 # from .keystone_authtoken.keystonemiddleware.auth_token.region_name
 {{ if not .keystone_authtoken.keystonemiddleware.auth_token.region_name }}#{{ end }}region_name = {{ .keystone_authtoken.keystonemiddleware.auth_token.region_name | default "<None>" }}
 
-# Directory used to cache files related to PKI tokens. (string value)
+# DEPRECATED: Directory used to cache files related to PKI tokens. This option
+# has been deprecated in the Ocata release and will be removed in the P release.
+# (string value)
+# This option is deprecated for removal since Ocata.
+# Its value may be silently ignored in the future.
+# Reason: PKI token format is no longer supported.
 # from .keystone_authtoken.keystonemiddleware.auth_token.signing_dir
 {{ if not .keystone_authtoken.keystonemiddleware.auth_token.signing_dir }}#{{ end }}signing_dir = {{ .keystone_authtoken.keystonemiddleware.auth_token.signing_dir | default "<None>" }}
 
@@ -3572,10 +3684,14 @@
 # from .keystone_authtoken.keystonemiddleware.auth_token.token_cache_time
 {{ if not .keystone_authtoken.keystonemiddleware.auth_token.token_cache_time }}#{{ end }}token_cache_time = {{ .keystone_authtoken.keystonemiddleware.auth_token.token_cache_time | default "300" }}
 
-# Determines the frequency at which the list of revoked tokens is retrieved from
-# the Identity service (in seconds). A high number of revocation events combined
-# with a low cache duration may significantly reduce performance. Only valid for
-# PKI tokens. (integer value)
+# DEPRECATED: Determines the frequency at which the list of revoked tokens is
+# retrieved from the Identity service (in seconds). A high number of revocation
+# events combined with a low cache duration may significantly reduce
+# performance. Only valid for PKI tokens. This option has been deprecated in the
+# Ocata release and will be removed in the P release. (integer value)
+# This option is deprecated for removal since Ocata.
+# Its value may be silently ignored in the future.
+# Reason: PKI token format is no longer supported.
 # from .keystone_authtoken.keystonemiddleware.auth_token.revocation_cache_time
 {{ if not .keystone_authtoken.keystonemiddleware.auth_token.revocation_cache_time }}#{{ end }}revocation_cache_time = {{ .keystone_authtoken.keystonemiddleware.auth_token.revocation_cache_time | default "10" }}
 
@@ -3639,21 +3755,44 @@
 # from .keystone_authtoken.keystonemiddleware.auth_token.enforce_token_bind
 {{ if not .keystone_authtoken.keystonemiddleware.auth_token.enforce_token_bind }}#{{ end }}enforce_token_bind = {{ .keystone_authtoken.keystonemiddleware.auth_token.enforce_token_bind | default "permissive" }}
 
-# If true, the revocation list will be checked for cached tokens. This requires
-# that PKI tokens are configured on the identity server. (boolean value)
+# DEPRECATED: If true, the revocation list will be checked for cached tokens.
+# This requires that PKI tokens are configured on the identity server. (boolean
+# value)
+# This option is deprecated for removal since Ocata.
+# Its value may be silently ignored in the future.
+# Reason: PKI token format is no longer supported.
 # from .keystone_authtoken.keystonemiddleware.auth_token.check_revocations_for_cached
 {{ if not .keystone_authtoken.keystonemiddleware.auth_token.check_revocations_for_cached }}#{{ end }}check_revocations_for_cached = {{ .keystone_authtoken.keystonemiddleware.auth_token.check_revocations_for_cached | default "false" }}
 
-# Hash algorithms to use for hashing PKI tokens. This may be a single algorithm
-# or multiple. The algorithms are those supported by Python standard
-# hashlib.new(). The hashes will be tried in the order given, so put the
-# preferred one first for performance. The result of the first hash will be
+# DEPRECATED: Hash algorithms to use for hashing PKI tokens. This may be a
+# single algorithm or multiple. The algorithms are those supported by Python
+# standard hashlib.new(). The hashes will be tried in the order given, so put
+# the preferred one first for performance. The result of the first hash will be
 # stored in the cache. This will typically be set to multiple values only while
 # migrating from a less secure algorithm to a more secure one. Once all the old
 # tokens are expired this option should be set to a single value for better
 # performance. (list value)
+# This option is deprecated for removal since Ocata.
+# Its value may be silently ignored in the future.
+# Reason: PKI token format is no longer supported.
 # from .keystone_authtoken.keystonemiddleware.auth_token.hash_algorithms
 {{ if not .keystone_authtoken.keystonemiddleware.auth_token.hash_algorithms }}#{{ end }}hash_algorithms = {{ .keystone_authtoken.keystonemiddleware.auth_token.hash_algorithms | default "md5" }}
+
+# A choice of roles that must be present in a service token. Service tokens are
+# allowed to request that an expired token can be used and so this check should
+# tightly control that only actual services should be sending this token. Roles
+# here are applied as an ANY check so any role in this list must be present. For
+# backwards compatibility reasons this currently only affects the allow_expired
+# check. (list value)
+# from .keystone_authtoken.keystonemiddleware.auth_token.service_token_roles
+{{ if not .keystone_authtoken.keystonemiddleware.auth_token.service_token_roles }}#{{ end }}service_token_roles = {{ .keystone_authtoken.keystonemiddleware.auth_token.service_token_roles | default "service" }}
+
+# For backwards compatibility reasons we must let valid service tokens pass that
+# don't pass the service_token_roles check as valid. Setting this true will
+# become the default in a future release and should be enabled if possible.
+# (boolean value)
+# from .keystone_authtoken.keystonemiddleware.auth_token.service_token_roles_required
+{{ if not .keystone_authtoken.keystonemiddleware.auth_token.service_token_roles_required }}#{{ end }}service_token_roles_required = {{ .keystone_authtoken.keystonemiddleware.auth_token.service_token_roles_required | default "false" }}
 
 # Authentication type to load (string value)
 # Deprecated group/name - [keystone_authtoken]/auth_plugin
@@ -3694,7 +3833,7 @@
 # from .matchmaker_redis.oslo.messaging.password
 {{ if not .matchmaker_redis.oslo.messaging.password }}#{{ end }}password = {{ .matchmaker_redis.oslo.messaging.password | default "" }}
 
-# DEPRECATED: List of Redis Sentinel hosts (fault tolerance mode) e.g.
+# DEPRECATED: List of Redis Sentinel hosts (fault tolerance mode), e.g.,
 # [host:port, host1:port ... ] (list value)
 # This option is deprecated for removal.
 # Its value may be silently ignored in the future.
@@ -3714,7 +3853,7 @@
 # from .matchmaker_redis.oslo.messaging.check_timeout
 {{ if not .matchmaker_redis.oslo.messaging.check_timeout }}#{{ end }}check_timeout = {{ .matchmaker_redis.oslo.messaging.check_timeout | default "20000" }}
 
-# Timeout in ms on blocking socket operations (integer value)
+# Timeout in ms on blocking socket operations. (integer value)
 # from .matchmaker_redis.oslo.messaging.socket_timeout
 {{ if not .matchmaker_redis.oslo.messaging.socket_timeout }}#{{ end }}socket_timeout = {{ .matchmaker_redis.oslo.messaging.socket_timeout | default "10000" }}
 
@@ -3761,17 +3900,18 @@
 # from .oslo_messaging_amqp.oslo.messaging.trace
 {{ if not .oslo_messaging_amqp.oslo.messaging.trace }}#{{ end }}trace = {{ .oslo_messaging_amqp.oslo.messaging.trace | default "false" }}
 
-# CA certificate PEM file to verify server certificate (string value)
+# CA certificate PEM file used to verify the server's certificate (string value)
 # Deprecated group/name - [amqp1]/ssl_ca_file
 # from .oslo_messaging_amqp.oslo.messaging.ssl_ca_file
 {{ if not .oslo_messaging_amqp.oslo.messaging.ssl_ca_file }}#{{ end }}ssl_ca_file = {{ .oslo_messaging_amqp.oslo.messaging.ssl_ca_file | default "" }}
 
-# Identifying certificate PEM file to present to clients (string value)
+# Self-identifying certificate PEM file for client authentication (string value)
 # Deprecated group/name - [amqp1]/ssl_cert_file
 # from .oslo_messaging_amqp.oslo.messaging.ssl_cert_file
 {{ if not .oslo_messaging_amqp.oslo.messaging.ssl_cert_file }}#{{ end }}ssl_cert_file = {{ .oslo_messaging_amqp.oslo.messaging.ssl_cert_file | default "" }}
 
-# Private key PEM file used to sign cert_file certificate (string value)
+# Private key PEM file used to sign ssl_cert_file certificate (optional) (string
+# value)
 # Deprecated group/name - [amqp1]/ssl_key_file
 # from .oslo_messaging_amqp.oslo.messaging.ssl_key_file
 {{ if not .oslo_messaging_amqp.oslo.messaging.ssl_key_file }}#{{ end }}ssl_key_file = {{ .oslo_messaging_amqp.oslo.messaging.ssl_key_file | default "" }}
@@ -3781,8 +3921,11 @@
 # from .oslo_messaging_amqp.oslo.messaging.ssl_key_password
 {{ if not .oslo_messaging_amqp.oslo.messaging.ssl_key_password }}#{{ end }}ssl_key_password = {{ .oslo_messaging_amqp.oslo.messaging.ssl_key_password | default "<None>" }}
 
-# Accept clients using either SSL or plain TCP (boolean value)
+# DEPRECATED: Accept clients using either SSL or plain TCP (boolean value)
 # Deprecated group/name - [amqp1]/allow_insecure_clients
+# This option is deprecated for removal.
+# Its value may be silently ignored in the future.
+# Reason: Not applicable - not a SSL server
 # from .oslo_messaging_amqp.oslo.messaging.allow_insecure_clients
 {{ if not .oslo_messaging_amqp.oslo.messaging.allow_insecure_clients }}#{{ end }}allow_insecure_clients = {{ .oslo_messaging_amqp.oslo.messaging.allow_insecure_clients | default "false" }}
 
@@ -3834,8 +3977,13 @@
 # from .oslo_messaging_amqp.oslo.messaging.link_retry_delay
 {{ if not .oslo_messaging_amqp.oslo.messaging.link_retry_delay }}#{{ end }}link_retry_delay = {{ .oslo_messaging_amqp.oslo.messaging.link_retry_delay | default "10" }}
 
-# The deadline for an rpc reply message delivery. Only used when caller does not
-# provide a timeout expiry. (integer value)
+# The maximum number of attempts to re-send a reply message which failed due to
+# a recoverable error. (integer value)
+# Minimum value: -1
+# from .oslo_messaging_amqp.oslo.messaging.default_reply_retry
+{{ if not .oslo_messaging_amqp.oslo.messaging.default_reply_retry }}#{{ end }}default_reply_retry = {{ .oslo_messaging_amqp.oslo.messaging.default_reply_retry | default "0" }}
+
+# The deadline for an rpc reply message delivery. (integer value)
 # Minimum value: 5
 # from .oslo_messaging_amqp.oslo.messaging.default_reply_timeout
 {{ if not .oslo_messaging_amqp.oslo.messaging.default_reply_timeout }}#{{ end }}default_reply_timeout = {{ .oslo_messaging_amqp.oslo.messaging.default_reply_timeout | default "30" }}
@@ -3851,6 +3999,12 @@
 # Minimum value: 5
 # from .oslo_messaging_amqp.oslo.messaging.default_notify_timeout
 {{ if not .oslo_messaging_amqp.oslo.messaging.default_notify_timeout }}#{{ end }}default_notify_timeout = {{ .oslo_messaging_amqp.oslo.messaging.default_notify_timeout | default "30" }}
+
+# The duration to schedule a purge of idle sender links. Detach link after
+# expiry. (integer value)
+# Minimum value: 1
+# from .oslo_messaging_amqp.oslo.messaging.default_sender_link_timeout
+{{ if not .oslo_messaging_amqp.oslo.messaging.default_sender_link_timeout }}#{{ end }}default_sender_link_timeout = {{ .oslo_messaging_amqp.oslo.messaging.default_sender_link_timeout | default "600" }}
 
 # Indicates the addressing mode used by the driver.
 # Permitted values:
@@ -3933,6 +4087,78 @@
 # Minimum value: 1
 # from .oslo_messaging_amqp.oslo.messaging.notify_server_credit
 {{ if not .oslo_messaging_amqp.oslo.messaging.notify_server_credit }}#{{ end }}notify_server_credit = {{ .oslo_messaging_amqp.oslo.messaging.notify_server_credit | default "100" }}
+
+# Send messages of this type pre-settled.
+# Pre-settled messages will not receive acknowledgement
+# from the peer. Note well: pre-settled messages may be
+# silently discarded if the delivery fails.
+# Permitted values:
+# 'rpc-call' - send RPC Calls pre-settled
+# 'rpc-reply'- send RPC Replies pre-settled
+# 'rpc-cast' - Send RPC Casts pre-settled
+# 'notify'   - Send Notifications pre-settled
+#  (multi valued)
+# from .oslo_messaging_amqp.oslo.messaging.pre_settled (multiopt)
+{{ if not .oslo_messaging_amqp.oslo.messaging.pre_settled }}#pre_settled = {{ .oslo_messaging_amqp.oslo.messaging.pre_settled | default "rpc-cast" }}{{ else }}{{ range .oslo_messaging_amqp.oslo.messaging.pre_settled }}pre_settled = {{ . }}{{ end }}{{ end }}
+# from .oslo_messaging_amqp.oslo.messaging.pre_settled (multiopt)
+{{ if not .oslo_messaging_amqp.oslo.messaging.pre_settled }}#pre_settled = {{ .oslo_messaging_amqp.oslo.messaging.pre_settled | default "rpc-reply" }}{{ else }}{{ range .oslo_messaging_amqp.oslo.messaging.pre_settled }}pre_settled = {{ . }}{{ end }}{{ end }}
+
+
+[oslo_messaging_kafka]
+
+#
+# From oslo.messaging
+#
+
+# DEPRECATED: Default Kafka broker Host (string value)
+# This option is deprecated for removal.
+# Its value may be silently ignored in the future.
+# Reason: Replaced by [DEFAULT]/transport_url
+# from .oslo_messaging_kafka.oslo.messaging.kafka_default_host
+{{ if not .oslo_messaging_kafka.oslo.messaging.kafka_default_host }}#{{ end }}kafka_default_host = {{ .oslo_messaging_kafka.oslo.messaging.kafka_default_host | default "localhost" }}
+
+# DEPRECATED: Default Kafka broker Port (port value)
+# Minimum value: 0
+# Maximum value: 65535
+# This option is deprecated for removal.
+# Its value may be silently ignored in the future.
+# Reason: Replaced by [DEFAULT]/transport_url
+# from .oslo_messaging_kafka.oslo.messaging.kafka_default_port
+{{ if not .oslo_messaging_kafka.oslo.messaging.kafka_default_port }}#{{ end }}kafka_default_port = {{ .oslo_messaging_kafka.oslo.messaging.kafka_default_port | default "9092" }}
+
+# Max fetch bytes of Kafka consumer (integer value)
+# from .oslo_messaging_kafka.oslo.messaging.kafka_max_fetch_bytes
+{{ if not .oslo_messaging_kafka.oslo.messaging.kafka_max_fetch_bytes }}#{{ end }}kafka_max_fetch_bytes = {{ .oslo_messaging_kafka.oslo.messaging.kafka_max_fetch_bytes | default "1048576" }}
+
+# Default timeout(s) for Kafka consumers (integer value)
+# from .oslo_messaging_kafka.oslo.messaging.kafka_consumer_timeout
+{{ if not .oslo_messaging_kafka.oslo.messaging.kafka_consumer_timeout }}#{{ end }}kafka_consumer_timeout = {{ .oslo_messaging_kafka.oslo.messaging.kafka_consumer_timeout | default "1.0" }}
+
+# Pool Size for Kafka Consumers (integer value)
+# from .oslo_messaging_kafka.oslo.messaging.pool_size
+{{ if not .oslo_messaging_kafka.oslo.messaging.pool_size }}#{{ end }}pool_size = {{ .oslo_messaging_kafka.oslo.messaging.pool_size | default "10" }}
+
+# The pool size limit for connections expiration policy (integer value)
+# from .oslo_messaging_kafka.oslo.messaging.conn_pool_min_size
+{{ if not .oslo_messaging_kafka.oslo.messaging.conn_pool_min_size }}#{{ end }}conn_pool_min_size = {{ .oslo_messaging_kafka.oslo.messaging.conn_pool_min_size | default "2" }}
+
+# The time-to-live in sec of idle connections in the pool (integer value)
+# from .oslo_messaging_kafka.oslo.messaging.conn_pool_ttl
+{{ if not .oslo_messaging_kafka.oslo.messaging.conn_pool_ttl }}#{{ end }}conn_pool_ttl = {{ .oslo_messaging_kafka.oslo.messaging.conn_pool_ttl | default "1200" }}
+
+# Group id for Kafka consumer. Consumers in one group will coordinate message
+# consumption (string value)
+# from .oslo_messaging_kafka.oslo.messaging.consumer_group
+{{ if not .oslo_messaging_kafka.oslo.messaging.consumer_group }}#{{ end }}consumer_group = {{ .oslo_messaging_kafka.oslo.messaging.consumer_group | default "oslo_messaging_consumer" }}
+
+# Upper bound on the delay for KafkaProducer batching in seconds (floating point
+# value)
+# from .oslo_messaging_kafka.oslo.messaging.producer_batch_timeout
+{{ if not .oslo_messaging_kafka.oslo.messaging.producer_batch_timeout }}#{{ end }}producer_batch_timeout = {{ .oslo_messaging_kafka.oslo.messaging.producer_batch_timeout | default "0.0" }}
+
+# Size of batch for the producer async send (integer value)
+# from .oslo_messaging_kafka.oslo.messaging.producer_batch_size
+{{ if not .oslo_messaging_kafka.oslo.messaging.producer_batch_size }}#{{ end }}producer_batch_size = {{ .oslo_messaging_kafka.oslo.messaging.producer_batch_size | default "16384" }}
 
 
 [oslo_messaging_notifications]
@@ -4072,6 +4298,7 @@
 {{ if not .oslo_messaging_rabbit.oslo.messaging.rabbit_password }}#{{ end }}rabbit_password = {{ .oslo_messaging_rabbit.oslo.messaging.rabbit_password | default "guest" }}
 
 # The RabbitMQ login method. (string value)
+# Allowed values: PLAIN, AMQPLAIN, RABBIT-CR-DEMO
 # Deprecated group/name - [DEFAULT]/rabbit_login_method
 # from .oslo_messaging_rabbit.oslo.messaging.rabbit_login_method
 {{ if not .oslo_messaging_rabbit.oslo.messaging.rabbit_login_method }}#{{ end }}rabbit_login_method = {{ .oslo_messaging_rabbit.oslo.messaging.rabbit_login_method | default "AMQPLAIN" }}
@@ -4110,7 +4337,7 @@
 # Try to use HA queues in RabbitMQ (x-ha-policy: all). If you change this
 # option, you must wipe the RabbitMQ database. In RabbitMQ 3.0, queue mirroring
 # is no longer controlled by the x-ha-policy argument when declaring a queue. If
-# you just want to make sure that all queues (except  those with auto-generated
+# you just want to make sure that all queues (except those with auto-generated
 # names) are mirrored across all nodes, run: "rabbitmqctl set_policy HA
 # '^(?!amq\.).*' '{"ha-mode": "all"}' " (boolean value)
 # Deprecated group/name - [DEFAULT]/rabbit_ha_queues
@@ -4207,6 +4434,12 @@
 # from .oslo_messaging_rabbit.oslo.messaging.pool_stale
 {{ if not .oslo_messaging_rabbit.oslo.messaging.pool_stale }}#{{ end }}pool_stale = {{ .oslo_messaging_rabbit.oslo.messaging.pool_stale | default "60" }}
 
+# Default serialization mechanism for serializing/deserializing
+# outgoing/incoming messages (string value)
+# Allowed values: json, msgpack
+# from .oslo_messaging_rabbit.oslo.messaging.default_serializer_type
+{{ if not .oslo_messaging_rabbit.oslo.messaging.default_serializer_type }}#{{ end }}default_serializer_type = {{ .oslo_messaging_rabbit.oslo.messaging.default_serializer_type | default "json" }}
+
 # Persist notification messages. (boolean value)
 # from .oslo_messaging_rabbit.oslo.messaging.notification_persistence
 {{ if not .oslo_messaging_rabbit.oslo.messaging.notification_persistence }}#{{ end }}notification_persistence = {{ .oslo_messaging_rabbit.oslo.messaging.notification_persistence | default "false" }}
@@ -4264,7 +4497,7 @@
 
 # Reconnecting retry count in case of connectivity problem during sending RPC
 # message, -1 means infinite retry. If actual retry attempts in not 0 the rpc
-# request could be processed more then one time (integer value)
+# request could be processed more than one time (integer value)
 # from .oslo_messaging_rabbit.oslo.messaging.default_rpc_retry_attempts
 {{ if not .oslo_messaging_rabbit.oslo.messaging.default_rpc_retry_attempts }}#{{ end }}default_rpc_retry_attempts = {{ .oslo_messaging_rabbit.oslo.messaging.default_rpc_retry_attempts | default "-1" }}
 
@@ -4287,7 +4520,7 @@
 {{ if not .oslo_messaging_zmq.oslo.messaging.rpc_zmq_bind_address }}#{{ end }}rpc_zmq_bind_address = {{ .oslo_messaging_zmq.oslo.messaging.rpc_zmq_bind_address | default "*" }}
 
 # MatchMaker driver. (string value)
-# Allowed values: redis, dummy
+# Allowed values: redis, sentinel, dummy
 # Deprecated group/name - [DEFAULT]/rpc_zmq_matchmaker
 # from .oslo_messaging_zmq.oslo.messaging.rpc_zmq_matchmaker
 {{ if not .oslo_messaging_zmq.oslo.messaging.rpc_zmq_matchmaker }}#{{ end }}rpc_zmq_matchmaker = {{ .oslo_messaging_zmq.oslo.messaging.rpc_zmq_matchmaker | default "redis" }}
@@ -4314,13 +4547,14 @@
 # from .oslo_messaging_zmq.oslo.messaging.rpc_zmq_host
 {{ if not .oslo_messaging_zmq.oslo.messaging.rpc_zmq_host }}#{{ end }}rpc_zmq_host = {{ .oslo_messaging_zmq.oslo.messaging.rpc_zmq_host | default "localhost" }}
 
-# Seconds to wait before a cast expires (TTL). The default value of -1 specifies
-# an infinite linger period. The value of 0 specifies no linger period. Pending
-# messages shall be discarded immediately when the socket is closed. Only
-# supported by impl_zmq. (integer value)
+# Number of seconds to wait before all pending messages will be sent after
+# closing a socket. The default value of -1 specifies an infinite linger period.
+# The value of 0 specifies no linger period. Pending messages shall be discarded
+# immediately when the socket is closed. Positive values specify an upper bound
+# for the linger period. (integer value)
 # Deprecated group/name - [DEFAULT]/rpc_cast_timeout
-# from .oslo_messaging_zmq.oslo.messaging.rpc_cast_timeout
-{{ if not .oslo_messaging_zmq.oslo.messaging.rpc_cast_timeout }}#{{ end }}rpc_cast_timeout = {{ .oslo_messaging_zmq.oslo.messaging.rpc_cast_timeout | default "-1" }}
+# from .oslo_messaging_zmq.oslo.messaging.zmq_linger
+{{ if not .oslo_messaging_zmq.oslo.messaging.zmq_linger }}#{{ end }}zmq_linger = {{ .oslo_messaging_zmq.oslo.messaging.zmq_linger | default "-1" }}
 
 # The default number of seconds that poll should wait. Poll raises timeout
 # exception when timeout expired. (integer value)
@@ -4344,12 +4578,23 @@
 # value)
 # Deprecated group/name - [DEFAULT]/use_pub_sub
 # from .oslo_messaging_zmq.oslo.messaging.use_pub_sub
-{{ if not .oslo_messaging_zmq.oslo.messaging.use_pub_sub }}#{{ end }}use_pub_sub = {{ .oslo_messaging_zmq.oslo.messaging.use_pub_sub | default "true" }}
+{{ if not .oslo_messaging_zmq.oslo.messaging.use_pub_sub }}#{{ end }}use_pub_sub = {{ .oslo_messaging_zmq.oslo.messaging.use_pub_sub | default "false" }}
 
 # Use ROUTER remote proxy. (boolean value)
 # Deprecated group/name - [DEFAULT]/use_router_proxy
 # from .oslo_messaging_zmq.oslo.messaging.use_router_proxy
-{{ if not .oslo_messaging_zmq.oslo.messaging.use_router_proxy }}#{{ end }}use_router_proxy = {{ .oslo_messaging_zmq.oslo.messaging.use_router_proxy | default "true" }}
+{{ if not .oslo_messaging_zmq.oslo.messaging.use_router_proxy }}#{{ end }}use_router_proxy = {{ .oslo_messaging_zmq.oslo.messaging.use_router_proxy | default "false" }}
+
+# This option makes direct connections dynamic or static. It makes sense only
+# with use_router_proxy=False which means to use direct connections for direct
+# message types (ignored otherwise). (boolean value)
+# from .oslo_messaging_zmq.oslo.messaging.use_dynamic_connections
+{{ if not .oslo_messaging_zmq.oslo.messaging.use_dynamic_connections }}#{{ end }}use_dynamic_connections = {{ .oslo_messaging_zmq.oslo.messaging.use_dynamic_connections | default "false" }}
+
+# How many additional connections to a host will be made for failover reasons.
+# This option is actual only in dynamic connections mode. (integer value)
+# from .oslo_messaging_zmq.oslo.messaging.zmq_failover_connections
+{{ if not .oslo_messaging_zmq.oslo.messaging.zmq_failover_connections }}#{{ end }}zmq_failover_connections = {{ .oslo_messaging_zmq.oslo.messaging.zmq_failover_connections | default "2" }}
 
 # Minimal port number for random ports range. (port value)
 # Minimum value: 0
@@ -4383,7 +4628,73 @@
 # even if server is disconnected, when the server appears we send all
 # accumulated messages to it. (boolean value)
 # from .oslo_messaging_zmq.oslo.messaging.zmq_immediate
-{{ if not .oslo_messaging_zmq.oslo.messaging.zmq_immediate }}#{{ end }}zmq_immediate = {{ .oslo_messaging_zmq.oslo.messaging.zmq_immediate | default "false" }}
+{{ if not .oslo_messaging_zmq.oslo.messaging.zmq_immediate }}#{{ end }}zmq_immediate = {{ .oslo_messaging_zmq.oslo.messaging.zmq_immediate | default "true" }}
+
+# Enable/disable TCP keepalive (KA) mechanism. The default value of -1 (or any
+# other negative value) means to skip any overrides and leave it to OS default;
+# 0 and 1 (or any other positive value) mean to disable and enable the option
+# respectively. (integer value)
+# from .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive
+{{ if not .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive }}#{{ end }}zmq_tcp_keepalive = {{ .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive | default "-1" }}
+
+# The duration between two keepalive transmissions in idle condition. The unit
+# is platform dependent, for example, seconds in Linux, milliseconds in Windows
+# etc. The default value of -1 (or any other negative value and 0) means to skip
+# any overrides and leave it to OS default. (integer value)
+# from .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive_idle
+{{ if not .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive_idle }}#{{ end }}zmq_tcp_keepalive_idle = {{ .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive_idle | default "-1" }}
+
+# The number of retransmissions to be carried out before declaring that remote
+# end is not available. The default value of -1 (or any other negative value and
+# 0) means to skip any overrides and leave it to OS default. (integer value)
+# from .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive_cnt
+{{ if not .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive_cnt }}#{{ end }}zmq_tcp_keepalive_cnt = {{ .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive_cnt | default "-1" }}
+
+# The duration between two successive keepalive retransmissions, if
+# acknowledgement to the previous keepalive transmission is not received. The
+# unit is platform dependent, for example, seconds in Linux, milliseconds in
+# Windows etc. The default value of -1 (or any other negative value and 0) means
+# to skip any overrides and leave it to OS default. (integer value)
+# from .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive_intvl
+{{ if not .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive_intvl }}#{{ end }}zmq_tcp_keepalive_intvl = {{ .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive_intvl | default "-1" }}
+
+# Maximum number of (green) threads to work concurrently. (integer value)
+# from .oslo_messaging_zmq.oslo.messaging.rpc_thread_pool_size
+{{ if not .oslo_messaging_zmq.oslo.messaging.rpc_thread_pool_size }}#{{ end }}rpc_thread_pool_size = {{ .oslo_messaging_zmq.oslo.messaging.rpc_thread_pool_size | default "100" }}
+
+# Expiration timeout in seconds of a sent/received message after which it is not
+# tracked anymore by a client/server. (integer value)
+# from .oslo_messaging_zmq.oslo.messaging.rpc_message_ttl
+{{ if not .oslo_messaging_zmq.oslo.messaging.rpc_message_ttl }}#{{ end }}rpc_message_ttl = {{ .oslo_messaging_zmq.oslo.messaging.rpc_message_ttl | default "300" }}
+
+# Wait for message acknowledgements from receivers. This mechanism works only
+# via proxy without PUB/SUB. (boolean value)
+# from .oslo_messaging_zmq.oslo.messaging.rpc_use_acks
+{{ if not .oslo_messaging_zmq.oslo.messaging.rpc_use_acks }}#{{ end }}rpc_use_acks = {{ .oslo_messaging_zmq.oslo.messaging.rpc_use_acks | default "false" }}
+
+# Number of seconds to wait for an ack from a cast/call. After each retry
+# attempt this timeout is multiplied by some specified multiplier. (integer
+# value)
+# from .oslo_messaging_zmq.oslo.messaging.rpc_ack_timeout_base
+{{ if not .oslo_messaging_zmq.oslo.messaging.rpc_ack_timeout_base }}#{{ end }}rpc_ack_timeout_base = {{ .oslo_messaging_zmq.oslo.messaging.rpc_ack_timeout_base | default "15" }}
+
+# Number to multiply base ack timeout by after each retry attempt. (integer
+# value)
+# from .oslo_messaging_zmq.oslo.messaging.rpc_ack_timeout_multiplier
+{{ if not .oslo_messaging_zmq.oslo.messaging.rpc_ack_timeout_multiplier }}#{{ end }}rpc_ack_timeout_multiplier = {{ .oslo_messaging_zmq.oslo.messaging.rpc_ack_timeout_multiplier | default "2" }}
+
+# Default number of message sending attempts in case of any problems occurred:
+# positive value N means at most N retries, 0 means no retries, None or -1 (or
+# any other negative values) mean to retry forever. This option is used only if
+# acknowledgments are enabled. (integer value)
+# from .oslo_messaging_zmq.oslo.messaging.rpc_retry_attempts
+{{ if not .oslo_messaging_zmq.oslo.messaging.rpc_retry_attempts }}#{{ end }}rpc_retry_attempts = {{ .oslo_messaging_zmq.oslo.messaging.rpc_retry_attempts | default "3" }}
+
+# List of publisher hosts SubConsumer can subscribe on. This option has higher
+# priority then the default publishers list taken from the matchmaker. (list
+# value)
+# from .oslo_messaging_zmq.oslo.messaging.subscribe_on
+{{ if not .oslo_messaging_zmq.oslo.messaging.subscribe_on }}#{{ end }}subscribe_on = {{ .oslo_messaging_zmq.oslo.messaging.subscribe_on | default "" }}
 
 
 [oslo_middleware]
@@ -4404,7 +4715,7 @@
 # From oslo.policy
 #
 
-# The JSON file that defines policies. (string value)
+# The file that defines policies. (string value)
 # Deprecated group/name - [DEFAULT]/policy_file
 # from .oslo_policy.oslo.policy.policy_file
 {{ if not .oslo_policy.oslo.policy.policy_file }}#{{ end }}policy_file = {{ .oslo_policy.oslo.policy.policy_file | default "policy.json" }}
@@ -4546,9 +4857,48 @@
 # Examples of possible values:
 #
 # * messaging://: use oslo_messaging driver for sending notifications.
+# * mongodb://127.0.0.1:27017 : use mongodb driver for sending notifications.
+# * elasticsearch://127.0.0.1:9200 : use elasticsearch driver for sending
+# notifications.
 #  (string value)
 # from .profiler.glance.api.connection_string
 {{ if not .profiler.glance.api.connection_string }}#{{ end }}connection_string = {{ .profiler.glance.api.connection_string | default "messaging://" }}
+
+#
+# Document type for notification indexing in elasticsearch.
+#  (string value)
+# from .profiler.glance.api.es_doc_type
+{{ if not .profiler.glance.api.es_doc_type }}#{{ end }}es_doc_type = {{ .profiler.glance.api.es_doc_type | default "notification" }}
+
+#
+# This parameter is a time value parameter (for example: es_scroll_time=2m),
+# indicating for how long the nodes that participate in the search will maintain
+# relevant resources in order to continue and support it.
+#  (string value)
+# from .profiler.glance.api.es_scroll_time
+{{ if not .profiler.glance.api.es_scroll_time }}#{{ end }}es_scroll_time = {{ .profiler.glance.api.es_scroll_time | default "2m" }}
+
+#
+# Elasticsearch splits large requests in batches. This parameter defines
+# maximum size of each batch (for example: es_scroll_size=10000).
+#  (integer value)
+# from .profiler.glance.api.es_scroll_size
+{{ if not .profiler.glance.api.es_scroll_size }}#{{ end }}es_scroll_size = {{ .profiler.glance.api.es_scroll_size | default "10000" }}
+
+#
+# Redissentinel provides a timeout option on the connections.
+# This parameter defines that timeout (for example: socket_timeout=0.1).
+#  (floating point value)
+# from .profiler.glance.api.socket_timeout
+{{ if not .profiler.glance.api.socket_timeout }}#{{ end }}socket_timeout = {{ .profiler.glance.api.socket_timeout | default "0.1" }}
+
+#
+# Redissentinel uses a service name to identify a master redis service.
+# This parameter defines the name (for example:
+# sentinal_service_name=mymaster).
+#  (string value)
+# from .profiler.glance.api.sentinel_service_name
+{{ if not .profiler.glance.api.sentinel_service_name }}#{{ end }}sentinel_service_name = {{ .profiler.glance.api.sentinel_service_name | default "mymaster" }}
 
 
 [store_type_location_strategy]
@@ -4741,3 +5091,4 @@
 {{ if not .taskflow_executor.glance.api.conversion_format }}#{{ end }}conversion_format = {{ .taskflow_executor.glance.api.conversion_format | default "raw" }}
 
 {{- end -}}
+

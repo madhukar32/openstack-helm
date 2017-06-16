@@ -17,16 +17,20 @@
 # Declare name/value pairs to be passed into your templates.
 # name: value
 
+sdn:
+  opencontrail:
+    enabled: true
+
 replicas:
   server: 1
 
 images:
-  db_init: docker.io/kolla/ubuntu-source-neutron-server:3.0.3
-  db_sync: docker.io/kolla/ubuntu-source-neutron-server:3.0.3
-  ks_user: docker.io/kolla/ubuntu-source-kolla-toolbox:3.0.3
-  ks_service: docker.io/kolla/ubuntu-source-kolla-toolbox:3.0.3
-  ks_endpoints: docker.io/kolla/ubuntu-source-kolla-toolbox:3.0.3
-  server: docker.io/kolla/ubuntu-source-neutron-server:3.0.3
+  db_init: docker.io/kolla/ubuntu-source-neutron-server:4.0.0
+  db_sync: docker.io/kolla/ubuntu-source-neutron-server:4.0.0
+  ks_user: docker.io/kolla/ubuntu-source-kolla-toolbox:4.0.0
+  ks_service: docker.io/kolla/ubuntu-source-kolla-toolbox:4.0.0
+  ks_endpoints: docker.io/kolla/ubuntu-source-kolla-toolbox:4.0.0
+  server: ubuntu-binary-neutron-server-contrail:4.0.2
   dhcp: docker.io/kolla/ubuntu-source-neutron-dhcp-agent:3.0.3
   metadata: docker.io/kolla/ubuntu-source-neutron-metadata-agent:3.0.3
   l3: docker.io/kolla/ubuntu-source-neutron-l3-agent:3.0.3
@@ -79,7 +83,7 @@ network:
     # this must list the skydns server first, and in calico
     # this is consistently 10.96.0.10
     servers:
-    - 10.96.0.10
+    - 10.87.116.10
     - 8.8.8.8
   external_bridge: br-ex
   ip_address: 0.0.0.0
@@ -279,19 +283,20 @@ conf:
         default_availability_zones: nova
         api_workers: 4
         allow_overlapping_ips: True
-        core_plugin: ml2
-        service_plugins: router
-        interface_driver: openvswitch
-        metadata_proxy_socket: /var/lib/neutron/openstack-helm/metadata_proxy
-        db:
-          allow_automatic_l3agent_failover: True
-          l3_ha: True
-          min_l3_agents_per_router: 2
-          max_l3_agents_per_router: 2
-          l3_ha_network_type: vxlan
-          dhcp_agents_per_network: 3
-          network_auto_schedule: True
-          router_auto_schedule: True
+        core_plugin: neutron_plugin_contrail.plugins.opencontrail.contrail_plugin.NeutronPluginContrailCoreV2
+        service_plugins: neutron_plugin_contrail.plugins.opencontrail.loadbalancer.v2.plugin.LoadBalancerPluginV2
+        api_extensions_path: extensions:/usr/lib/python2.7/site-packages/neutron_plugin_contrail/extensions:/usr/lib/python2.7/site-packages/neutron_lbaas/extensions
+        #interface_driver: openvswitch
+        #metadata_proxy_socket: /var/lib/neutron/openstack-helm/metadata_proxy
+        #db:
+          #allow_automatic_l3agent_failover: True
+          #l3_ha: True
+          #min_l3_agents_per_router: 2
+          #max_l3_agents_per_router: 2
+          #l3_ha_network_type: vxlan
+          #dhcp_agents_per_network: 3
+          #network_auto_schedule: True
+          #router_auto_schedule: True
         agent:
           interface_driver: openvswitch
     oslo_concurrency:
@@ -332,6 +337,16 @@ conf:
           user_domain_name: default
           username: neutron
           password: password
+  opencontrail:
+    override:
+    append:
+    default:
+      apiserver:
+        api_server_ip: 10.87.65.151
+        api_server_port: 8082
+      collector:
+        analytics_api_ip: 10.87.65.151
+        analytics_api_port: 8081
   ml2_conf:
     override:
     append:

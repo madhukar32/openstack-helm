@@ -78,6 +78,7 @@ data:
 {{- if .Values.conf.policy.append -}}
 {{ .Values.conf.policy.append | indent 4 }}
 {{- end }}
+{{- if not .Values.sdn.opencontrail.enabled }}
   dhcp_agent.ini: |+
 {{ if .Values.conf.dhcp_agent.override -}}
 {{ .Values.conf.dhcp_agent.override | indent 4 }}
@@ -125,18 +126,6 @@ data:
 {{- end }}
 {{- if .Values.conf.metering_agent.append -}}
 {{ .Values.conf.metering_agent.append | indent 4 }}
-{{- end }}
-  neutron.conf: |+
-{{ if .Values.conf.neutron.override -}}
-{{ .Values.conf.neutron.override | indent 4 }}
-{{- else -}}
-{{- if .Values.conf.neutron.prefix -}}
-{{ .Values.conf.neutron.prefix | indent 4 }}
-{{- end }}
-{{ tuple "etc/_neutron.conf.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
-{{- end }}
-{{- if .Values.conf.neutron.append -}}
-{{ .Values.conf.neutron.append | indent 4 }}
 {{- end }}
   ml2_conf.ini: |+
 {{ if .Values.conf.ml2_conf.override -}}
@@ -210,6 +199,33 @@ data:
 {{- if .Values.conf.sriov_agent.append -}}
 {{ .Values.conf.sriov_agent.append | indent 4 }}
 {{- end }}
+{{- else }}
+  opencontrail_plugin.ini: |+
+{{- if .Values.conf.opencontrail.override -}}
+{{ .Values.conf.neutron.override | indent 4 }}
+{{- else -}}
+{{- if .Values.conf.opencontrail.prefix -}}
+{{ .Values.conf.neutron.prefix | indent 4 }}
+{{- end }}
+{{ tuple "etc/_opencontrail_plugin.ini.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
+{{- end }}
+{{- if .Values.conf.opencontrail.append -}}
+{{ .Values.conf.opencontrail.append | indent 4 }}
+{{- end }}
+{{- end }}
+  neutron.conf: |+
+{{ if .Values.conf.neutron.override -}}
+{{ .Values.conf.neutron.override | indent 4 }}
+{{- else -}}
+{{- if .Values.conf.neutron.prefix -}}
+{{ .Values.conf.neutron.prefix | indent 4 }}
+{{- end }}
+{{ tuple "etc/_neutron.conf.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
+{{- end }}
+{{- if .Values.conf.neutron.append -}}
+{{ .Values.conf.neutron.append | indent 4 }}
+{{- end }}
   resolv.conf: |+
 {{ tuple "etc/_resolv.conf.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
   dnsmasq.conf: ""
+

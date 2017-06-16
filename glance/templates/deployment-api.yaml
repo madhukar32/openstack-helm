@@ -89,9 +89,9 @@ spec:
               mountPath: /etc/glance/policy.json
               subPath: policy.json
               readOnly: true
-{{- if eq .Values.storage "pvc" }}
+{{- if eq .Values.storage "pvc" "file" }}
             - name: glance-images
-              mountPath: {{ .Values.conf.glance.glance_store.glance.store.filesystem_store_datadir }}
+              mountPath: /var/lib/glance/images
 {{- else }}
             - name: glance-etc
               mountPath: /etc/ceph/ceph.conf
@@ -117,5 +117,9 @@ spec:
         - name: glance-images
           persistentVolumeClaim:
             claimName: glance-images
+{{- else if eq .Values.storage "file" }}
+        - name: glance-images
+          hostPath:
+            path: /var/lib/glance/images
 {{- end }}
 {{ if $mounts_glance_api.volumes }}{{ toYaml $mounts_glance_api.volumes | indent 8 }}{{ end }}
