@@ -26,3 +26,11 @@
 #          rollover when a size limit is hit.
 #
 stdio_handler = "file"
+{{- if .Values.sdn.opencontrail.enabled }}
+cgroup_device_acl = [
+    "/dev/null", "/dev/full", "/dev/zero",
+    "/dev/random", "/dev/urandom",
+    "/dev/ptmx", "/dev/kvm", "/dev/kqemu",
+    "/dev/rtc", "/dev/hpet","/dev/net/tun",
+]
+{{- end }}

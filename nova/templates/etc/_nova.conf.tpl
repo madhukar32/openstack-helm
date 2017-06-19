@@ -1,4 +1,3 @@
-
 # Copyright 2017 The Openstack-Helm Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,6 +27,9 @@
 {{- if not .default.oslo.service -}}{{- set .default.oslo "service" dict -}}{{- end -}}
 {{- if not .default.oslo.service.periodic_task -}}{{- set .default.oslo.service "periodic_task" dict -}}{{- end -}}
 {{- if not .default.oslo.service.service -}}{{- set .default.oslo.service "service" dict -}}{{- end -}}
+{{- if not .api -}}{{- set . "api" dict -}}{{- end -}}
+{{- if not .api.nova -}}{{- set .api "nova" dict -}}{{- end -}}
+{{- if not .api.nova.conf -}}{{- set .api.nova "conf" dict -}}{{- end -}}
 {{- if not .api_database -}}{{- set . "api_database" dict -}}{{- end -}}
 {{- if not .api_database.nova -}}{{- set .api_database "nova" dict -}}{{- end -}}
 {{- if not .api_database.nova.conf -}}{{- set .api_database.nova "conf" dict -}}{{- end -}}
@@ -49,6 +51,12 @@
 {{- if not .conductor -}}{{- set . "conductor" dict -}}{{- end -}}
 {{- if not .conductor.nova -}}{{- set .conductor "nova" dict -}}{{- end -}}
 {{- if not .conductor.nova.conf -}}{{- set .conductor.nova "conf" dict -}}{{- end -}}
+{{- if not .console -}}{{- set . "console" dict -}}{{- end -}}
+{{- if not .console.nova -}}{{- set .console "nova" dict -}}{{- end -}}
+{{- if not .console.nova.conf -}}{{- set .console.nova "conf" dict -}}{{- end -}}
+{{- if not .consoleauth -}}{{- set . "consoleauth" dict -}}{{- end -}}
+{{- if not .consoleauth.nova -}}{{- set .consoleauth "nova" dict -}}{{- end -}}
+{{- if not .consoleauth.nova.conf -}}{{- set .consoleauth.nova "conf" dict -}}{{- end -}}
 {{- if not .cors -}}{{- set . "cors" dict -}}{{- end -}}
 {{- if not .cors.oslo -}}{{- set .cors "oslo" dict -}}{{- end -}}
 {{- if not .cors.oslo.middleware -}}{{- set .cors.oslo "middleware" dict -}}{{- end -}}
@@ -65,12 +73,18 @@
 {{- if not .ephemeral_storage_encryption -}}{{- set . "ephemeral_storage_encryption" dict -}}{{- end -}}
 {{- if not .ephemeral_storage_encryption.nova -}}{{- set .ephemeral_storage_encryption "nova" dict -}}{{- end -}}
 {{- if not .ephemeral_storage_encryption.nova.conf -}}{{- set .ephemeral_storage_encryption.nova "conf" dict -}}{{- end -}}
+{{- if not .filter_scheduler -}}{{- set . "filter_scheduler" dict -}}{{- end -}}
+{{- if not .filter_scheduler.nova -}}{{- set .filter_scheduler "nova" dict -}}{{- end -}}
+{{- if not .filter_scheduler.nova.conf -}}{{- set .filter_scheduler.nova "conf" dict -}}{{- end -}}
 {{- if not .glance -}}{{- set . "glance" dict -}}{{- end -}}
 {{- if not .glance.nova -}}{{- set .glance "nova" dict -}}{{- end -}}
 {{- if not .glance.nova.conf -}}{{- set .glance.nova "conf" dict -}}{{- end -}}
 {{- if not .guestfs -}}{{- set . "guestfs" dict -}}{{- end -}}
 {{- if not .guestfs.nova -}}{{- set .guestfs "nova" dict -}}{{- end -}}
 {{- if not .guestfs.nova.conf -}}{{- set .guestfs.nova "conf" dict -}}{{- end -}}
+{{- if not .healthcheck -}}{{- set . "healthcheck" dict -}}{{- end -}}
+{{- if not .healthcheck.oslo -}}{{- set .healthcheck "oslo" dict -}}{{- end -}}
+{{- if not .healthcheck.oslo.middleware -}}{{- set .healthcheck.oslo "middleware" dict -}}{{- end -}}
 {{- if not .hyperv -}}{{- set . "hyperv" dict -}}{{- end -}}
 {{- if not .hyperv.nova -}}{{- set .hyperv "nova" dict -}}{{- end -}}
 {{- if not .hyperv.nova.conf -}}{{- set .hyperv.nova "conf" dict -}}{{- end -}}
@@ -101,6 +115,9 @@
 {{- if not .neutron -}}{{- set . "neutron" dict -}}{{- end -}}
 {{- if not .neutron.nova -}}{{- set .neutron "nova" dict -}}{{- end -}}
 {{- if not .neutron.nova.conf -}}{{- set .neutron.nova "conf" dict -}}{{- end -}}
+{{- if not .notifications -}}{{- set . "notifications" dict -}}{{- end -}}
+{{- if not .notifications.nova -}}{{- set .notifications "nova" dict -}}{{- end -}}
+{{- if not .notifications.nova.conf -}}{{- set .notifications.nova "conf" dict -}}{{- end -}}
 {{- if not .osapi_v21 -}}{{- set . "osapi_v21" dict -}}{{- end -}}
 {{- if not .osapi_v21.nova -}}{{- set .osapi_v21 "nova" dict -}}{{- end -}}
 {{- if not .osapi_v21.nova.conf -}}{{- set .osapi_v21.nova "conf" dict -}}{{- end -}}
@@ -110,6 +127,9 @@
 {{- if not .oslo_messaging_amqp -}}{{- set . "oslo_messaging_amqp" dict -}}{{- end -}}
 {{- if not .oslo_messaging_amqp.oslo -}}{{- set .oslo_messaging_amqp "oslo" dict -}}{{- end -}}
 {{- if not .oslo_messaging_amqp.oslo.messaging -}}{{- set .oslo_messaging_amqp.oslo "messaging" dict -}}{{- end -}}
+{{- if not .oslo_messaging_kafka -}}{{- set . "oslo_messaging_kafka" dict -}}{{- end -}}
+{{- if not .oslo_messaging_kafka.oslo -}}{{- set .oslo_messaging_kafka "oslo" dict -}}{{- end -}}
+{{- if not .oslo_messaging_kafka.oslo.messaging -}}{{- set .oslo_messaging_kafka.oslo "messaging" dict -}}{{- end -}}
 {{- if not .oslo_messaging_notifications -}}{{- set . "oslo_messaging_notifications" dict -}}{{- end -}}
 {{- if not .oslo_messaging_notifications.oslo -}}{{- set .oslo_messaging_notifications "oslo" dict -}}{{- end -}}
 {{- if not .oslo_messaging_notifications.oslo.messaging -}}{{- set .oslo_messaging_notifications.oslo "messaging" dict -}}{{- end -}}
@@ -125,21 +145,30 @@
 {{- if not .oslo_policy -}}{{- set . "oslo_policy" dict -}}{{- end -}}
 {{- if not .oslo_policy.oslo -}}{{- set .oslo_policy "oslo" dict -}}{{- end -}}
 {{- if not .oslo_policy.oslo.policy -}}{{- set .oslo_policy.oslo "policy" dict -}}{{- end -}}
+{{- if not .pci -}}{{- set . "pci" dict -}}{{- end -}}
+{{- if not .pci.nova -}}{{- set .pci "nova" dict -}}{{- end -}}
+{{- if not .pci.nova.conf -}}{{- set .pci.nova "conf" dict -}}{{- end -}}
 {{- if not .placement -}}{{- set . "placement" dict -}}{{- end -}}
 {{- if not .placement.nova -}}{{- set .placement "nova" dict -}}{{- end -}}
 {{- if not .placement.nova.conf -}}{{- set .placement.nova "conf" dict -}}{{- end -}}
-{{- if not .placement_database -}}{{- set . "placement_database" dict -}}{{- end -}}
-{{- if not .placement_database.nova -}}{{- set .placement_database "nova" dict -}}{{- end -}}
-{{- if not .placement_database.nova.conf -}}{{- set .placement_database.nova "conf" dict -}}{{- end -}}
+{{- if not .quota -}}{{- set . "quota" dict -}}{{- end -}}
+{{- if not .quota.nova -}}{{- set .quota "nova" dict -}}{{- end -}}
+{{- if not .quota.nova.conf -}}{{- set .quota.nova "conf" dict -}}{{- end -}}
 {{- if not .rdp -}}{{- set . "rdp" dict -}}{{- end -}}
 {{- if not .rdp.nova -}}{{- set .rdp "nova" dict -}}{{- end -}}
 {{- if not .rdp.nova.conf -}}{{- set .rdp.nova "conf" dict -}}{{- end -}}
 {{- if not .remote_debug -}}{{- set . "remote_debug" dict -}}{{- end -}}
 {{- if not .remote_debug.nova -}}{{- set .remote_debug "nova" dict -}}{{- end -}}
 {{- if not .remote_debug.nova.conf -}}{{- set .remote_debug.nova "conf" dict -}}{{- end -}}
+{{- if not .scheduler -}}{{- set . "scheduler" dict -}}{{- end -}}
+{{- if not .scheduler.nova -}}{{- set .scheduler "nova" dict -}}{{- end -}}
+{{- if not .scheduler.nova.conf -}}{{- set .scheduler.nova "conf" dict -}}{{- end -}}
 {{- if not .serial_console -}}{{- set . "serial_console" dict -}}{{- end -}}
 {{- if not .serial_console.nova -}}{{- set .serial_console "nova" dict -}}{{- end -}}
 {{- if not .serial_console.nova.conf -}}{{- set .serial_console.nova "conf" dict -}}{{- end -}}
+{{- if not .service_user -}}{{- set . "service_user" dict -}}{{- end -}}
+{{- if not .service_user.nova -}}{{- set .service_user "nova" dict -}}{{- end -}}
+{{- if not .service_user.nova.conf -}}{{- set .service_user.nova "conf" dict -}}{{- end -}}
 {{- if not .spice -}}{{- set . "spice" dict -}}{{- end -}}
 {{- if not .spice.nova -}}{{- set .spice "nova" dict -}}{{- end -}}
 {{- if not .spice.nova.conf -}}{{- set .spice.nova "conf" dict -}}{{- end -}}
@@ -152,6 +181,9 @@
 {{- if not .upgrade_levels -}}{{- set . "upgrade_levels" dict -}}{{- end -}}
 {{- if not .upgrade_levels.nova -}}{{- set .upgrade_levels "nova" dict -}}{{- end -}}
 {{- if not .upgrade_levels.nova.conf -}}{{- set .upgrade_levels.nova "conf" dict -}}{{- end -}}
+{{- if not .vendordata_dynamic_auth -}}{{- set . "vendordata_dynamic_auth" dict -}}{{- end -}}
+{{- if not .vendordata_dynamic_auth.nova -}}{{- set .vendordata_dynamic_auth "nova" dict -}}{{- end -}}
+{{- if not .vendordata_dynamic_auth.nova.conf -}}{{- set .vendordata_dynamic_auth.nova "conf" dict -}}{{- end -}}
 {{- if not .vmware -}}{{- set . "vmware" dict -}}{{- end -}}
 {{- if not .vmware.nova -}}{{- set .vmware "nova" dict -}}{{- end -}}
 {{- if not .vmware.nova.conf -}}{{- set .vmware.nova "conf" dict -}}{{- end -}}
@@ -182,50 +214,6 @@
 # From nova.conf
 #
 
-#
-# This determines the strategy to use for authentication: keystone or noauth2.
-# 'noauth2' is designed for testing only, as it does no actual credential
-# checking. 'noauth2' provides administrative credentials only if 'admin' is
-# specified as the username.
-#  (string value)
-# Allowed values: keystone, noauth2
-# from .default.nova.conf.auth_strategy
-{{ if not .default.nova.conf.auth_strategy }}#{{ end }}auth_strategy = {{ .default.nova.conf.auth_strategy | default "keystone" }}
-
-#
-# When True, the 'X-Forwarded-For' header is treated as the canonical remote
-# address. When False (the default), the 'remote_address' header is used.
-#
-# You should only enable this if you have an HTML sanitizing proxy.
-#  (boolean value)
-# from .default.nova.conf.use_forwarded_for
-{{ if not .default.nova.conf.use_forwarded_for }}#{{ end }}use_forwarded_for = {{ .default.nova.conf.use_forwarded_for | default "false" }}
-
-#
-# When gathering the existing metadata for a config drive, the EC2-style
-# metadata is returned for all versions that don't appear in this option.
-# As of the Liberty release, the available versions are:
-#
-# * 1.0
-# * 2007-01-19
-# * 2007-03-01
-# * 2007-08-29
-# * 2007-10-10
-# * 2007-12-15
-# * 2008-02-01
-# * 2008-09-01
-# * 2009-04-04
-#
-# The option is in the format of a single string, with each version separated
-# by a space.
-#
-# Possible values:
-#
-# * Any string that represents zero or more versions, separated by spaces.
-#  (string value)
-# from .default.nova.conf.config_drive_skip_versions
-{{ if not .default.nova.conf.config_drive_skip_versions }}#{{ end }}config_drive_skip_versions = {{ .default.nova.conf.config_drive_skip_versions | default "1.0 2007-01-19 2007-03-01 2007-08-29 2007-10-10 2007-12-15 2008-02-01 2008-09-01" }}
-
 # DEPRECATED:
 # When returning instance metadata, this is the class that is used
 # for getting vendor metadata when that class isn't specified in the individual
@@ -235,207 +223,10 @@
 #
 # * Any valid dot-separated class path that can be imported.
 #  (string value)
-# This option is deprecated for removal.
+# This option is deprecated for removal since 13.0.0.
 # Its value may be silently ignored in the future.
 # from .default.nova.conf.vendordata_driver
 {{ if not .default.nova.conf.vendordata_driver }}#{{ end }}vendordata_driver = {{ .default.nova.conf.vendordata_driver | default "nova.api.metadata.vendordata_json.JsonFileVendorData" }}
-
-#
-# A list of vendordata providers.
-#
-# vendordata providers are how deployers can provide metadata via configdrive
-# and metadata that is specific to their deployment. There are currently two
-# supported providers: StaticJSON and DynamicJSON.
-#
-# StaticJSON reads a JSON file configured by the flag vendordata_jsonfile_path
-# and places the JSON from that file into vendor_data.json and
-# vendor_data2.json.
-#
-# DynamicJSON is configured via the vendordata_dynamic_targets flag, which is
-# documented separately. For each of the endpoints specified in that flag, a
-# section is added to the vendor_data2.json.
-#
-# For more information on the requirements for implementing a vendordata
-# dynamic endpoint, please see the vendordata.rst file in the nova developer
-# reference.
-#
-# Possible values:
-#
-# * A list of vendordata providers, with StaticJSON and DynamicJSON being
-#   current options.
-#
-# Related options:
-#
-# * vendordata_dynamic_targets
-# * vendordata_dynamic_ssl_certfile
-# * vendordata_dynamic_connect_timeout
-# * vendordata_dynamic_read_timeout
-#  (list value)
-# from .default.nova.conf.vendordata_providers
-{{ if not .default.nova.conf.vendordata_providers }}#{{ end }}vendordata_providers = {{ .default.nova.conf.vendordata_providers | default "" }}
-
-#
-# A list of targets for the dynamic vendordata provider. These targets are of
-# the form <name>@<url>.
-#
-# The dynamic vendordata provider collects metadata by contacting external REST
-# services and querying them for information about the instance. This behaviour
-# is documented in the vendordata.rst file in the nova developer reference.
-#  (list value)
-# from .default.nova.conf.vendordata_dynamic_targets
-{{ if not .default.nova.conf.vendordata_dynamic_targets }}#{{ end }}vendordata_dynamic_targets = {{ .default.nova.conf.vendordata_dynamic_targets | default "" }}
-
-#
-# Path to an optional certificate file or CA bundle to verify dynamic
-# vendordata REST services ssl certificates against.
-#
-# Possible values:
-#
-# * An empty string, or a path to a valid certificate file
-#
-# Related options:
-#
-# * vendordata_providers
-# * vendordata_dynamic_targets
-# * vendordata_dynamic_connect_timeout
-# * vendordata_dynamic_read_timeout
-#  (string value)
-# from .default.nova.conf.vendordata_dynamic_ssl_certfile
-{{ if not .default.nova.conf.vendordata_dynamic_ssl_certfile }}#{{ end }}vendordata_dynamic_ssl_certfile = {{ .default.nova.conf.vendordata_dynamic_ssl_certfile | default "" }}
-
-#
-# Maximum wait time for an external REST service to connect.
-#
-# Possible values:
-#
-# * Any integer with a value greater than three (the TCP packet retransmission
-#   timeout). Note that instance start may be blocked during this wait time,
-#   so this value should be kept small.
-#
-# Related options:
-#
-# * vendordata_providers
-# * vendordata_dynamic_targets
-# * vendordata_dynamic_ssl_certfile
-# * vendordata_dynamic_read_timeout
-#  (integer value)
-# Minimum value: 3
-# from .default.nova.conf.vendordata_dynamic_connect_timeout
-{{ if not .default.nova.conf.vendordata_dynamic_connect_timeout }}#{{ end }}vendordata_dynamic_connect_timeout = {{ .default.nova.conf.vendordata_dynamic_connect_timeout | default "5" }}
-
-#
-# Maximum wait time for an external REST service to return data once connected.
-#
-# Possible values:
-#
-# * Any integer. Note that instance start is blocked during this wait time,
-#   so this value should be kept small.
-#
-# Related options:
-#
-# * vendordata_providers
-# * vendordata_dynamic_targets
-# * vendordata_dynamic_ssl_certfile
-# * vendordata_dynamic_connect_timeout
-#  (integer value)
-# Minimum value: 0
-# from .default.nova.conf.vendordata_dynamic_read_timeout
-{{ if not .default.nova.conf.vendordata_dynamic_read_timeout }}#{{ end }}vendordata_dynamic_read_timeout = {{ .default.nova.conf.vendordata_dynamic_read_timeout | default "5" }}
-
-#
-# This option is the time (in seconds) to cache metadata. When set to 0,
-# metadata caching is disabled entirely; this is generally not recommended for
-# performance reasons. Increasing this setting should improve response times
-# of the metadata API when under heavy load. Higher values may increase memory
-# usage, and result in longer times for host metadata changes to take effect.
-#  (integer value)
-# Minimum value: 0
-# from .default.nova.conf.metadata_cache_expiration
-{{ if not .default.nova.conf.metadata_cache_expiration }}#{{ end }}metadata_cache_expiration = {{ .default.nova.conf.metadata_cache_expiration | default "15" }}
-
-#
-# Cloud providers may store custom data in vendor data file that will then be
-# available to the instances via the metadata service, and to the rendering of
-# config-drive. The default class for this, JsonFileVendorData, loads this
-# information from a JSON file, whose path is configured by this option. If
-# there is no path set by this option, the class returns an empty dictionary.
-#
-# Possible values:
-#
-# * Any string representing the path to the data file, or an empty string
-#     (default).
-#  (string value)
-# from .default.nova.conf.vendordata_jsonfile_path
-{{ if not .default.nova.conf.vendordata_jsonfile_path }}#{{ end }}vendordata_jsonfile_path = {{ .default.nova.conf.vendordata_jsonfile_path | default "<None>" }}
-
-#
-# As a query can potentially return many thousands of items, you can limit the
-# maximum number of items in a single response by setting this option.
-#  (integer value)
-# Minimum value: 0
-# from .default.nova.conf.osapi_max_limit
-{{ if not .default.nova.conf.osapi_max_limit }}#{{ end }}osapi_max_limit = {{ .default.nova.conf.osapi_max_limit | default "1000" }}
-
-#
-# This string is prepended to the normal URL that is returned in links to the
-# OpenStack Compute API. If it is empty (the default), the URLs are returned
-# unchanged.
-#
-# Possible values:
-#
-# * Any string, including an empty string (the default).
-#  (string value)
-# from .default.nova.conf.osapi_compute_link_prefix
-{{ if not .default.nova.conf.osapi_compute_link_prefix }}#{{ end }}osapi_compute_link_prefix = {{ .default.nova.conf.osapi_compute_link_prefix | default "<None>" }}
-
-#
-# This string is prepended to the normal URL that is returned in links to
-# Glance resources. If it is empty (the default), the URLs are returned
-# unchanged.
-#
-# Possible values:
-#
-# * Any string, including an empty string (the default).
-#  (string value)
-# from .default.nova.conf.osapi_glance_link_prefix
-{{ if not .default.nova.conf.osapi_glance_link_prefix }}#{{ end }}osapi_glance_link_prefix = {{ .default.nova.conf.osapi_glance_link_prefix | default "<None>" }}
-
-#
-# Operators can turn off the ability for a user to take snapshots of their
-# instances by setting this option to False. When disabled, any attempt to
-# take a snapshot will result in a HTTP 400 response ("Bad Request").
-#  (boolean value)
-# from .default.nova.conf.allow_instance_snapshots
-{{ if not .default.nova.conf.allow_instance_snapshots }}#{{ end }}allow_instance_snapshots = {{ .default.nova.conf.allow_instance_snapshots | default "true" }}
-
-#
-# This option is a list of all instance states for which network address
-# information should not be returned from the API.
-#
-# Possible values:
-#
-#   A list of strings, where each string is a valid VM state, as defined in
-#   nova/compute/vm_states.py. As of the Newton release, they are:
-#
-# * "active"
-# * "building"
-# * "paused"
-# * "suspended"
-# * "stopped"
-# * "rescued"
-# * "resized"
-# * "soft-delete"
-# * "deleted"
-# * "error"
-# * "shelved"
-# * "shelved_offloaded"
-#  (list value)
-# from .default.nova.conf.osapi_hide_server_address_states
-{{ if not .default.nova.conf.osapi_hide_server_address_states }}#{{ end }}osapi_hide_server_address_states = {{ .default.nova.conf.osapi_hide_server_address_states | default "building" }}
-
-# The full path to the fping binary. (string value)
-# from .default.nova.conf.fping_path
-{{ if not .default.nova.conf.fping_path }}#{{ end }}fping_path = {{ .default.nova.conf.fping_path | default "/usr/sbin/fping" }}
 
 # DEPRECATED:
 # This option is used to enable or disable quota checking for tenant networks.
@@ -444,35 +235,13 @@
 #
 # * quota_networks
 #  (boolean value)
-# This option is deprecated for removal.
+# This option is deprecated for removal since 14.0.0.
 # Its value may be silently ignored in the future.
 # Reason:
 # CRUD operations on tenant networks are only available when using nova-network
 # and nova-network is itself deprecated.
 # from .default.nova.conf.enable_network_quota
 {{ if not .default.nova.conf.enable_network_quota }}#{{ end }}enable_network_quota = {{ .default.nova.conf.enable_network_quota | default "false" }}
-
-#
-# When True, the TenantNetworkController will query the Neutron API to get the
-# default networks to use.
-#
-# Related options:
-#
-# * neutron_default_tenant_id
-#  (boolean value)
-# from .default.nova.conf.use_neutron_default_nets
-{{ if not .default.nova.conf.use_neutron_default_nets }}#{{ end }}use_neutron_default_nets = {{ .default.nova.conf.use_neutron_default_nets | default "false" }}
-
-#
-# Tenant ID for getting the default network from Neutron API (also referred in
-# some places as the 'project ID') to use.
-#
-# Related options:
-#
-# * use_neutron_default_nets
-#  (string value)
-# from .default.nova.conf.neutron_default_tenant_id
-{{ if not .default.nova.conf.neutron_default_tenant_id }}#{{ end }}neutron_default_tenant_id = {{ .default.nova.conf.neutron_default_tenant_id | default "default" }}
 
 # DEPRECATED:
 # This option controls the number of private networks that can be created per
@@ -483,22 +252,13 @@
 # * enable_network_quota
 #  (integer value)
 # Minimum value: 0
-# This option is deprecated for removal.
+# This option is deprecated for removal since 14.0.0.
 # Its value may be silently ignored in the future.
 # Reason:
 # CRUD operations on tenant networks are only available when using nova-network
 # and nova-network is itself deprecated.
 # from .default.nova.conf.quota_networks
 {{ if not .default.nova.conf.quota_networks }}#{{ end }}quota_networks = {{ .default.nova.conf.quota_networks | default "3" }}
-
-#
-# Enables returning of the instance password by the relevant server API calls
-# such as create, rebuild, evacuate, or rescue. If the hypervisor does not
-# support password injection, then the password returned will not be correct,
-# so if your hypervisor does not support password injection, set this to False.
-#  (boolean value)
-# from .default.nova.conf.enable_instance_password
-{{ if not .default.nova.conf.enable_instance_password }}#{{ end }}enable_instance_password = {{ .default.nova.conf.enable_instance_password | default "true" }}
 
 #
 # This option specifies the name of the availability zone for the
@@ -508,8 +268,8 @@
 #
 # Possible values:
 #
-#     * Any string representing an availability zone name
-#     * 'internal' is the default value
+# * Any string representing an availability zone name
+# * 'internal' is the default value
 #
 #  (string value)
 # from .default.nova.conf.internal_service_availability_zone
@@ -524,8 +284,8 @@
 #
 # Possible values:
 #
-#     * Any string representing an availability zone name
-#     * 'nova' is the default value
+# * Any string representing an availability zone name
+# * 'nova' is the default value
 #
 #  (string value)
 # from .default.nova.conf.default_availability_zone
@@ -542,9 +302,10 @@
 # offset.
 #
 # Possible values:
-#   *  period, example: ``hour``, ``day``, ``month` or ``year``
-#   *  period with offset, example: ``month@15``
-#      will result in monthly audits starting on 15th day of month.
+#
+# *  period, example: ``hour``, ``day``, ``month` or ``year``
+# *  period with offset, example: ``month@15`` will result in monthly audits
+#    starting on 15th day of month.
 #  (string value)
 # from .default.nova.conf.instance_usage_audit_period
 {{ if not .default.nova.conf.instance_usage_audit_period }}#{{ end }}instance_usage_audit_period = {{ .default.nova.conf.instance_usage_audit_period | default "month" }}
@@ -577,9 +338,8 @@
 #
 # Related options:
 #
-#   * ``monkey_patch_modules``: This must have values set for this option to
-# have
-#   any effect
+# * ``monkey_patch_modules``: This must have values set for this option to
+#   have any effect
 #  (boolean value)
 # from .default.nova.conf.monkey_patch
 {{ if not .default.nova.conf.monkey_patch }}#{{ end }}monkey_patch = {{ .default.nova.conf.monkey_patch | default "false" }}
@@ -592,30 +352,32 @@
 #
 # Possible values:
 #
-#   * nova.compute.api:nova.notifications.notify_decorator
-#   * nova.api.ec2.cloud:nova.notifications.notify_decorator
-#   * [...]
+# * nova.compute.api:nova.notifications.notify_decorator
+# * nova.api.ec2.cloud:nova.notifications.notify_decorator
+# * [...]
 #
 # Related options:
 #
-#   * ``monkey_patch``: This must be set to ``True`` for this option to
-#     have any effect
+# * ``monkey_patch``: This must be set to ``True`` for this option to
+#   have any effect
 #  (list value)
 # from .default.nova.conf.monkey_patch_modules
 {{ if not .default.nova.conf.monkey_patch_modules }}#{{ end }}monkey_patch_modules = {{ .default.nova.conf.monkey_patch_modules | default "nova.compute.api:nova.notifications.notify_decorator" }}
 
-# DEPRECATED:
-# Determines the RPC topic that the cert nodes listen on. For most deployments
-# there is no need to ever change it.
+#
+# Defines which driver to use for controlling virtualization.
+#
+# Possible values:
+#
+# * ``libvirt.LibvirtDriver``
+# * ``xenapi.XenAPIDriver``
+# * ``fake.FakeDriver``
+# * ``ironic.IronicDriver``
+# * ``vmwareapi.VMwareVCDriver``
+# * ``hyperv.HyperVDriver``
 #  (string value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-# Reason:
-# Since the nova-cert service is marked for deprecation, the feature to change
-# RPC topic that cert nodes listen may be removed as early as the 15.0.0
-# Ocata release.
-# from .default.nova.conf.cert_topic
-{{ if not .default.nova.conf.cert_topic }}#{{ end }}cert_topic = {{ .default.nova.conf.cert_topic | default "cert" }}
+# from .default.nova.conf.compute_driver
+{{ if not .default.nova.conf.compute_driver }}#{{ end }}compute_driver = {{ .default.nova.conf.compute_driver | default "<None>" }}
 
 #
 # Allow destination machine to match source for resize. Useful when
@@ -659,17 +421,24 @@
 # from .default.nova.conf.non_inheritable_image_properties
 {{ if not .default.nova.conf.non_inheritable_image_properties }}#{{ end }}non_inheritable_image_properties = {{ .default.nova.conf.non_inheritable_image_properties | default "cache_in_nova,bittorrent" }}
 
-#
+# DEPRECATED:
 # This option is used to decide when an image should have no external
 # ramdisk or kernel. By default this is set to 'nokernel', so when an
 # image is booted with the property 'kernel_id' with the value
 # 'nokernel', Nova assumes the image doesn't require an external kernel
 # and ramdisk.
 #  (string value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# When an image is booted with the property 'kernel_id' with the value
+# 'nokernel', Nova assumes the image doesn't require an external kernel and
+# ramdisk. This option allows user to change the API behaviour which should not
+# be allowed and this value "nokernel" should be hard coded.
 # from .default.nova.conf.null_kernel
 {{ if not .default.nova.conf.null_kernel }}#{{ end }}null_kernel = {{ .default.nova.conf.null_kernel | default "nokernel" }}
 
-#
+# DEPRECATED:
 # When creating multiple instances with a single request using the
 # os-multiple-create API extension, this template will be used to build
 # the display name for each instance. The benefit is that the instances
@@ -680,6 +449,11 @@
 #
 # * Valid keys for the template are: name, uuid, count.
 #  (string value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# This config changes API behaviour. All changes in API behaviour should be
+# discoverable.
 # from .default.nova.conf.multi_instance_display_name_template
 {{ if not .default.nova.conf.multi_instance_display_name_template }}#{{ end }}multi_instance_display_name_template = {{ .default.nova.conf.multi_instance_display_name_template | default "%(name)s-%(count)d" }}
 
@@ -706,19 +480,6 @@
 # from .default.nova.conf.max_local_block_devices
 {{ if not .default.nova.conf.max_local_block_devices }}#{{ end }}max_local_block_devices = {{ .default.nova.conf.max_local_block_devices | default "3" }}
 
-# DEPRECATED:
-# Monitor classes available to the compute which may be specified more than
-# once.
-# This option is DEPRECATED and no longer used. Use setuptools entry points to
-# list available monitor plugins.
-#  (multi valued)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-# Reason: stevedore and setuptools entry points now allow a set of plugins to be
-# specified without this config option.
-# from .default.nova.conf.compute_available_monitors (multiopt)
-{{ if not .default.nova.conf.compute_available_monitors }}#compute_available_monitors = {{ .default.nova.conf.compute_available_monitors | default "" }}{{ else }}{{ range .default.nova.conf.compute_available_monitors }}compute_available_monitors = {{ . }}{{ end }}{{ end }}
-
 #
 # A list of monitors that can be used for getting compute metrics.
 # You can use the alias/name from the setuptools entry points for
@@ -736,6 +497,232 @@
 {{ if not .default.nova.conf.compute_monitors }}#{{ end }}compute_monitors = {{ .default.nova.conf.compute_monitors | default "" }}
 
 #
+# The default format an ephemeral_volume will be formatted with on creation.
+#
+# Possible values:
+#
+# * ``ext2``
+# * ``ext3``
+# * ``ext4``
+# * ``xfs``
+# * ``ntfs`` (only for Windows guests)
+#  (string value)
+# from .default.nova.conf.default_ephemeral_format
+{{ if not .default.nova.conf.default_ephemeral_format }}#{{ end }}default_ephemeral_format = {{ .default.nova.conf.default_ephemeral_format | default "<None>" }}
+
+#
+# Determine if instance should boot or fail on VIF plugging timeout.
+#
+# Nova sends a port update to Neutron after an instance has been scheduled,
+# providing Neutron with the necessary information to finish setup of the port.
+# Once completed, Neutron notifies Nova that it has finished setting up the
+# port, at which point Nova resumes the boot of the instance since network
+# connectivity is now supposed to be present. A timeout will occur if the reply
+# is not received after a given interval.
+#
+# This option determines what Nova does when the VIF plugging timeout event
+# happens. When enabled, the instance will error out. When disabled, the
+# instance will continue to boot on the assumption that the port is ready.
+#
+# Possible values:
+#
+# * True: Instances should fail after VIF plugging timeout
+# * False: Instances should continue booting after VIF plugging timeout
+#  (boolean value)
+# from .default.nova.conf.vif_plugging_is_fatal
+{{ if not .default.nova.conf.vif_plugging_is_fatal }}#{{ end }}vif_plugging_is_fatal = {{ .default.nova.conf.vif_plugging_is_fatal | default "true" }}
+
+#
+# Timeout for Neutron VIF plugging event message arrival.
+#
+# Number of seconds to wait for Neutron vif plugging events to
+# arrive before continuing or failing (see 'vif_plugging_is_fatal').
+#
+# Related options:
+#
+# * vif_plugging_is_fatal - If ``vif_plugging_timeout`` is set to zero and
+#   ``vif_plugging_is_fatal`` is False, events should not be expected to
+#   arrive at all.
+#  (integer value)
+# Minimum value: 0
+# from .default.nova.conf.vif_plugging_timeout
+{{ if not .default.nova.conf.vif_plugging_timeout }}#{{ end }}vif_plugging_timeout = {{ .default.nova.conf.vif_plugging_timeout | default "300" }}
+
+# Path to '/etc/network/interfaces' template.
+#
+# The path to a template file for the '/etc/network/interfaces'-style file,
+# which
+# will be populated by nova and subsequently used by cloudinit. This provides a
+# method to configure network connectivity in environments without a DHCP
+# server.
+#
+# The template will be rendered using Jinja2 template engine, and receive a
+# top-level key called ``interfaces``. This key will contain a list of
+# dictionaries, one for each interface.
+#
+# Refer to the cloudinit documentaion for more information:
+#
+#   https://cloudinit.readthedocs.io/en/latest/topics/datasources.html
+#
+# Possible values:
+#
+# * A path to a Jinja2-formatted template for a Debian '/etc/network/interfaces'
+#   file. This applies even if using a non Debian-derived guest.
+#
+# Related options:
+#
+# * ``flat_inject``: This must be set to ``True`` to ensure nova embeds network
+#   configuration information in the metadata provided through the config drive.
+#  (string value)
+# from .default.nova.conf.injected_network_template
+{{ if not .default.nova.conf.injected_network_template }}#{{ end }}injected_network_template = {{ .default.nova.conf.injected_network_template | default "$pybasedir/nova/virt/interfaces.template" }}
+
+#
+# The image preallocation mode to use.
+#
+# Image preallocation allows storage for instance images to be allocated up
+# front
+# when the instance is initially provisioned. This ensures immediate feedback is
+# given if enough space isn't available. In addition, it should significantly
+# improve performance on writes to new blocks and may even improve I/O
+# performance to prewritten blocks due to reduced fragmentation.
+#
+# Possible values:
+#
+# * "none"  => no storage provisioning is done up front
+# * "space" => storage is fully allocated at instance start
+#  (string value)
+# Allowed values: none, space
+# from .default.nova.conf.preallocate_images
+{{ if not .default.nova.conf.preallocate_images }}#{{ end }}preallocate_images = {{ .default.nova.conf.preallocate_images | default "none" }}
+
+#
+# Enable use of copy-on-write (cow) images.
+#
+# QEMU/KVM allow the use of qcow2 as backing files. By disabling this,
+# backing files will not be used.
+#  (boolean value)
+# from .default.nova.conf.use_cow_images
+{{ if not .default.nova.conf.use_cow_images }}#{{ end }}use_cow_images = {{ .default.nova.conf.use_cow_images | default "true" }}
+
+#
+# Force conversion of backing images to raw format.
+#
+# Possible values:
+#
+# * True: Backing image files will be converted to raw image format
+# * False: Backing image files will not be converted
+#
+# Related options:
+#
+# * ``compute_driver``: Only the libvirt driver uses this option.
+#  (boolean value)
+# from .default.nova.conf.force_raw_images
+{{ if not .default.nova.conf.force_raw_images }}#{{ end }}force_raw_images = {{ .default.nova.conf.force_raw_images | default "true" }}
+
+#
+# Name of the mkfs commands for ephemeral device.
+#
+# The format is <os_type>=<mkfs command>
+#  (multi valued)
+# from .default.nova.conf.virt_mkfs (multiopt)
+{{ if not .default.nova.conf.virt_mkfs }}#virt_mkfs = {{ .default.nova.conf.virt_mkfs | default "" }}{{ else }}{{ range .default.nova.conf.virt_mkfs }}virt_mkfs = {{ . }}{{ end }}{{ end }}
+
+#
+# Enable resizing of filesystems via a block device.
+#
+# If enabled, attempt to resize the filesystem by accessing the image over a
+# block device. This is done by the host and may not be necessary if the image
+# contains a recent version of cloud-init. Possible mechanisms require the nbd
+# driver (for qcow and raw), or loop (for raw).
+#  (boolean value)
+# from .default.nova.conf.resize_fs_using_block_device
+{{ if not .default.nova.conf.resize_fs_using_block_device }}#{{ end }}resize_fs_using_block_device = {{ .default.nova.conf.resize_fs_using_block_device | default "false" }}
+
+# Amount of time, in seconds, to wait for NBD device start up. (integer value)
+# Minimum value: 0
+# from .default.nova.conf.timeout_nbd
+{{ if not .default.nova.conf.timeout_nbd }}#{{ end }}timeout_nbd = {{ .default.nova.conf.timeout_nbd | default "10" }}
+
+#
+# Location of cached images.
+#
+# This is NOT the full path - just a folder name relative to '$instances_path'.
+# For per-compute-host cached images, set to '_base_$my_ip'
+#  (string value)
+# from .default.nova.conf.image_cache_subdirectory_name
+{{ if not .default.nova.conf.image_cache_subdirectory_name }}#{{ end }}image_cache_subdirectory_name = {{ .default.nova.conf.image_cache_subdirectory_name | default "_base" }}
+
+# Should unused base images be removed? (boolean value)
+# from .default.nova.conf.remove_unused_base_images
+{{ if not .default.nova.conf.remove_unused_base_images }}#{{ end }}remove_unused_base_images = {{ .default.nova.conf.remove_unused_base_images | default "true" }}
+
+#
+# Unused unresized base images younger than this will not be removed.
+#  (integer value)
+# from .default.nova.conf.remove_unused_original_minimum_age_seconds
+{{ if not .default.nova.conf.remove_unused_original_minimum_age_seconds }}#{{ end }}remove_unused_original_minimum_age_seconds = {{ .default.nova.conf.remove_unused_original_minimum_age_seconds | default "86400" }}
+
+#
+# Generic property to specify the pointer type.
+#
+# Input devices allow interaction with a graphical framebuffer. For
+# example to provide a graphic tablet for absolute cursor movement.
+#
+# If set, the 'hw_pointer_model' image property takes precedence over
+# this configuration option.
+#
+# Possible values:
+#
+# * None: Uses default behavior provided by drivers (mouse on PS2 for
+#         libvirt x86)
+# * ps2mouse: Uses relative movement. Mouse connected by PS2
+# * usbtablet: Uses absolute movement. Tablet connect by USB
+#
+# Related options:
+#
+# * usbtablet must be configured with VNC enabled or SPICE enabled and SPICE
+#   agent disabled. When used with libvirt the instance mode should be
+#   configured as HVM.
+#   (string value)
+# Allowed values: <None>, ps2mouse, usbtablet
+# from .default.nova.conf.pointer_model
+{{ if not .default.nova.conf.pointer_model }}#{{ end }}pointer_model = {{ .default.nova.conf.pointer_model | default "usbtablet" }}
+
+#
+# Defines which physical CPUs (pCPUs) can be used by instance
+# virtual CPUs (vCPUs).
+#
+# Possible values:
+#
+# * A comma-separated list of physical CPU numbers that virtual CPUs can be
+#   allocated to by default. Each element should be either a single CPU number,
+#   a range of CPU numbers, or a caret followed by a CPU number to be
+#   excluded from a previous range. For example:
+#
+#     vcpu_pin_set = "4-12,^8,15"
+#  (string value)
+# from .default.nova.conf.vcpu_pin_set
+{{ if not .default.nova.conf.vcpu_pin_set }}#{{ end }}vcpu_pin_set = {{ .default.nova.conf.vcpu_pin_set | default "<None>" }}
+
+#
+# Number of huge/large memory pages to reserved per NUMA host cell.
+#
+# Possible values:
+#
+# * A list of valid key=value which reflect NUMA node ID, page size
+#   (Default unit is KiB) and number of pages to be reserved.
+#
+#     reserved_huge_pages = node:0,size:2048,count:64
+#     reserved_huge_pages = node:1,size:1GB,count:1
+#
+#   In this example we are reserving on NUMA node 0 64 pages of 2MiB
+#   and on NUMA node 1 1 page of 1GiB.
+#  (dict value)
+# from .default.nova.conf.reserved_huge_pages (multiopt)
+{{ if not .default.nova.conf.reserved_huge_pages }}#reserved_huge_pages = {{ .default.nova.conf.reserved_huge_pages | default "<None>" }}{{ else }}{{ range .default.nova.conf.reserved_huge_pages }}reserved_huge_pages = {{ . }}{{ end }}{{ end }}
+
+#
 # Amount of disk resources in MB to make them always available to host. The
 # disk usage gets reported back to the scheduler from nova-compute running
 # on the compute nodes. To prevent the disk resources from being considered
@@ -743,8 +730,8 @@
 #
 # Possible values:
 #
-#   * Any positive integer representing amount of disk in MB to reserve
-#     for the host.
+# * Any positive integer representing amount of disk in MB to reserve
+#   for the host.
 #  (integer value)
 # Minimum value: 0
 # from .default.nova.conf.reserved_host_disk_mb
@@ -760,72 +747,70 @@
 #
 # Possible values:
 #
-#   * Any positive integer representing amount of memory in MB to reserve
-#     for the host.
+# * Any positive integer representing amount of memory in MB to reserve
+#   for the host.
 #  (integer value)
 # Minimum value: 0
 # from .default.nova.conf.reserved_host_memory_mb
 {{ if not .default.nova.conf.reserved_host_memory_mb }}#{{ end }}reserved_host_memory_mb = {{ .default.nova.conf.reserved_host_memory_mb | default "512" }}
 
-# DEPRECATED:
-# Abstracts out managing compute host stats to pluggable class. This class
-# manages and updates stats for the local compute host after an instance
-# is changed. These configurable compute stats may be useful for a
-# particular scheduler implementation.
 #
-# Possible values
+# This option helps you specify virtual CPU to physical CPU allocation ratio.
 #
-#   * A string representing fully qualified class name.
-#  (string value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-# from .default.nova.conf.compute_stats_class
-{{ if not .default.nova.conf.compute_stats_class }}#{{ end }}compute_stats_class = {{ .default.nova.conf.compute_stats_class | default "nova.compute.stats.Stats" }}
-
-#
-# This option helps you specify virtual CPU to physical CPU allocation
-# ratio which affects all CPU filters.
+# From Ocata (15.0.0) this is used to influence the hosts selected by
+# the Placement API. Note that when Placement is used, the CoreFilter
+# is redundant, because the Placement API will have already filtered
+# out hosts that would have failed the CoreFilter.
 #
 # This configuration specifies ratio for CoreFilter which can be set
 # per compute node. For AggregateCoreFilter, it will fall back to this
 # configuration value if no per-aggregate setting is found.
 #
-# Possible values:
-#
-#     * Any valid positive integer or float value
-#     * Default value is 0.0
-#
 # NOTE: This can be set per-compute, or if set to 0.0, the value
 # set on the scheduler node(s) or compute node(s) will be used
 # and defaulted to 16.0'.
+#
+# Possible values:
+#
+# * Any valid positive integer or float value
 #  (floating point value)
+# Minimum value: 0
 # from .default.nova.conf.cpu_allocation_ratio
 {{ if not .default.nova.conf.cpu_allocation_ratio }}#{{ end }}cpu_allocation_ratio = {{ .default.nova.conf.cpu_allocation_ratio | default "0.0" }}
 
 #
 # This option helps you specify virtual RAM to physical RAM
-# allocation ratio which affects all RAM filters.
+# allocation ratio.
+#
+# From Ocata (15.0.0) this is used to influence the hosts selected by
+# the Placement API. Note that when Placement is used, the RamFilter
+# is redundant, because the Placement API will have already filtered
+# out hosts that would have failed the RamFilter.
 #
 # This configuration specifies ratio for RamFilter which can be set
 # per compute node. For AggregateRamFilter, it will fall back to this
 # configuration value if no per-aggregate setting found.
 #
-# Possible values:
-#
-#     * Any valid positive integer or float value
-#     * Default value is 0.0
-#
 # NOTE: This can be set per-compute, or if set to 0.0, the value
 # set on the scheduler node(s) or compute node(s) will be used and
 # defaulted to 1.5.
+#
+# Possible values:
+#
+# * Any valid positive integer or float value
 #  (floating point value)
+# Minimum value: 0
 # from .default.nova.conf.ram_allocation_ratio
 {{ if not .default.nova.conf.ram_allocation_ratio }}#{{ end }}ram_allocation_ratio = {{ .default.nova.conf.ram_allocation_ratio | default "0.0" }}
 
 #
 # This option helps you specify virtual disk to physical disk
-# allocation ratio used by the disk_filter.py script to determine if
-# a host has sufficient disk space to fit a requested instance.
+# allocation ratio.
+#
+# From Ocata (15.0.0) this is used to influence the hosts selected by
+# the Placement API. Note that when Placement is used, the DiskFilter
+# is redundant, because the Placement API will have already filtered
+# out hosts that would have failed the DiskFilter.
 #
 # A ratio greater than 1.0 will result in over-subscription of the
 # available physical disk, which can be useful for more
@@ -835,15 +820,15 @@
 # to preserve a percentage of the disk for uses other than
 # instances.
 #
-# Possible values:
-#
-#     * Any valid positive integer or float value
-#     * Default value is 0.0
-#
 # NOTE: This can be set per-compute, or if set to 0.0, the value
 # set on the scheduler node(s) or compute node(s) will be used and
 # defaulted to 1.0'.
+#
+# Possible values:
+#
+# * Any valid positive integer or float value
 #  (floating point value)
+# Minimum value: 0
 # from .default.nova.conf.disk_allocation_ratio
 {{ if not .default.nova.conf.disk_allocation_ratio }}#{{ end }}disk_allocation_ratio = {{ .default.nova.conf.disk_allocation_ratio | default "0.0" }}
 
@@ -900,7 +885,7 @@
 
 #
 # Maximum number of 1 second retries in live_migration. It specifies number
-# of retries to iptables when it complains. It happens when an user continously
+# of retries to iptables when it complains. It happens when an user continuously
 # sends live-migration request to same host leading to concurrent request
 # to iptables.
 #
@@ -994,63 +979,246 @@
 # from .default.nova.conf.sync_power_state_pool_size
 {{ if not .default.nova.conf.sync_power_state_pool_size }}#{{ end }}sync_power_state_pool_size = {{ .default.nova.conf.sync_power_state_pool_size | default "1000" }}
 
-# Interval to pull network bandwidth usage info. Not supported on all
-# hypervisors. Set to -1 to disable. Setting this to 0 will run at the default
-# rate. (integer value)
+#
+# Number of seconds to wait between runs of the image cache manager.
+#
+# Possible values:
+# * 0: run at the default rate.
+# * -1: disable
+# * Any other value
+#  (integer value)
+# Minimum value: -1
+# from .default.nova.conf.image_cache_manager_interval
+{{ if not .default.nova.conf.image_cache_manager_interval }}#{{ end }}image_cache_manager_interval = {{ .default.nova.conf.image_cache_manager_interval | default "2400" }}
+
+#
+# Interval to pull network bandwidth usage info.
+#
+# Not supported on all hypervisors. If a hypervisor doesn't support bandwidth
+# usage, it will not get the info in the usage events.
+#
+# Possible values:
+#
+# * 0: Will run at the default periodic interval.
+# * Any value < 0: Disables the option.
+# * Any positive integer in seconds.
+#  (integer value)
 # from .default.nova.conf.bandwidth_poll_interval
 {{ if not .default.nova.conf.bandwidth_poll_interval }}#{{ end }}bandwidth_poll_interval = {{ .default.nova.conf.bandwidth_poll_interval | default "600" }}
 
-# Interval to sync power states between the database and the hypervisor. Set to
-# -1 to disable. Setting this to 0 will run at the default rate. (integer value)
+#
+# Interval to sync power states between the database and the hypervisor.
+#
+# The interval that Nova checks the actual virtual machine power state
+# and the power state that Nova has in its database. If a user powers
+# down their VM, Nova updates the API to report the VM has been
+# powered down. Should something turn on the VM unexpectedly,
+# Nova will turn the VM back off to keep the system in the expected
+# state.
+#
+# Possible values:
+#
+# * 0: Will run at the default periodic interval.
+# * Any value < 0: Disables the option.
+# * Any positive integer in seconds.
+#
+# Related options:
+#
+# * If ``handle_virt_lifecycle_events`` in workarounds_group is
+#   false and this option is negative, then instances that get out
+#   of sync between the hypervisor and the Nova database will have
+#   to be synchronized manually.
+#  (integer value)
 # from .default.nova.conf.sync_power_state_interval
 {{ if not .default.nova.conf.sync_power_state_interval }}#{{ end }}sync_power_state_interval = {{ .default.nova.conf.sync_power_state_interval | default "600" }}
 
-# Number of seconds between instance network information cache updates (integer
-# value)
+#
+# Interval between instance network information cache updates.
+#
+# Number of seconds after which each compute node runs the task of
+# querying Neutron for all of its instances networking information,
+# then updates the Nova db with that information. Nova will never
+# update it's cache if this option is set to 0. If we don't update the
+# cache, the metadata service and nova-api endpoints will be proxying
+# incorrect network data about the instance. So, it is not recommended
+# to set this option to 0.
+#
+# Possible values:
+#
+# * Any positive integer in seconds.
+# * Any value <=0 will disable the sync. This is not recommended.
+#  (integer value)
 # from .default.nova.conf.heal_instance_info_cache_interval
 {{ if not .default.nova.conf.heal_instance_info_cache_interval }}#{{ end }}heal_instance_info_cache_interval = {{ .default.nova.conf.heal_instance_info_cache_interval | default "60" }}
 
-# Interval in seconds for reclaiming deleted instances. It takes effect only
-# when value is greater than 0. (integer value)
-# Minimum value: 0
+#
+# Interval for reclaiming deleted instances.
+#
+# A value greater than 0 will enable SOFT_DELETE of instances.
+# This option decides whether the server to be deleted will be put into
+# the SOFT_DELETED state. If this value is greater than 0, the deleted
+# server will not be deleted immediately, instead it will be put into
+# a queue until it's too old (deleted time greater than the value of
+# reclaim_instance_interval). The server can be recovered from the
+# delete queue by using the restore action. If the deleted server remains
+# longer than the value of reclaim_instance_interval, it will be
+# deleted by a periodic task in the compute service automatically.
+#
+# Note that this option is read from both the API and compute nodes, and
+# must be set globally otherwise servers could be put into a soft deleted
+# state in the API and never actually reclaimed (deleted) on the compute
+# node.
+#
+# Possible values:
+#
+# * Any positive integer(in seconds) greater than 0 will enable
+#   this option.
+# * Any value <=0 will disable the option.
+#  (integer value)
 # from .default.nova.conf.reclaim_instance_interval
 {{ if not .default.nova.conf.reclaim_instance_interval }}#{{ end }}reclaim_instance_interval = {{ .default.nova.conf.reclaim_instance_interval | default "0" }}
 
-# Interval in seconds for gathering volume usages (integer value)
+#
+# Interval for gathering volume usages.
+#
+# This option updates the volume usage cache for every
+# volume_usage_poll_interval number of seconds.
+#
+# Possible values:
+#
+# * Any positive integer(in seconds) greater than 0 will enable
+#   this option.
+# * Any value <=0 will disable the option.
+#  (integer value)
 # from .default.nova.conf.volume_usage_poll_interval
 {{ if not .default.nova.conf.volume_usage_poll_interval }}#{{ end }}volume_usage_poll_interval = {{ .default.nova.conf.volume_usage_poll_interval | default "0" }}
 
-# Interval in seconds for polling shelved instances to offload. Set to -1 to
-# disable.Setting this to 0 will run at the default rate. (integer value)
+#
+# Interval for polling shelved instances to offload.
+#
+# The periodic task runs for every shelved_poll_interval number
+# of seconds and checks if there are any shelved instances. If it
+# finds a shelved instance, based on the 'shelved_offload_time' config
+# value it offloads the shelved instances. Check 'shelved_offload_time'
+# config option description for details.
+#
+# Possible values:
+#
+# * Any value <= 0: Disables the option.
+# * Any positive integer in seconds.
+#
+# Related options:
+#
+# * ``shelved_offload_time``
+#  (integer value)
 # from .default.nova.conf.shelved_poll_interval
 {{ if not .default.nova.conf.shelved_poll_interval }}#{{ end }}shelved_poll_interval = {{ .default.nova.conf.shelved_poll_interval | default "3600" }}
 
-# Time in seconds before a shelved instance is eligible for removing from a
-# host. -1 never offload, 0 offload immediately when shelved (integer value)
+#
+# Time before a shelved instance is eligible for removal from a host.
+#
+# By default this option is set to 0 and the shelved instance will be
+# removed from the hypervisor immediately after shelve operation.
+# Otherwise, the instance will be kept for the value of
+# shelved_offload_time(in seconds) so that during the time period the
+# unshelve action will be faster, then the periodic task will remove
+# the instance from hypervisor after shelved_offload_time passes.
+#
+# Possible values:
+#
+# * 0: Instance will be immediately offloaded after being
+#      shelved.
+# * Any value < 0: An instance will never offload.
+# * Any positive integer in seconds: The instance will exist for
+#   the specified number of seconds before being offloaded.
+#  (integer value)
 # from .default.nova.conf.shelved_offload_time
 {{ if not .default.nova.conf.shelved_offload_time }}#{{ end }}shelved_offload_time = {{ .default.nova.conf.shelved_offload_time | default "0" }}
 
-# Interval in seconds for retrying failed instance file deletes. Set to -1 to
-# disable. Setting this to 0 will run at the default rate. (integer value)
+#
+# Interval for retrying failed instance file deletes.
+#
+# This option depends on 'maximum_instance_delete_attempts'.
+# This option specifies how often to retry deletes whereas
+# 'maximum_instance_delete_attempts' specifies the maximum number
+# of retry attempts that can be made.
+#
+# Possible values:
+#
+# * 0: Will run at the default periodic interval.
+# * Any value < 0: Disables the option.
+# * Any positive integer in seconds.
+#
+# Related options:
+#
+# * ``maximum_instance_delete_attempts`` from instance_cleaning_opts
+#   group.
+#  (integer value)
 # from .default.nova.conf.instance_delete_interval
 {{ if not .default.nova.conf.instance_delete_interval }}#{{ end }}instance_delete_interval = {{ .default.nova.conf.instance_delete_interval | default "300" }}
 
-# Waiting time interval (seconds) between block device allocation retries on
-# failures (integer value)
+#
+# Interval (in seconds) between block device allocation retries on failures.
+#
+# This option allows the user to specify the time interval between
+# consecutive retries. 'block_device_allocate_retries' option specifies
+# the maximum number of retries.
+#
+# Possible values:
+#
+# * 0: Disables the option.
+# * Any positive integer in seconds enables the option.
+#
+# Related options:
+#
+# * ``block_device_allocate_retries`` in compute_manager_opts group.
+#  (integer value)
+# Minimum value: 0
 # from .default.nova.conf.block_device_allocate_retries_interval
 {{ if not .default.nova.conf.block_device_allocate_retries_interval }}#{{ end }}block_device_allocate_retries_interval = {{ .default.nova.conf.block_device_allocate_retries_interval | default "3" }}
 
-# Waiting time interval (seconds) between sending the scheduler a list of
-# current instance UUIDs to verify that its view of instances is in sync with
-# nova. If the CONF option `scheduler_tracks_instance_changes` is False,
-# changing this option will have no effect. (integer value)
+#
+# Interval between sending the scheduler a list of current instance UUIDs to
+# verify that its view of instances is in sync with nova.
+#
+# If the CONF option 'scheduler_tracks_instance_changes' is
+# False, the sync calls will not be made. So, changing this option will
+# have no effect.
+#
+# If the out of sync situations are not very common, this interval
+# can be increased to lower the number of RPC messages being sent.
+# Likewise, if sync issues turn out to be a problem, the interval
+# can be lowered to check more frequently.
+#
+# Possible values:
+#
+# * 0: Will run at the default periodic interval.
+# * Any value < 0: Disables the option.
+# * Any positive integer in seconds.
+#
+# Related options:
+#
+# * This option has no impact if ``scheduler_tracks_instance_changes``
+#   is set to False.
+#  (integer value)
 # from .default.nova.conf.scheduler_instance_sync_interval
 {{ if not .default.nova.conf.scheduler_instance_sync_interval }}#{{ end }}scheduler_instance_sync_interval = {{ .default.nova.conf.scheduler_instance_sync_interval | default "120" }}
 
-# Interval in seconds for updating compute resources. A number less than 0 means
-# to disable the task completely. Leaving this at the default of 0 will cause
-# this to run at the default periodic interval. Setting it to any positive value
-# will cause it to run at approximately that number of seconds. (integer value)
+#
+# Interval for updating compute resources.
+#
+# This option specifies how often the update_available_resources
+# periodic task should run. A number less than 0 means to disable the
+# task completely. Leaving this at the default of 0 will cause this to
+# run at the default periodic interval. Setting it to any positive
+# value will cause it to run at approximately that number of seconds.
+#
+# Possible values:
+#
+# * 0: Will run at the default periodic interval.
+# * Any value < 0: Disables the option.
+# * Any positive integer in seconds.
+#  (integer value)
 # from .default.nova.conf.update_resources_interval
 {{ if not .default.nova.conf.update_resources_interval }}#{{ end }}update_resources_interval = {{ .default.nova.conf.update_resources_interval | default "0" }}
 
@@ -1199,28 +1367,41 @@
 # from .default.nova.conf.running_deleted_instance_timeout
 {{ if not .default.nova.conf.running_deleted_instance_timeout }}#{{ end }}running_deleted_instance_timeout = {{ .default.nova.conf.running_deleted_instance_timeout | default "0" }}
 
-# The number of times to attempt to reap an instance's files. (integer value)
+#
+# The number of times to attempt to reap an instance's files.
+#
+# This option specifies the maximum number of retry attempts
+# that can be made.
+#
+# Possible values:
+#
+# * Any positive integer defines how many attempts are made.
+# * Any value <=0 means no delete attempts occur, but you should use
+#   ``instance_delete_interval`` to disable the delete attempts.
+#
+# Related options:
+# * ``instance_delete_interval`` in interval_opts group can be used to disable
+#   this option.
+#  (integer value)
 # from .default.nova.conf.maximum_instance_delete_attempts
 {{ if not .default.nova.conf.maximum_instance_delete_attempts }}#{{ end }}maximum_instance_delete_attempts = {{ .default.nova.conf.maximum_instance_delete_attempts | default "5" }}
 
-#
+# DEPRECATED:
 # This is the message queue topic that the compute service 'listens' on. It is
 # used when the compute service is started up to configure the queue, and
 # whenever an RPC call to the compute service is made.
 #
-# * Possible values:
+# Possible values:
 #
-#     Any string, but there is almost never any reason to ever change this value
-#     from its default of 'compute'.
-#
-# * Services that use this:
-#
-#     ``nova-compute``
-#
-# * Related options:
-#
-#     None
+# * Any string, but there is almost never any reason to ever change this value
+#   from its default of 'compute'.
 #  (string value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# There is no need to let users choose the RPC topic for all services - there
+# is little gain from this. Furthermore, it makes it really easy to break Nova
+# by using this option.
 # from .default.nova.conf.compute_topic
 {{ if not .default.nova.conf.compute_topic }}#{{ end }}compute_topic = {{ .default.nova.conf.compute_topic | default "compute" }}
 
@@ -1289,14 +1470,6 @@
 #  (string value)
 # from .default.nova.conf.instance_name_template
 {{ if not .default.nova.conf.instance_name_template }}#{{ end }}instance_name_template = {{ .default.nova.conf.instance_name_template | default "instance-%08x" }}
-
-# DEPRECATED: Template string to be used to generate snapshot names (string
-# value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-# Reason: This is not used anymore and will be removed in the O release.
-# from .default.nova.conf.snapshot_name_template
-{{ if not .default.nova.conf.snapshot_name_template }}#{{ end }}snapshot_name_template = {{ .default.nova.conf.snapshot_name_template | default "snapshot-%s" }}
 
 #
 # Number of times to retry live-migration before failing.
@@ -1399,57 +1572,46 @@
 # from .default.nova.conf.mkisofs_cmd
 {{ if not .default.nova.conf.mkisofs_cmd }}#{{ end }}mkisofs_cmd = {{ .default.nova.conf.mkisofs_cmd | default "genisoimage" }}
 
+# DEPRECATED:
+# nova-console-proxy is used to set up multi-tenant VM console access.
+# This option allows pluggable driver program for the console session
+# and represents driver to use for the console proxy.
 #
-# Adds list of allowed origins to the console websocket proxy to allow
-# connections from other origin hostnames.
-# Websocket proxy matches the host header with the origin header to
-# prevent cross-site requests. This list specifies if any there are
-# values other than host are allowed in the origin header.
+# Possible values:
 #
-# Possible values
-#
-#   * An empty list (default) or list of allowed origin hostnames.
-#  (list value)
-# from .default.nova.conf.console_allowed_origins
-{{ if not .default.nova.conf.console_allowed_origins }}#{{ end }}console_allowed_origins = {{ .default.nova.conf.console_allowed_origins | default "" }}
+# * A string representing fully classified class name of console driver.
+#  (string value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# This option no longer does anything. Previously this option had only two
+# valid,
+# in-tree values: nova.console.xvp.XVPConsoleProxy and
+# nova.console.fake.FakeConsoleProxy. The latter of these was only used in tests
+# and has since been replaced.
+# from .default.nova.conf.console_driver
+{{ if not .default.nova.conf.console_driver }}#{{ end }}console_driver = {{ .default.nova.conf.console_driver | default "nova.console.xvp.XVPConsoleProxy" }}
 
-#
+# DEPRECATED:
 # Represents the message queue topic name used by nova-console
 # service when communicating via the AMQP server. The Nova API uses a message
 # queue to communicate with nova-console to retrieve a console URL for that
 # host.
 #
-# Possible values
+# Possible values:
 #
-#   * 'console' (default) or any string representing topic exchange name.
+# * A string representing topic exchange name
 #  (string value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# There is no need to let users choose the RPC topic for all services - there
+# is little gain from this. Furthermore, it makes it really easy to break Nova
+# by using this option.
 # from .default.nova.conf.console_topic
 {{ if not .default.nova.conf.console_topic }}#{{ end }}console_topic = {{ .default.nova.conf.console_topic | default "console" }}
 
-#
-# Nova-console proxy is used to set up multi-tenant VM console access.
-# This option allows pluggable driver program for the console session
-# and represents driver to use for the console proxy.
-#
-# Possible values
-#
-#   * 'nova.console.xvp.XVPConsoleProxy' (default) or
-#     a string representing fully classified class name of console driver.
-#  (string value)
-# from .default.nova.conf.console_driver
-{{ if not .default.nova.conf.console_driver }}#{{ end }}console_driver = {{ .default.nova.conf.console_driver | default "nova.console.xvp.XVPConsoleProxy" }}
-
-#
-# Publicly visible name for this console host.
-#
-# Possible values
-#
-#   * Current hostname (default) or any string representing hostname.
-#  (string value)
-# from .default.nova.conf.console_public_hostname
-{{ if not .default.nova.conf.console_public_hostname }}#{{ end }}console_public_hostname = {{ .default.nova.conf.console_public_hostname | default "d5bac85a44d3" }}
-
-#
+# DEPRECATED:
 # This option allows you to change the message topic used by nova-consoleauth
 # service when communicating via the AMQP server. Nova Console Authentication
 # server authenticates nova consoles. Users can then access their instances
@@ -1458,48 +1620,30 @@
 #
 # Possible Values:
 #
-#   * 'consoleauth' (default) or Any string representing topic exchange name.
+# * 'consoleauth' (default) or Any string representing topic exchange name.
 #  (string value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# There is no need to let users choose the RPC topic for all services - there
+# is little gain from this. Furthermore, it makes it really easy to break Nova
+# by using this option.
 # from .default.nova.conf.consoleauth_topic
 {{ if not .default.nova.conf.consoleauth_topic }}#{{ end }}consoleauth_topic = {{ .default.nova.conf.consoleauth_topic | default "consoleauth" }}
 
-#
-# This option indicates the lifetime of a console auth token. A console auth
-# token is used in authorizing console access for a user. Once the auth token
-# time to live count has elapsed, the token is considered expired. Expired
-# tokens are then deleted.
-#  (integer value)
-# Minimum value: 0
-# from .default.nova.conf.console_token_ttl
-{{ if not .default.nova.conf.console_token_ttl }}#{{ end }}console_token_ttl = {{ .default.nova.conf.console_token_ttl | default "600" }}
-
 # DEPRECATED: The driver to use for database access (string value)
-# This option is deprecated for removal.
+# This option is deprecated for removal since 13.0.0.
 # Its value may be silently ignored in the future.
 # from .default.nova.conf.db_driver
 {{ if not .default.nova.conf.db_driver }}#{{ end }}db_driver = {{ .default.nova.conf.db_driver | default "nova.db" }}
 
 # DEPRECATED:
-# When set to true, this option enables validation of exception
-# message format.
-#
-# This option is used to detect errors in NovaException class when it formats
-# error messages. If True, raise an exception; if False, use the unformatted
-# message.
-#  (boolean value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-# Reason: This is only used for internal testing.
-# from .default.nova.conf.fatal_exception_format_errors
-{{ if not .default.nova.conf.fatal_exception_format_errors }}#{{ end }}fatal_exception_format_errors = {{ .default.nova.conf.fatal_exception_format_errors | default "false" }}
-
-# DEPRECATED:
 # Default flavor to use for the EC2 API only.
 # The Nova API does not support a default flavor.
 #  (string value)
-# This option is deprecated for removal.
+# This option is deprecated for removal since 14.0.0.
 # Its value may be silently ignored in the future.
-# Reason: The EC2 API is deprecated
+# Reason: The EC2 API is deprecated.
 # from .default.nova.conf.default_flavor
 {{ if not .default.nova.conf.default_flavor }}#{{ end }}default_flavor = {{ .default.nova.conf.default_flavor | default "m1.small" }}
 
@@ -1517,21 +1661,29 @@
 #
 # Possible values:
 #
-#     * Any string representing a floating IP pool name
+# * Any string representing a floating IP pool name
 #  (string value)
 # from .default.nova.conf.default_floating_pool
 {{ if not .default.nova.conf.default_floating_pool }}#{{ end }}default_floating_pool = {{ .default.nova.conf.default_floating_pool | default "nova" }}
 
-#
+# DEPRECATED:
 # Autoassigning floating IP to VM
 #
 # When set to True, floating IP is auto allocated and associated
 # to the VM upon creation.
+#
+# Related options:
+#
+# * use_neutron: this options only works with nova-network.
 #  (boolean value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# nova-network is deprecated, as are any related configuration options.
 # from .default.nova.conf.auto_assign_floating_ip
 {{ if not .default.nova.conf.auto_assign_floating_ip }}#{{ end }}auto_assign_floating_ip = {{ .default.nova.conf.auto_assign_floating_ip | default "false" }}
 
-#
+# DEPRECATED:
 # Full class name for the DNS Manager for floating IPs.
 #
 # This option specifies the class of the driver that provides functionality
@@ -1544,12 +1696,20 @@
 #
 # Possible values:
 #
-#     * Full Python path to the class to be used
+# * Full Python path to the class to be used
+#
+# Related options:
+#
+# * use_neutron: this options only works with nova-network.
 #  (string value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# nova-network is deprecated, as are any related configuration options.
 # from .default.nova.conf.floating_ip_dns_manager
 {{ if not .default.nova.conf.floating_ip_dns_manager }}#{{ end }}floating_ip_dns_manager = {{ .default.nova.conf.floating_ip_dns_manager | default "nova.network.noop_dns_driver.NoopDNSDriver" }}
 
-#
+# DEPRECATED:
 # Full class name for the DNS Manager for instance IPs.
 #
 # This option specifies the class of the driver that provides functionality
@@ -1561,16 +1721,32 @@
 #
 # Possible values:
 #
-#     * Full Python path to the class to be used
+# * Full Python path to the class to be used
+#
+# Related options:
+#
+# * use_neutron: this options only works with nova-network.
 #  (string value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# nova-network is deprecated, as are any related configuration options.
 # from .default.nova.conf.instance_dns_manager
 {{ if not .default.nova.conf.instance_dns_manager }}#{{ end }}instance_dns_manager = {{ .default.nova.conf.instance_dns_manager | default "nova.network.noop_dns_driver.NoopDNSDriver" }}
 
-#
+# DEPRECATED:
 # If specified, Nova checks if the availability_zone of every instance matches
 # what the database says the availability_zone should be for the specified
 # dns_domain.
+#
+# Related options:
+#
+# * use_neutron: this options only works with nova-network.
 #  (string value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# nova-network is deprecated, as are any related configuration options.
 # from .default.nova.conf.instance_dns_domain
 {{ if not .default.nova.conf.instance_dns_domain }}#{{ end }}instance_dns_domain = {{ .default.nova.conf.instance_dns_domain | default "" }}
 
@@ -1606,7 +1782,7 @@
 # * vpn_ip
 #  (string value)
 # from .default.nova.conf.my_ip
-{{ if not .default.nova.conf.my_ip }}#{{ end }}my_ip = {{ .default.nova.conf.my_ip | default "172.17.0.2" }}
+{{ if not .default.nova.conf.my_ip }}#{{ end }}my_ip = {{ .default.nova.conf.my_ip | default "10.87.65.155" }}
 
 #
 # The IP address which is used to connect to the block storage network.
@@ -1630,7 +1806,7 @@
 # * String with hostname, FQDN or IP address. Default is hostname of this host.
 #  (string value)
 # from .default.nova.conf.host
-{{ if not .default.nova.conf.host }}#{{ end }}host = {{ .default.nova.conf.host | default "d5bac85a44d3" }}
+{{ if not .default.nova.conf.host }}#{{ end }}host = {{ .default.nova.conf.host | default "5b6s17" }}
 
 #
 # Assign IPv6 and IPv4 addresses when creating instances.
@@ -1993,6 +2169,16 @@
 {{ if not .default.nova.conf.ebtables_retry_interval }}#{{ end }}ebtables_retry_interval = {{ .default.nova.conf.ebtables_retry_interval | default "1.0" }}
 
 #
+# This option determines whether the network setup information is injected into
+# the VM before it is booted. While it was originally designed to be used only
+# by
+# nova-network, it is also used by the vmware and xenapi virt drivers to control
+# whether network information is injected into a VM.
+#  (boolean value)
+# from .default.nova.conf.flat_injected
+{{ if not .default.nova.conf.flat_injected }}#{{ end }}flat_injected = {{ .default.nova.conf.flat_injected | default "false" }}
+
+# DEPRECATED:
 # This option determines the bridge used for simple network interfaces when no
 # bridge is specified in the VM creation request.
 #
@@ -2007,10 +2193,14 @@
 #
 #     ``use_neutron``
 #  (string value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# nova-network is deprecated, as are any related configuration options.
 # from .default.nova.conf.flat_network_bridge
 {{ if not .default.nova.conf.flat_network_bridge }}#{{ end }}flat_network_bridge = {{ .default.nova.conf.flat_network_bridge | default "<None>" }}
 
-#
+# DEPRECATED:
 # This is the address of the DNS server for a simple network. If this option is
 # not specified, the default of '8.8.4.4' is used.
 #
@@ -2025,20 +2215,14 @@
 #
 #     ``use_neutron``
 #  (string value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# nova-network is deprecated, as are any related configuration options.
 # from .default.nova.conf.flat_network_dns
 {{ if not .default.nova.conf.flat_network_dns }}#{{ end }}flat_network_dns = {{ .default.nova.conf.flat_network_dns | default "8.8.4.4" }}
 
-#
-# This option determines whether the network setup information is injected into
-# the VM before it is booted. While it was originally designed to be used only
-# by
-# nova-network, it is also used by the vmware and xenapi virt drivers to control
-# whether network information is injected into a VM.
-#  (boolean value)
-# from .default.nova.conf.flat_injected
-{{ if not .default.nova.conf.flat_injected }}#{{ end }}flat_injected = {{ .default.nova.conf.flat_injected | default "false" }}
-
-#
+# DEPRECATED:
 # This option is the name of the virtual interface of the VM on which the bridge
 # will be built. While it was originally designed to be used only by
 # nova-network, it is also used by libvirt for the bridge interface name.
@@ -2047,10 +2231,14 @@
 #
 #     Any valid virtual interface name, such as 'eth0'
 #  (string value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# nova-network is deprecated, as are any related configuration options.
 # from .default.nova.conf.flat_interface
 {{ if not .default.nova.conf.flat_interface }}#{{ end }}flat_interface = {{ .default.nova.conf.flat_interface | default "<None>" }}
 
-#
+# DEPRECATED:
 # This is the VLAN number used for private networks. Note that the when creating
 # the networks, if the specified number has already been assigned, nova-network
 # will increment this number until it finds an available VLAN.
@@ -2072,10 +2260,14 @@
 #  (integer value)
 # Minimum value: 1
 # Maximum value: 4094
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# nova-network is deprecated, as are any related configuration options.
 # from .default.nova.conf.vlan_start
 {{ if not .default.nova.conf.vlan_start }}#{{ end }}vlan_start = {{ .default.nova.conf.vlan_start | default "100" }}
 
-#
+# DEPRECATED:
 # This option is the name of the virtual interface of the VM on which the VLAN
 # bridge will be built. While it was originally designed to be used only by
 # nova-network, it is also used by libvirt and xenapi for the bridge interface
@@ -2089,10 +2281,17 @@
 #
 #     Any valid virtual interface name, such as 'eth0'
 #  (string value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# nova-network is deprecated, as are any related configuration options. While
+# this option has an effect when using neutron, it incorrectly override the
+# value
+# provided by neutron and should therefore not be used.
 # from .default.nova.conf.vlan_interface
 {{ if not .default.nova.conf.vlan_interface }}#{{ end }}vlan_interface = {{ .default.nova.conf.vlan_interface | default "<None>" }}
 
-#
+# DEPRECATED:
 # This option represents the number of networks to create if not explicitly
 # specified when the network is created. The only time this is used is if a CIDR
 # is specified, but an explicit network_size is not. In that case, the subnets
@@ -2115,10 +2314,14 @@
 #     ``use_neutron``, ``network_size``
 #  (integer value)
 # Minimum value: 1
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# nova-network is deprecated, as are any related configuration options.
 # from .default.nova.conf.num_networks
 {{ if not .default.nova.conf.num_networks }}#{{ end }}num_networks = {{ .default.nova.conf.num_networks | default "1" }}
 
-#
+# DEPRECATED:
 # This is the public IP address for the cloudpipe VPN servers. It defaults to
 # the
 # IP address of the host.
@@ -2137,10 +2340,14 @@
 #
 #     ``network_manager``, ``use_neutron``, ``vpn_start``
 #  (string value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# nova-network is deprecated, as are any related configuration options.
 # from .default.nova.conf.vpn_ip
 {{ if not .default.nova.conf.vpn_ip }}#{{ end }}vpn_ip = {{ .default.nova.conf.vpn_ip | default "$my_ip" }}
 
-#
+# DEPRECATED:
 # This is the port number to use as the first VPN port for private networks.
 #
 # Please note that this option is only used when using nova-network instead of
@@ -2160,10 +2367,14 @@
 #  (port value)
 # Minimum value: 0
 # Maximum value: 65535
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# nova-network is deprecated, as are any related configuration options.
 # from .default.nova.conf.vpn_start
 {{ if not .default.nova.conf.vpn_start }}#{{ end }}vpn_start = {{ .default.nova.conf.vpn_start | default "1000" }}
 
-#
+# DEPRECATED:
 # This option determines the number of addresses in each private subnet.
 #
 # Please note that this option is only used when using nova-network instead of
@@ -2181,10 +2392,14 @@
 #     ``use_neutron``, ``num_networks``
 #  (integer value)
 # Minimum value: 1
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# nova-network is deprecated, as are any related configuration options.
 # from .default.nova.conf.network_size
 {{ if not .default.nova.conf.network_size }}#{{ end }}network_size = {{ .default.nova.conf.network_size | default "256" }}
 
-#
+# DEPRECATED:
 # This option determines the fixed IPv6 address block when creating a network.
 #
 # Please note that this option is only used when using nova-network instead of
@@ -2198,10 +2413,14 @@
 #
 #     ``use_neutron``
 #  (string value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# nova-network is deprecated, as are any related configuration options.
 # from .default.nova.conf.fixed_range_v6
 {{ if not .default.nova.conf.fixed_range_v6 }}#{{ end }}fixed_range_v6 = {{ .default.nova.conf.fixed_range_v6 | default "fd00::/48" }}
 
-#
+# DEPRECATED:
 # This is the default IPv4 gateway. It is used only in the testing suite.
 #
 # Please note that this option is only used when using nova-network instead of
@@ -2215,10 +2434,14 @@
 #
 #     ``use_neutron``, ``gateway_v6``
 #  (string value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# nova-network is deprecated, as are any related configuration options.
 # from .default.nova.conf.gateway
 {{ if not .default.nova.conf.gateway }}#{{ end }}gateway = {{ .default.nova.conf.gateway | default "<None>" }}
 
-#
+# DEPRECATED:
 # This is the default IPv6 gateway. It is used only in the testing suite.
 #
 # Please note that this option is only used when using nova-network instead of
@@ -2232,10 +2455,14 @@
 #
 #     ``use_neutron``, ``gateway``
 #  (string value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# nova-network is deprecated, as are any related configuration options.
 # from .default.nova.conf.gateway_v6
 {{ if not .default.nova.conf.gateway_v6 }}#{{ end }}gateway_v6 = {{ .default.nova.conf.gateway_v6 | default "<None>" }}
 
-#
+# DEPRECATED:
 # This option represents the number of IP addresses to reserve at the top of the
 # address range for VPN clients. It also will be ignored if the configuration
 # option for `network_manager` is not set to the default of
@@ -2250,10 +2477,14 @@
 #     ``use_neutron``, ``network_manager``
 #  (integer value)
 # Minimum value: 0
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# nova-network is deprecated, as are any related configuration options.
 # from .default.nova.conf.cnt_vpn_clients
 {{ if not .default.nova.conf.cnt_vpn_clients }}#{{ end }}cnt_vpn_clients = {{ .default.nova.conf.cnt_vpn_clients | default "0" }}
 
-#
+# DEPRECATED:
 # This is the number of seconds to wait before disassociating a deallocated
 # fixed
 # IP address. This is only used with the nova-network service, and has no effect
@@ -2268,10 +2499,14 @@
 #     ``use_neutron``
 #  (integer value)
 # Minimum value: 0
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# nova-network is deprecated, as are any related configuration options.
 # from .default.nova.conf.fixed_ip_disassociate_timeout
 {{ if not .default.nova.conf.fixed_ip_disassociate_timeout }}#{{ end }}fixed_ip_disassociate_timeout = {{ .default.nova.conf.fixed_ip_disassociate_timeout | default "600" }}
 
-#
+# DEPRECATED:
 # This option determines how many times nova-network will attempt to create a
 # unique MAC address before giving up and raising a
 # `VirtualInterfaceMacAddressException` error.
@@ -2285,10 +2520,14 @@
 #     ``use_neutron``
 #  (integer value)
 # Minimum value: 1
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# nova-network is deprecated, as are any related configuration options.
 # from .default.nova.conf.create_unique_mac_address_attempts
 {{ if not .default.nova.conf.create_unique_mac_address_attempts }}#{{ end }}create_unique_mac_address_attempts = {{ .default.nova.conf.create_unique_mac_address_attempts | default "5" }}
 
-#
+# DEPRECATED:
 # Determines whether unused gateway devices, both VLAN and bridge, are deleted
 # if
 # the network is in nova-network VLAN mode and is multi-hosted.
@@ -2297,10 +2536,14 @@
 #
 #     ``use_neutron``, ``vpn_ip``, ``fake_network``
 #  (boolean value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# nova-network is deprecated, as are any related configuration options.
 # from .default.nova.conf.teardown_unused_network_gateway
 {{ if not .default.nova.conf.teardown_unused_network_gateway }}#{{ end }}teardown_unused_network_gateway = {{ .default.nova.conf.teardown_unused_network_gateway | default "false" }}
 
-#
+# DEPRECATED:
 # When this option is True, a call is made to release the DHCP for the instance
 # when that instance is terminated.
 #
@@ -2308,10 +2551,14 @@
 #
 #     ``use_neutron``
 #  (boolean value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# nova-network is deprecated, as are any related configuration options.
 # from .default.nova.conf.force_dhcp_release
 {{ if not .default.nova.conf.force_dhcp_release }}#{{ end }}force_dhcp_release = {{ .default.nova.conf.force_dhcp_release | default "true" }}
 
-#
+# DEPRECATED:
 # When this option is True, whenever a DNS entry must be updated, a fanout cast
 # message is sent to all network hosts to update their DNS entries in multi-host
 # mode.
@@ -2320,10 +2567,14 @@
 #
 #     ``use_neutron``
 #  (boolean value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# nova-network is deprecated, as are any related configuration options.
 # from .default.nova.conf.update_dns_entries
 {{ if not .default.nova.conf.update_dns_entries }}#{{ end }}update_dns_entries = {{ .default.nova.conf.update_dns_entries | default "false" }}
 
-#
+# DEPRECATED:
 # This option determines the time, in seconds, to wait between refreshing DNS
 # entries for the network.
 #
@@ -2338,10 +2589,14 @@
 #     ``use_neutron``
 #  (integer value)
 # Minimum value: -1
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# nova-network is deprecated, as are any related configuration options.
 # from .default.nova.conf.dns_update_periodic_interval
 {{ if not .default.nova.conf.dns_update_periodic_interval }}#{{ end }}dns_update_periodic_interval = {{ .default.nova.conf.dns_update_periodic_interval | default "-1" }}
 
-#
+# DEPRECATED:
 # This option allows you to specify the domain for the DHCP server.
 #
 # Possible values:
@@ -2352,10 +2607,14 @@
 #
 #     ``use_neutron``
 #  (string value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# nova-network is deprecated, as are any related configuration options.
 # from .default.nova.conf.dhcp_domain
 {{ if not .default.nova.conf.dhcp_domain }}#{{ end }}dhcp_domain = {{ .default.nova.conf.dhcp_domain | default "novalocal" }}
 
-#
+# DEPRECATED:
 # This option allows you to specify the L3 management library to be used.
 #
 # Possible values:
@@ -2367,6 +2626,10 @@
 #
 #     ``use_neutron``
 #  (string value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# nova-network is deprecated, as are any related configuration options.
 # from .default.nova.conf.l3_lib
 {{ if not .default.nova.conf.l3_lib }}#{{ end }}l3_lib = {{ .default.nova.conf.l3_lib | default "nova.network.l3.LinuxNetL3" }}
 
@@ -2384,118 +2647,223 @@
 # argument
 # with the name 'share_address'.
 #  (boolean value)
-# This option is deprecated for removal.
+# This option is deprecated for removal since 2014.2.
 # Its value may be silently ignored in the future.
 # from .default.nova.conf.share_dhcp_address
 {{ if not .default.nova.conf.share_dhcp_address }}#{{ end }}share_dhcp_address = {{ .default.nova.conf.share_dhcp_address | default "false" }}
 
-# Whether to use Neutron or Nova Network as the back end for networking.
-# Defaults to False (indicating Nova network).Set to True to use neutron.
-# (boolean value)
+# DEPRECATED: Whether to use Neutron or Nova Network as the back end for
+# networking. Defaults to False (indicating Nova network).Set to True to use
+# neutron. (boolean value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# nova-network is deprecated, as are any related configuration options.
 # from .default.nova.conf.use_neutron
-{{ if not .default.nova.conf.use_neutron }}#{{ end }}use_neutron = {{ .default.nova.conf.use_neutron | default "false" }}
+{{ if not .default.nova.conf.use_neutron }}#{{ end }}use_neutron = {{ .default.nova.conf.use_neutron | default "true" }}
 
-# URL for LDAP server which will store DNS entries (string value)
+#
+# URL for LDAP server which will store DNS entries
+#
+# Possible values:
+#
+# * A valid LDAP URL representing the server
+#  (uri value)
 # from .default.nova.conf.ldap_dns_url
 {{ if not .default.nova.conf.ldap_dns_url }}#{{ end }}ldap_dns_url = {{ .default.nova.conf.ldap_dns_url | default "ldap://ldap.example.com:389" }}
 
-# User for LDAP DNS (string value)
+# Bind user for LDAP server (string value)
 # from .default.nova.conf.ldap_dns_user
 {{ if not .default.nova.conf.ldap_dns_user }}#{{ end }}ldap_dns_user = {{ .default.nova.conf.ldap_dns_user | default "uid=admin,ou=people,dc=example,dc=org" }}
 
-# Password for LDAP DNS (string value)
+# Bind user's password for LDAP server (string value)
 # from .default.nova.conf.ldap_dns_password
 {{ if not .default.nova.conf.ldap_dns_password }}#{{ end }}ldap_dns_password = {{ .default.nova.conf.ldap_dns_password | default "password" }}
 
-# Hostmaster for LDAP DNS driver Statement of Authority (string value)
+#
+# Hostmaster for LDAP DNS driver Statement of Authority
+#
+# Possible values:
+#
+# * Any valid string representing LDAP DNS hostmaster.
+#  (string value)
 # from .default.nova.conf.ldap_dns_soa_hostmaster
 {{ if not .default.nova.conf.ldap_dns_soa_hostmaster }}#{{ end }}ldap_dns_soa_hostmaster = {{ .default.nova.conf.ldap_dns_soa_hostmaster | default "hostmaster@example.org" }}
 
-# DNS Servers for LDAP DNS driver (multi valued)
+#
+# DNS Servers for LDAP DNS driver
+#
+# Possible values:
+#
+# * A valid URL representing a DNS server
+#  (multi valued)
 # from .default.nova.conf.ldap_dns_servers (multiopt)
 {{ if not .default.nova.conf.ldap_dns_servers }}#ldap_dns_servers = {{ .default.nova.conf.ldap_dns_servers | default "dns.example.org" }}{{ else }}{{ range .default.nova.conf.ldap_dns_servers }}ldap_dns_servers = {{ . }}{{ end }}{{ end }}
 
-# Base DN for DNS entries in LDAP (string value)
+#
+# Base distinguished name for the LDAP search query
+#
+# This option helps to decide where to look up the host in LDAP.
+#  (string value)
 # from .default.nova.conf.ldap_dns_base_dn
 {{ if not .default.nova.conf.ldap_dns_base_dn }}#{{ end }}ldap_dns_base_dn = {{ .default.nova.conf.ldap_dns_base_dn | default "ou=hosts,dc=example,dc=org" }}
 
-# Refresh interval (in seconds) for LDAP DNS driver Statement of Authority
-# (string value)
+#
+# Refresh interval (in seconds) for LDAP DNS driver Start of Authority
+#
+# Time interval, a secondary/slave DNS server waits before requesting for
+# primary DNS server's current SOA record. If the records are different,
+# secondary DNS server will request a zone transfer from primary.
+#
+# NOTE: Lower values would cause more traffic.
+#  (integer value)
 # from .default.nova.conf.ldap_dns_soa_refresh
 {{ if not .default.nova.conf.ldap_dns_soa_refresh }}#{{ end }}ldap_dns_soa_refresh = {{ .default.nova.conf.ldap_dns_soa_refresh | default "1800" }}
 
-# Retry interval (in seconds) for LDAP DNS driver Statement of Authority (string
-# value)
+#
+# Retry interval (in seconds) for LDAP DNS driver Start of Authority
+#
+# Time interval, a secondary/slave DNS server should wait, if an
+# attempt to transfer zone failed during the previous refresh interval.
+#  (integer value)
 # from .default.nova.conf.ldap_dns_soa_retry
 {{ if not .default.nova.conf.ldap_dns_soa_retry }}#{{ end }}ldap_dns_soa_retry = {{ .default.nova.conf.ldap_dns_soa_retry | default "3600" }}
 
-# Expiry interval (in seconds) for LDAP DNS driver Statement of Authority
-# (string value)
+#
+# Expiry interval (in seconds) for LDAP DNS driver Start of Authority
+#
+# Time interval, a secondary/slave DNS server holds the information
+# before it is no longer considered authoritative.
+#  (integer value)
 # from .default.nova.conf.ldap_dns_soa_expiry
 {{ if not .default.nova.conf.ldap_dns_soa_expiry }}#{{ end }}ldap_dns_soa_expiry = {{ .default.nova.conf.ldap_dns_soa_expiry | default "86400" }}
 
-# Minimum interval (in seconds) for LDAP DNS driver Statement of Authority
-# (string value)
+#
+# Minimum interval (in seconds) for LDAP DNS driver Start of Authority
+#
+# It is Minimum time-to-live applies for all resource records in the
+# zone file. This value is supplied to other servers how long they
+# should keep the data in cache.
+#  (integer value)
 # from .default.nova.conf.ldap_dns_soa_minimum
 {{ if not .default.nova.conf.ldap_dns_soa_minimum }}#{{ end }}ldap_dns_soa_minimum = {{ .default.nova.conf.ldap_dns_soa_minimum | default "7200" }}
 
-# The topic network nodes listen on (string value)
+# DEPRECATED: The topic network nodes listen on (string value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# There is no need to let users choose the RPC topic for all services - there
+# is little gain from this. Furthermore, it makes it really easy to break Nova
+# by using this option.
 # from .default.nova.conf.network_topic
 {{ if not .default.nova.conf.network_topic }}#{{ end }}network_topic = {{ .default.nova.conf.network_topic | default "network" }}
 
-# Default value for multi_host in networks. Also, if set, some rpc network calls
-# will be sent directly to host. (boolean value)
+# DEPRECATED:
+# Default value for multi_host in networks.
+#
+# nova-network service can operate in a multi-host or single-host mode.
+# In multi-host mode each compute node runs a copy of nova-network and the
+# instances on that compute node use the compute node as a gateway to the
+# Internet. Where as in single-host mode, a central server runs the nova-network
+# service. All compute nodes forward traffic from the instances to the
+# cloud controller which then forwards traffic to the Internet.
+#
+# If this options is set to true, some rpc network calls will be sent directly
+# to host.
+#
+# Note that this option is only used when using nova-network instead of
+# Neutron in your deployment.
+#
+# Related options:
+#
+# * use_neutron
+#  (boolean value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# nova-network is deprecated, as are any related configuration options.
 # from .default.nova.conf.multi_host
 {{ if not .default.nova.conf.multi_host }}#{{ end }}multi_host = {{ .default.nova.conf.multi_host | default "false" }}
 
-# Driver to use for network creation (string value)
+# DEPRECATED:
+# Driver to use for network creation.
+#
+# Network driver initializes (creates bridges and so on) only when the
+# first VM lands on a host node. All network managers configure the
+# network using network drivers. The driver is not tied to any particular
+# network manager.
+#
+# The default Linux driver implements vlans, bridges, and iptables rules
+# using linux utilities.
+#
+# Note that this option is only used when using nova-network instead
+# of Neutron in your deployment.
+#
+# Related options:
+#
+# * use_neutron
+#  (string value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# nova-network is deprecated, as are any related configuration options.
 # from .default.nova.conf.network_driver
 {{ if not .default.nova.conf.network_driver }}#{{ end }}network_driver = {{ .default.nova.conf.network_driver | default "nova.network.linux_net" }}
 
 #
-# If set, send compute.instance.update notifications on instance state
-# changes.
+# Firewall driver to use with ``nova-network`` service.
 #
-# Please refer to https://wiki.openstack.org/wiki/SystemUsageData for
-# additional information on notifications.
+# This option only applies when using the ``nova-network`` service. When using
+# another networking services, such as Neutron, this should be to set to the
+# ``nova.virt.firewall.NoopFirewallDriver``.
 #
-# Possible values:
-#
-# * None - no notifications
-# * "vm_state" - notifications on VM state changes
-# * "vm_and_task_state" - notifications on VM and task state changes
-#  (string value)
-# Allowed values: <None>, vm_state, vm_and_task_state
-# from .default.nova.conf.notify_on_state_change
-{{ if not .default.nova.conf.notify_on_state_change }}#{{ end }}notify_on_state_change = {{ .default.nova.conf.notify_on_state_change | default "<None>" }}
-
-#
-# If enabled, send api.fault notifications on caught exceptions in the
-# API service.
-#  (boolean value)
-# from .default.nova.conf.notify_api_faults
-{{ if not .default.nova.conf.notify_api_faults }}#{{ end }}notify_api_faults = {{ .default.nova.conf.notify_api_faults | default "false" }}
-
-# Default notification level for outgoing notifications. (string value)
-# Allowed values: DEBUG, INFO, WARN, ERROR, CRITICAL
-# from .default.nova.conf.default_notification_level
-{{ if not .default.nova.conf.default_notification_level }}#{{ end }}default_notification_level = {{ .default.nova.conf.default_notification_level | default "INFO" }}
-
-#
-# Default publisher_id for outgoing notifications. If you consider routing
-# notifications using different publisher, change this value accordingly.
+# If unset (the default), this will default to the hypervisor-specified
+# default driver.
 #
 # Possible values:
 #
-# * Defaults to the IPv4 address of this host, but it can be any valid
-#   oslo.messaging publisher_id
+# * nova.virt.firewall.IptablesFirewallDriver
+# * nova.virt.firewall.NoopFirewallDriver
+# * nova.virt.libvirt.firewall.IptablesFirewallDriver
+# * [...]
 #
 # Related options:
 #
-# *  my_ip - IP address of this host
+# * ``use_neutron``: This must be set to ``False`` to enable ``nova-network``
+#   networking
 #  (string value)
-# from .default.nova.conf.default_publisher_id
-{{ if not .default.nova.conf.default_publisher_id }}#{{ end }}default_publisher_id = {{ .default.nova.conf.default_publisher_id | default "$my_ip" }}
+# from .default.nova.conf.firewall_driver
+{{ if not .default.nova.conf.firewall_driver }}#{{ end }}firewall_driver = {{ .default.nova.conf.firewall_driver | default "<None>" }}
+
+#
+# Determine whether to allow network traffic from same network.
+#
+# When set to true, hosts on the same subnet are not filtered and are allowed
+# to pass all types of traffic between them. On a flat network, this allows
+# all instances from all projects unfiltered communication. With VLAN
+# networking, this allows access between instances within the same project.
+#
+# This option only applies when using the ``nova-network`` service. When using
+# another networking services, such as Neutron, security groups or other
+# approaches should be used.
+#
+# Possible values:
+#
+# * True: Network traffic should be allowed pass between all instances on the
+#   same network, regardless of their tenant and security policies
+# * False: Network traffic should not be allowed pass between instances unless
+#   it is unblocked in a security group
+#
+# Related options:
+#
+# * ``use_neutron``: This must be set to ``False`` to enable ``nova-network``
+#   networking
+# * ``firewall_driver``: This must be set to
+#   ``nova.virt.libvirt.firewall.IptablesFirewallDriver`` to ensure the
+#   libvirt firewall driver is enabled.
+#  (boolean value)
+# from .default.nova.conf.allow_same_net_traffic
+{{ if not .default.nova.conf.allow_same_net_traffic }}#{{ end }}allow_same_net_traffic = {{ .default.nova.conf.allow_same_net_traffic | default "true" }}
 
 #
 # Filename that will be used for storing websocket frames received
@@ -2583,969 +2951,159 @@
 {{ if not .default.nova.conf.state_path }}#{{ end }}state_path = {{ .default.nova.conf.state_path | default "$pybasedir" }}
 
 #
-# An alias for a PCI passthrough device requirement.
+# Number of seconds indicating how frequently the state of services on a
+# given hypervisor is reported. Nova needs to know this to determine the
+# overall health of the deployment.
 #
-# This allows users to specify the alias in the extra_spec for a flavor, without
-# needing to repeat all the PCI property requirements.
+# Related Options:
 #
-# Possible Values:
-#
-# * A list of JSON values which describe the aliases. For example:
-#
-#     pci_alias = {
-#       "name": "QuickAssist",
-#       "product_id": "0443",
-#       "vendor_id": "8086",
-#       "device_type": "type-PCI"
-#     }
-#
-#   defines an alias for the Intel QuickAssist card. (multi valued). Valid key
-#   values are :
-#
-#   * "name": Name of the PCI alias.
-#   * "product_id": Product ID of the device in hexadecimal.
-#   * "vendor_id": Vendor ID of the device in hexadecimal.
-#   * "device_type": Type of PCI device. Valid values are: "type-PCI",
-#     "type-PF" and "type-VF".
-#  (multi valued)
-# from .default.nova.conf.pci_alias (multiopt)
-{{ if not .default.nova.conf.pci_alias }}#pci_alias = {{ .default.nova.conf.pci_alias | default "" }}{{ else }}{{ range .default.nova.conf.pci_alias }}pci_alias = {{ . }}{{ end }}{{ end }}
-
-#
-# White list of PCI devices available to VMs.
-#
-# Possible values:
-#
-# * A JSON dictionary which describe a whitelisted PCI device. It should take
-#   the following format:
-#
-#     ["vendor_id": "<id>",] ["product_id": "<id>",]
-#     ["address": "[[[[<domain>]:]<bus>]:][<slot>][.[<function>]]" |
-#      "devname": "<name>",]
-#     {"<tag>": "<tag_value>",}
-#
-#   Where '[' indicates zero or one occurrences, '{' indicates zero or multiple
-#   occurrences, and '|' mutually exclusive options. Note that any missing
-#   fields are automatically wildcarded.
-#
-#   Valid key values are :
-#
-#   * "vendor_id": Vendor ID of the device in hexadecimal.
-#   * "product_id": Product ID of the device in hexadecimal.
-#   * "address": PCI address of the device.
-#   * "devname": Device name of the device (for e.g. interface name). Not all
-#     PCI devices have a name.
-#   * "<tag>": Additional <tag> and <tag_value> used for matching PCI devices.
-#     Supported <tag>: "physical_network".
-#
-#   Valid examples are:
-#
-#     pci_passthrough_whitelist = {"devname":"eth0",
-#                                  "physical_network":"physnet"}
-#     pci_passthrough_whitelist = {"address":"*:0a:00.*"}
-#     pci_passthrough_whitelist = {"address":":0a:00.",
-#                                  "physical_network":"physnet1"}
-#     pci_passthrough_whitelist = {"vendor_id":"1137",
-#                                  "product_id":"0071"}
-#     pci_passthrough_whitelist = {"vendor_id":"1137",
-#                                  "product_id":"0071",
-#                                  "address": "0000:0a:00.1",
-#                                  "physical_network":"physnet1"}
-#
-#   The following are invalid, as they specify mutually exclusive options:
-#
-#     pci_passthrough_whitelist = {"devname":"eth0",
-#                                  "physical_network":"physnet",
-#                                  "address":"*:0a:00.*"}
-#
-# * A JSON list of JSON dictionaries corresponding to the above format. For
-#   example:
-#
-#     pci_passthrough_whitelist = [{"product_id":"0001", "vendor_id":"8086"},
-#                                  {"product_id":"0002", "vendor_id":"8086"}]
-#  (multi valued)
-# from .default.nova.conf.pci_passthrough_whitelist (multiopt)
-{{ if not .default.nova.conf.pci_passthrough_whitelist }}#pci_passthrough_whitelist = {{ .default.nova.conf.pci_passthrough_whitelist | default "" }}{{ else }}{{ range .default.nova.conf.pci_passthrough_whitelist }}pci_passthrough_whitelist = {{ . }}{{ end }}{{ end }}
-
-#
-# The number of instances allowed per project.
-#
-# Possible Values
-#
-#  * 10 (default) or any positive integer.
-#  * -1 : treated as unlimited.
+# * service_down_time
+#   report_interval should be less than service_down_time. If service_down_time
+#   is less than report_interval, services will routinely be considered down,
+#   because they report in too rarely.
 #  (integer value)
-# Minimum value: -1
-# from .default.nova.conf.quota_instances
-{{ if not .default.nova.conf.quota_instances }}#{{ end }}quota_instances = {{ .default.nova.conf.quota_instances | default "10" }}
-
-#
-# The number of instance cores or VCPUs allowed per project.
-#
-# Possible values:
-#
-#  * 20 (default) or any positive integer.
-#  * -1 : treated as unlimited.
-#  (integer value)
-# Minimum value: -1
-# from .default.nova.conf.quota_cores
-{{ if not .default.nova.conf.quota_cores }}#{{ end }}quota_cores = {{ .default.nova.conf.quota_cores | default "20" }}
-
-#
-# The number of megabytes of instance RAM allowed per project.
-#
-# Possible values:
-#
-#  * 51200 (default) or any positive integer.
-#  * -1 : treated as unlimited.
-#  (integer value)
-# Minimum value: -1
-# from .default.nova.conf.quota_ram
-{{ if not .default.nova.conf.quota_ram }}#{{ end }}quota_ram = {{ .default.nova.conf.quota_ram | default "51200" }}
-
-#
-# The number of floating IPs allowed per project. Floating IPs are not allocated
-# to instances by default. Users need to select them from the pool configured by
-# the OpenStack administrator to attach to their instances.
-#
-# Possible values:
-#
-#  * 10 (default) or any positive integer.
-#  * -1 : treated as unlimited.
-#  (integer value)
-# Minimum value: -1
-# from .default.nova.conf.quota_floating_ips
-{{ if not .default.nova.conf.quota_floating_ips }}#{{ end }}quota_floating_ips = {{ .default.nova.conf.quota_floating_ips | default "10" }}
-
-#
-# The number of fixed IPs allowed per project (this should be at least the
-# number
-# of instances allowed). Unlike floating IPs, fixed IPs are allocated
-# dynamically
-# by the network component when instances boot up.
-#
-# Possible values:
-#
-#  * -1 (default) : treated as unlimited.
-#  * Any positive integer.
-#  (integer value)
-# Minimum value: -1
-# from .default.nova.conf.quota_fixed_ips
-{{ if not .default.nova.conf.quota_fixed_ips }}#{{ end }}quota_fixed_ips = {{ .default.nova.conf.quota_fixed_ips | default "-1" }}
-
-#
-# The number of metadata items allowed per instance. User can associate metadata
-# while instance creation in the form of key-value pairs.
-#
-# Possible values:
-#
-#  * 128 (default) or any positive integer.
-#  * -1 : treated as unlimited.
-#  (integer value)
-# Minimum value: -1
-# from .default.nova.conf.quota_metadata_items
-{{ if not .default.nova.conf.quota_metadata_items }}#{{ end }}quota_metadata_items = {{ .default.nova.conf.quota_metadata_items | default "128" }}
-
-#
-# The number of injected files allowed. It allow users to customize the
-# personality of an instance by injecting data into it upon boot. Only text
-# file injection is permitted. Binary or zip files won't work. During file
-# injection, any existing files that match specified files are renamed to
-# include
-# .bak extension appended with a timestamp.
-#
-# Possible values:
-#
-#  * 5 (default) or any positive integer.
-#  * -1 : treated as unlimited.
-#  (integer value)
-# Minimum value: -1
-# from .default.nova.conf.quota_injected_files
-{{ if not .default.nova.conf.quota_injected_files }}#{{ end }}quota_injected_files = {{ .default.nova.conf.quota_injected_files | default "5" }}
-
-#
-# The number of bytes allowed per injected file.
-#
-# Possible values:
-#
-#  * 10240 (default) or any positive integer representing number of bytes.
-#  * -1 : treated as unlimited.
-#  (integer value)
-# Minimum value: -1
-# from .default.nova.conf.quota_injected_file_content_bytes
-{{ if not .default.nova.conf.quota_injected_file_content_bytes }}#{{ end }}quota_injected_file_content_bytes = {{ .default.nova.conf.quota_injected_file_content_bytes | default "10240" }}
-
-#
-# The maximum allowed injected file path length.
-#
-# Possible values:
-#
-#  * 255 (default) or any positive integer.
-#  * -1 : treated as unlimited.
-#  (integer value)
-# Minimum value: -1
-# from .default.nova.conf.quota_injected_file_path_length
-{{ if not .default.nova.conf.quota_injected_file_path_length }}#{{ end }}quota_injected_file_path_length = {{ .default.nova.conf.quota_injected_file_path_length | default "255" }}
-
-#
-# The number of security groups per project.
-#
-# Possible values:
-#
-#  * 10 (default) or any positive integer.
-#  * -1 : treated as unlimited.
-#  (integer value)
-# Minimum value: -1
-# from .default.nova.conf.quota_security_groups
-{{ if not .default.nova.conf.quota_security_groups }}#{{ end }}quota_security_groups = {{ .default.nova.conf.quota_security_groups | default "10" }}
-
-#
-# The number of security rules per security group. The associated rules in each
-# security group control the traffic to instances in the group.
-#
-# Possible values:
-#
-#  * 20 (default) or any positive integer.
-#  * -1 : treated as unlimited.
-#  (integer value)
-# Minimum value: -1
-# from .default.nova.conf.quota_security_group_rules
-{{ if not .default.nova.conf.quota_security_group_rules }}#{{ end }}quota_security_group_rules = {{ .default.nova.conf.quota_security_group_rules | default "20" }}
-
-#
-# The maximum number of key pairs allowed per user. Users can create at least
-# one
-# key pair for each project and use the key pair for multiple instances that
-# belong to that project.
-#
-# Possible values:
-#
-#  * 100 (default) or any positive integer.
-#  * -1 : treated as unlimited.
-#  (integer value)
-# Minimum value: -1
-# from .default.nova.conf.quota_key_pairs
-{{ if not .default.nova.conf.quota_key_pairs }}#{{ end }}quota_key_pairs = {{ .default.nova.conf.quota_key_pairs | default "100" }}
-
-#
-# Add quota values to constrain the number of server groups per project. Server
-# group used to control the affinity and anti-affinity scheduling policy for a
-# group of servers or instances. Reducing the quota will not affect any existing
-# group, but new servers will not be allowed into groups that have become over
-# quota.
-#
-# Possible values:
-#
-#  * 10 (default) or any positive integer.
-#  * -1 : treated as unlimited.
-#  (integer value)
-# Minimum value: -1
-# from .default.nova.conf.quota_server_groups
-{{ if not .default.nova.conf.quota_server_groups }}#{{ end }}quota_server_groups = {{ .default.nova.conf.quota_server_groups | default "10" }}
-
-#
-# Add quota values to constrain the number of servers per server group.
-#
-# Possible values:
-#
-#  * 10 (default) or any positive integer.
-#  * -1 : treated as unlimited.
-#  (integer value)
-# Minimum value: -1
-# from .default.nova.conf.quota_server_group_members
-{{ if not .default.nova.conf.quota_server_group_members }}#{{ end }}quota_server_group_members = {{ .default.nova.conf.quota_server_group_members | default "10" }}
-
-#
-# The number of seconds until a reservation expires. It represents the time
-# period for invalidating quota reservations.
-#
-# Possible values:
-#
-#  * 86400 (default) or any positive integer representing number of seconds.
-#  (integer value)
-# from .default.nova.conf.reservation_expire
-{{ if not .default.nova.conf.reservation_expire }}#{{ end }}reservation_expire = {{ .default.nova.conf.reservation_expire | default "86400" }}
-
-#
-# The count of reservations until usage is refreshed. This defaults to 0 (off)
-# to
-# avoid additional load but it is useful to turn on to help keep quota usage
-# up-to-date and reduce the impact of out of sync usage issues.
-#
-# Possible values:
-#
-#  * 0 (default) or any positive integer.
-#  (integer value)
-# Minimum value: 0
-# from .default.nova.conf.until_refresh
-{{ if not .default.nova.conf.until_refresh }}#{{ end }}until_refresh = {{ .default.nova.conf.until_refresh | default "0" }}
-
-#
-# The number of seconds between subsequent usage refreshes. This defaults to 0
-# (off) to avoid additional load but it is useful to turn on to help keep quota
-# usage up-to-date and reduce the impact of out of sync usage issues. Note that
-# quotas are not updated on a periodic task, they will update on a new
-# reservation if max_age has passed since the last reservation.
-#
-# Possible values:
-#
-#  * 0 (default) or any positive integer representing number of seconds.
-#  (integer value)
-# Minimum value: 0
-# from .default.nova.conf.max_age
-{{ if not .default.nova.conf.max_age }}#{{ end }}max_age = {{ .default.nova.conf.max_age | default "0" }}
-
-# DEPRECATED:
-# Provides abstraction for quota checks. Users can configure a specific
-# driver to use for quota checks.
-#
-# Possible values:
-#
-#  * nova.quota.DbQuotaDriver (default) or any string representing fully
-#    qualified class name.
-#  (string value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-# from .default.nova.conf.quota_driver
-{{ if not .default.nova.conf.quota_driver }}#{{ end }}quota_driver = {{ .default.nova.conf.quota_driver | default "nova.quota.DbQuotaDriver" }}
-
-# Specifies which notification format shall be used by nova.
-#
-# The default value is fine for most deployments and rarely needs to be changed.
-# This value can be set to 'versioned' once the infrastructure moves closer to
-# consuming the newer format of notifications. After this occurs, this option
-# will be removed (possibly in the "P" release).
-#
-# Possible values:
-# * unversioned: Only the legacy unversioned notifications are emitted.
-# * versioned: Only the new versioned notifications are emitted.
-# * both: Both the legacy unversioned and the new versioned notifications are
-#   emitted. (Default)
-#
-# The list of versioned notifications is visible in
-# http://docs.openstack.org/developer/nova/notifications.html
-#
-# Related options:
-#
-# * None (string value)
-# Allowed values: unversioned, versioned, both
-# from .default.nova.conf.notification_format
-{{ if not .default.nova.conf.notification_format }}#{{ end }}notification_format = {{ .default.nova.conf.notification_format | default "both" }}
-
-# DEPRECATED:
-# Parent directory for tempdir used for image decryption
-#  (string value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-# Reason: EC2 API related options are not supported.
-# from .default.nova.conf.image_decryption_dir
-{{ if not .default.nova.conf.image_decryption_dir }}#{{ end }}image_decryption_dir = {{ .default.nova.conf.image_decryption_dir | default "/tmp" }}
-
-# DEPRECATED:
-# Hostname or IP for OpenStack to use when accessing the S3 API
-#  (string value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-# Reason: EC2 API related options are not supported.
-# from .default.nova.conf.s3_host
-{{ if not .default.nova.conf.s3_host }}#{{ end }}s3_host = {{ .default.nova.conf.s3_host | default "$my_ip" }}
-
-# DEPRECATED:
-# Port used when accessing the S3 API. It should be in the range of
-# 1 - 65535
-#  (port value)
-# Minimum value: 0
-# Maximum value: 65535
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-# Reason: EC2 API related options are not supported.
-# from .default.nova.conf.s3_port
-{{ if not .default.nova.conf.s3_port }}#{{ end }}s3_port = {{ .default.nova.conf.s3_port | default "3333" }}
-
-# DEPRECATED: Access key to use S3 server for images (string value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-# Reason: EC2 API related options are not supported.
-# from .default.nova.conf.s3_access_key
-{{ if not .default.nova.conf.s3_access_key }}#{{ end }}s3_access_key = {{ .default.nova.conf.s3_access_key | default "notchecked" }}
-
-# DEPRECATED: Secret key to use for S3 server for images (string value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-# Reason: EC2 API related options are not supported.
-# from .default.nova.conf.s3_secret_key
-{{ if not .default.nova.conf.s3_secret_key }}#{{ end }}s3_secret_key = {{ .default.nova.conf.s3_secret_key | default "notchecked" }}
-
-# DEPRECATED: Whether to use SSL when talking to S3 (boolean value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-# Reason: EC2 API related options are not supported.
-# from .default.nova.conf.s3_use_ssl
-{{ if not .default.nova.conf.s3_use_ssl }}#{{ end }}s3_use_ssl = {{ .default.nova.conf.s3_use_ssl | default "false" }}
-
-# DEPRECATED:
-# Whether to affix the tenant id to the access key when downloading from S3
-#  (boolean value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-# Reason: EC2 API related options are not supported.
-# from .default.nova.conf.s3_affix_tenant
-{{ if not .default.nova.conf.s3_affix_tenant }}#{{ end }}s3_affix_tenant = {{ .default.nova.conf.s3_affix_tenant | default "false" }}
-
-#
-# New instances will be scheduled on a host chosen randomly from a subset of the
-# N best hosts, where N is the value set by this option.  Valid values are 1 or
-# greater. Any value less than one will be treated as 1.
-#
-# Setting this to a value greater than 1 will reduce the chance that multiple
-# scheduler processes handling similar requests will select the same host,
-# creating a potential race condition. By selecting a host randomly from the N
-# hosts that best fit the request, the chance of a conflict is reduced. However,
-# the higher you set this value, the less optimal the chosen host may be for a
-# given request.
-#
-# This option is only used by the FilterScheduler and its subclasses; if you use
-# a different scheduler, this option has no effect.
-#
-# * Related options:
-#
-#     None
-#  (integer value)
-# from .default.nova.conf.scheduler_host_subset_size
-{{ if not .default.nova.conf.scheduler_host_subset_size }}#{{ end }}scheduler_host_subset_size = {{ .default.nova.conf.scheduler_host_subset_size | default "1" }}
-
-#
-# This option specifies the filters used for filtering baremetal hosts. The
-# value
-# should be a list of strings, with each string being the name of a filter class
-# to be used. When used, they will be applied in order, so place your most
-# restrictive filters first to make the filtering process more efficient.
-#
-# This option is only used by the FilterScheduler and its subclasses; if you use
-# a different scheduler, this option has no effect.
-#
-# * Related options:
-#
-#     If the 'scheduler_use_baremetal_filters' option is False, this option has
-#     no effect.
-#  (list value)
-# from .default.nova.conf.baremetal_scheduler_default_filters
-{{ if not .default.nova.conf.baremetal_scheduler_default_filters }}#{{ end }}baremetal_scheduler_default_filters = {{ .default.nova.conf.baremetal_scheduler_default_filters | default "RetryFilter,AvailabilityZoneFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,ExactRamFilter,ExactDiskFilter,ExactCoreFilter" }}
-
-#
-# Set this to True to tell the nova scheduler that it should use the filters
-# specified in the 'baremetal_scheduler_default_filters' option. If you are not
-# scheduling baremetal nodes, leave this at the default setting of False.
-#
-# This option is only used by the FilterScheduler and its subclasses; if you use
-# a different scheduler, this option has no effect.
-#
-# * Related options:
-#
-#     If this option is set to True, then the filters specified in the
-#     'baremetal_scheduler_default_filters' are used instead of the filters
-#     specified in 'scheduler_default_filters'.
-#  (boolean value)
-# from .default.nova.conf.scheduler_use_baremetal_filters
-{{ if not .default.nova.conf.scheduler_use_baremetal_filters }}#{{ end }}scheduler_use_baremetal_filters = {{ .default.nova.conf.scheduler_use_baremetal_filters | default "false" }}
-
-#
-# This is an unordered list of the filter classes the Nova scheduler may apply.
-# Only the filters specified in the 'scheduler_default_filters' option will be
-# used, but any filter appearing in that option must also be included in this
-# list.
-#
-# By default, this is set to all filters that are included with Nova. If you
-# wish
-# to change this, replace this with a list of strings, where each element is the
-# path to a filter.
-#
-# This option is only used by the FilterScheduler and its subclasses; if you use
-# a different scheduler, this option has no effect.
-#
-# * Related options:
-#
-#     scheduler_default_filters
-#  (multi valued)
-# from .default.nova.conf.scheduler_available_filters (multiopt)
-{{ if not .default.nova.conf.scheduler_available_filters }}#scheduler_available_filters = {{ .default.nova.conf.scheduler_available_filters | default "nova.scheduler.filters.all_filters" }}{{ else }}{{ range .default.nova.conf.scheduler_available_filters }}scheduler_available_filters = {{ . }}{{ end }}{{ end }}
-
-#
-# This option is the list of filter class names that will be used for filtering
-# hosts. The use of 'default' in the name of this option implies that other
-# filters may sometimes be used, but that is not the case. These filters will be
-# applied in the order they are listed, so place your most restrictive filters
-# first to make the filtering process more efficient.
-#
-# This option is only used by the FilterScheduler and its subclasses; if you use
-# a different scheduler, this option has no effect.
-#
-# * Related options:
-#
-#     All of the filters in this option *must* be present in the
-#     'scheduler_available_filters' option, or a SchedulerHostFilterNotFound
-#     exception will be raised.
-#  (list value)
-# from .default.nova.conf.scheduler_default_filters
-{{ if not .default.nova.conf.scheduler_default_filters }}#{{ end }}scheduler_default_filters = {{ .default.nova.conf.scheduler_default_filters | default "RetryFilter,AvailabilityZoneFilter,RamFilter,DiskFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,ServerGroupAntiAffinityFilter,ServerGroupAffinityFilter" }}
-
-#
-# This is a list of weigher class names. Only hosts which pass the filters are
-# weighed. The weight for any host starts at 0, and the weighers order these
-# hosts by adding to or subtracting from the weight assigned by the previous
-# weigher. Weights may become negative.
-#
-# An instance will be scheduled to one of the N most-weighted hosts, where N is
-# 'scheduler_host_subset_size'.
-#
-# By default, this is set to all weighers that are included with Nova. If you
-# wish to change this, replace this with a list of strings, where each element
-# is
-# the path to a weigher.
-#
-# This option is only used by the FilterScheduler and its subclasses; if you use
-# a different scheduler, this option has no effect.
-#
-# * Related options:
-#
-#     None
-#  (list value)
-# from .default.nova.conf.scheduler_weight_classes
-{{ if not .default.nova.conf.scheduler_weight_classes }}#{{ end }}scheduler_weight_classes = {{ .default.nova.conf.scheduler_weight_classes | default "nova.scheduler.weights.all_weighers" }}
-
-#
-# The scheduler may need information about the instances on a host in order to
-# evaluate its filters and weighers. The most common need for this information
-# is
-# for the (anti-)affinity filters, which need to choose a host based on the
-# instances already running on a host.
-#
-# If the configured filters and weighers do not need this information, disabling
-# this option will improve performance. It may also be disabled when the
-# tracking
-# overhead proves too heavy, although this will cause classes requiring host
-# usage data to query the database on each request instead.
-#
-# This option is only used by the FilterScheduler and its subclasses; if you use
-# a different scheduler, this option has no effect.
-#
-# * Related options:
-#
-#     None
-#  (boolean value)
-# from .default.nova.conf.scheduler_tracks_instance_changes
-{{ if not .default.nova.conf.scheduler_tracks_instance_changes }}#{{ end }}scheduler_tracks_instance_changes = {{ .default.nova.conf.scheduler_tracks_instance_changes | default "true" }}
-
-#
-# This is the message queue topic that the scheduler 'listens' on. It is used
-# when the scheduler service is started up to configure the queue, and whenever
-# an RPC call to the scheduler is made. There is almost never any reason to ever
-# change this value.
-#
-# * Related options:
-#
-#     None
-#  (string value)
-# from .default.nova.conf.scheduler_topic
-{{ if not .default.nova.conf.scheduler_topic }}#{{ end }}scheduler_topic = {{ .default.nova.conf.scheduler_topic | default "scheduler" }}
-
-#
-# The scheduler host manager to use, which manages the in-memory picture of the
-# hosts that the scheduler uses.
-#
-# The option value should be chosen from one of the entrypoints under the
-# namespace 'nova.scheduler.host_manager' of file 'setup.cfg'. For example,
-# 'host_manager' is the default setting. Aside from the default, the only other
-# option as of the Mitaka release is 'ironic_host_manager', which should be used
-# if you're using Ironic to provision bare-metal instances.
-#
-# * Related options:
-#
-#     None
-#  (string value)
-# Allowed values: host_manager, ironic_host_manager
-# from .default.nova.conf.scheduler_host_manager
-{{ if not .default.nova.conf.scheduler_host_manager }}#{{ end }}scheduler_host_manager = {{ .default.nova.conf.scheduler_host_manager | default "host_manager" }}
-
-#
-# The class of the driver used by the scheduler. This should be chosen from one
-# of the entrypoints under the namespace 'nova.scheduler.driver' of file
-# 'setup.cfg'. If nothing is specified in this option, the 'filter_scheduler' is
-# used.
-#
-# This option also supports deprecated full Python path to the class to be used.
-# For example, "nova.scheduler.filter_scheduler.FilterScheduler". But note: this
-# support will be dropped in the N Release.
-#
-# Other options are:
-#
-#     * 'caching_scheduler' which aggressively caches the system state for
-# better
-#     individual scheduler performance at the risk of more retries when running
-#     multiple schedulers.
-#
-#     * 'chance_scheduler' which simply picks a host at random.
-#
-#     * 'fake_scheduler' which is used for testing.
-#
-# * Related options:
-#
-#     None
-#  (string value)
-# from .default.nova.conf.scheduler_driver
-{{ if not .default.nova.conf.scheduler_driver }}#{{ end }}scheduler_driver = {{ .default.nova.conf.scheduler_driver | default "filter_scheduler" }}
-
-#
-# This value controls how often (in seconds) to run periodic tasks in the
-# scheduler. The specific tasks that are run for each period are determined by
-# the particular scheduler being used.
-#
-# If this is larger than the nova-service 'service_down_time' setting, Nova may
-# report the scheduler service as down. This is because the scheduler driver is
-# responsible for sending a heartbeat and it will only do that as often as this
-# option allows. As each scheduler can work a little differently than the
-# others,
-# be sure to test this with your selected scheduler.
-#
-# * Related options:
-#
-#     ``nova-service service_down_time``
-#  (integer value)
-# from .default.nova.conf.scheduler_driver_task_period
-{{ if not .default.nova.conf.scheduler_driver_task_period }}#{{ end }}scheduler_driver_task_period = {{ .default.nova.conf.scheduler_driver_task_period | default "60" }}
-
-#
-# The absolute path to the scheduler configuration JSON file, if any. This file
-# location is monitored by the scheduler for changes and reloads it if needed.
-# It
-# is converted from JSON to a Python data structure, and passed into the
-# filtering and weighing functions of the scheduler, which can use it for
-# dynamic
-# configuration.
-#
-# * Related options:
-#
-#     None
-#  (string value)
-# from .default.nova.conf.scheduler_json_config_location
-{{ if not .default.nova.conf.scheduler_json_config_location }}#{{ end }}scheduler_json_config_location = {{ .default.nova.conf.scheduler_json_config_location | default "" }}
-
-#
-# If there is a need to restrict some images to only run on certain designated
-# hosts, list those image UUIDs here.
-#
-# This option is only used by the FilterScheduler and its subclasses; if you use
-# a different scheduler, this option has no effect. Also note that this setting
-# only affects scheduling if the 'IsolatedHostsFilter' filter is enabled.
-#
-# * Related options:
-#
-#     scheduler/isolated_hosts
-#     scheduler/restrict_isolated_hosts_to_isolated_images
-#  (list value)
-# from .default.nova.conf.isolated_images
-{{ if not .default.nova.conf.isolated_images }}#{{ end }}isolated_images = {{ .default.nova.conf.isolated_images | default "" }}
-
-#
-# If there is a need to restrict some images to only run on certain designated
-# hosts, list those host names here.
-#
-# This option is only used by the FilterScheduler and its subclasses; if you use
-# a different scheduler, this option has no effect. Also note that this setting
-# only affects scheduling if the 'IsolatedHostsFilter' filter is enabled.
-#
-# * Related options:
-#
-#     scheduler/isolated_images
-#     scheduler/restrict_isolated_hosts_to_isolated_images
-#  (list value)
-# from .default.nova.conf.isolated_hosts
-{{ if not .default.nova.conf.isolated_hosts }}#{{ end }}isolated_hosts = {{ .default.nova.conf.isolated_hosts | default "" }}
-
-#
-# This setting determines if the scheduler's isolated_hosts filter will allow
-# non-isolated images on a host designated as an isolated host. When set to True
-# (the default), non-isolated images will not be allowed to be built on isolated
-# hosts. When False, non-isolated images can be built on both isolated and
-# non-isolated hosts alike.
-#
-# This option is only used by the FilterScheduler and its subclasses; if you use
-# a different scheduler, this option has no effect. Also note that this setting
-# only affects scheduling if the 'IsolatedHostsFilter' filter is enabled. Even
-# then, this option doesn't affect the behavior of requests for isolated images,
-# which will *always* be restricted to isolated hosts.
-#
-# * Related options:
-#
-#     scheduler/isolated_images
-#     scheduler/isolated_hosts
-#  (boolean value)
-# from .default.nova.conf.restrict_isolated_hosts_to_isolated_images
-{{ if not .default.nova.conf.restrict_isolated_hosts_to_isolated_images }}#{{ end }}restrict_isolated_hosts_to_isolated_images = {{ .default.nova.conf.restrict_isolated_hosts_to_isolated_images | default "true" }}
-
-#
-# This setting caps the number of instances on a host that can be actively
-# performing IO (in a build, resize, snapshot, migrate, rescue, or unshelve task
-# state) before that host becomes ineligible to build new instances.
-#
-# Valid values are positive integers: 1 or greater.
-#
-# This option is only used by the FilterScheduler and its subclasses; if you use
-# a different scheduler, this option has no effect. Also note that this setting
-# only affects scheduling if the 'io_ops_filter' filter is enabled.
-#
-# * Related options:
-#
-#     None
-#  (integer value)
-# from .default.nova.conf.max_io_ops_per_host
-{{ if not .default.nova.conf.max_io_ops_per_host }}#{{ end }}max_io_ops_per_host = {{ .default.nova.conf.max_io_ops_per_host | default "8" }}
-
-#
-# Images and hosts can be configured so that certain images can only be
-# scheduled
-# to hosts in a particular aggregate. This is done with metadata values set on
-# the host aggregate that are identified by beginning with the value of this
-# option. If the host is part of an aggregate with such a metadata key, the
-# image
-# in the request spec must have the value of that metadata in its properties in
-# order for the scheduler to consider the host as acceptable.
-#
-# Valid values are strings.
-#
-# This option is only used by the FilterScheduler and its subclasses; if you use
-# a different scheduler, this option has no effect. Also note that this setting
-# only affects scheduling if the 'aggregate_image_properties_isolation' filter
-# is
-# enabled.
-#
-# * Related options:
-#
-#     aggregate_image_properties_isolation_separator
-#  (string value)
-# from .default.nova.conf.aggregate_image_properties_isolation_namespace
-{{ if not .default.nova.conf.aggregate_image_properties_isolation_namespace }}#{{ end }}aggregate_image_properties_isolation_namespace = {{ .default.nova.conf.aggregate_image_properties_isolation_namespace | default "<None>" }}
-
-#
-# When using the aggregate_image_properties_isolation filter, the relevant
-# metadata keys are prefixed with the namespace defined in the
-# aggregate_image_properties_isolation_namespace configuration option plus a
-# separator. This option defines the separator to be used. It defaults to a
-# period ('.').
-#
-# Valid values are strings.
-#
-# This option is only used by the FilterScheduler and its subclasses; if you use
-# a different scheduler, this option has no effect. Also note that this setting
-# only affects scheduling if the 'aggregate_image_properties_isolation' filter
-# is
-# enabled.
-#
-# * Related options:
-#
-#     aggregate_image_properties_isolation_namespace
-#  (string value)
-# from .default.nova.conf.aggregate_image_properties_isolation_separator
-{{ if not .default.nova.conf.aggregate_image_properties_isolation_separator }}#{{ end }}aggregate_image_properties_isolation_separator = {{ .default.nova.conf.aggregate_image_properties_isolation_separator | default "." }}
-
-#
-# If you need to limit the number of instances on any given host, set this
-# option
-# to the maximum number of instances you want to allow. The num_instances_filter
-# will reject any host that has at least as many instances as this option's
-# value.
-#
-# Valid values are positive integers; setting it to zero will cause all hosts to
-# be rejected if the num_instances_filter is active.
-#
-# This option is only used by the FilterScheduler and its subclasses; if you use
-# a different scheduler, this option has no effect. Also note that this setting
-# only affects scheduling if the 'num_instances_filter' filter is enabled.
-#
-# * Related options:
-#
-#     None
-#  (integer value)
-# from .default.nova.conf.max_instances_per_host
-{{ if not .default.nova.conf.max_instances_per_host }}#{{ end }}max_instances_per_host = {{ .default.nova.conf.max_instances_per_host | default "50" }}
-
-#
-# This option determines how hosts with more or less available RAM are weighed.
-# A
-# positive value will result in the scheduler preferring hosts with more
-# available RAM, and a negative number will result in the scheduler preferring
-# hosts with less available RAM. Another way to look at it is that positive
-# values for this option will tend to spread instances across many hosts, while
-# negative values will tend to fill up (stack) hosts as much as possible before
-# scheduling to a less-used host. The absolute value, whether positive or
-# negative, controls how strong the RAM weigher is relative to other weighers.
-#
-# This option is only used by the FilterScheduler and its subclasses; if you use
-# a different scheduler, this option has no effect. Also note that this setting
-# only affects scheduling if the 'ram' weigher is enabled.
-#
-# Valid values are numeric, either integer or float.
-#
-# * Related options:
-#
-#     None
-#  (floating point value)
-# from .default.nova.conf.ram_weight_multiplier
-{{ if not .default.nova.conf.ram_weight_multiplier }}#{{ end }}ram_weight_multiplier = {{ .default.nova.conf.ram_weight_multiplier | default "1.0" }}
-
-# Multiplier used for weighing free disk space. Negative numbers mean to stack
-# vs spread. (floating point value)
-# from .default.nova.conf.disk_weight_multiplier
-{{ if not .default.nova.conf.disk_weight_multiplier }}#{{ end }}disk_weight_multiplier = {{ .default.nova.conf.disk_weight_multiplier | default "1.0" }}
-
-#
-# This option determines how hosts with differing workloads are weighed.
-# Negative
-# values, such as the default, will result in the scheduler preferring hosts
-# with
-# lighter workloads whereas positive values will prefer hosts with heavier
-# workloads. Another way to look at it is that positive values for this option
-# will tend to schedule instances onto hosts that are already busy, while
-# negative values will tend to distribute the workload across more hosts. The
-# absolute value, whether positive or negative, controls how strong the io_ops
-# weigher is relative to other weighers.
-#
-# This option is only used by the FilterScheduler and its subclasses; if you use
-# a different scheduler, this option has no effect. Also note that this setting
-# only affects scheduling if the 'io_ops' weigher is enabled.
-#
-# Valid values are numeric, either integer or float.
-#
-# * Related options:
-#
-#     None
-#  (floating point value)
-# from .default.nova.conf.io_ops_weight_multiplier
-{{ if not .default.nova.conf.io_ops_weight_multiplier }}#{{ end }}io_ops_weight_multiplier = {{ .default.nova.conf.io_ops_weight_multiplier | default "-1.0" }}
-
-#
-# This is the maximum number of attempts that will be made to schedule an
-# instance before it is assumed that the failures aren't due to normal
-# occasional
-# race conflicts, but rather some other problem. When this is reached a
-# MaxRetriesExceeded exception is raised, and the instance is set to an error
-# state.
-#
-# Valid values are positive integers (1 or greater).
-#
-# * Related options:
-#
-#     None
-#  (integer value)
-# from .default.nova.conf.scheduler_max_attempts
-{{ if not .default.nova.conf.scheduler_max_attempts }}#{{ end }}scheduler_max_attempts = {{ .default.nova.conf.scheduler_max_attempts | default "3" }}
-
-# Multiplier used for weighing hosts for group soft-affinity. Only a positive
-# value is meaningful. Negative means that the behavior will change to the
-# opposite, which is soft-anti-affinity. (floating point value)
-# from .default.nova.conf.soft_affinity_weight_multiplier
-{{ if not .default.nova.conf.soft_affinity_weight_multiplier }}#{{ end }}soft_affinity_weight_multiplier = {{ .default.nova.conf.soft_affinity_weight_multiplier | default "1.0" }}
-
-# Multiplier used for weighing hosts for group soft-anti-affinity. Only a
-# positive value is meaningful. Negative means that the behavior will change to
-# the opposite, which is soft-affinity. (floating point value)
-# from .default.nova.conf.soft_anti_affinity_weight_multiplier
-{{ if not .default.nova.conf.soft_anti_affinity_weight_multiplier }}#{{ end }}soft_anti_affinity_weight_multiplier = {{ .default.nova.conf.soft_anti_affinity_weight_multiplier | default "1.0" }}
-
-# Seconds between nodes reporting state to datastore (integer value)
 # from .default.nova.conf.report_interval
 {{ if not .default.nova.conf.report_interval }}#{{ end }}report_interval = {{ .default.nova.conf.report_interval | default "10" }}
 
-# Enable periodic tasks (boolean value)
+#
+# Maximum time in seconds since last check-in for up service
+#
+# Each compute node periodically updates their database status based on the
+# specified report interval. If the compute node hasn't updated the status
+# for more than service_down_time, then the compute node is considered down.
+#
+# Related Options:
+#
+# * report_interval (service_down_time should not be less than report_interval)
+#  (integer value)
+# from .default.nova.conf.service_down_time
+{{ if not .default.nova.conf.service_down_time }}#{{ end }}service_down_time = {{ .default.nova.conf.service_down_time | default "60" }}
+
+#
+# Enable periodic tasks.
+#
+# If set to true, this option allows services to periodically run tasks
+# on the manager.
+#
+# In case of running multiple schedulers or conductors you may want to run
+# periodic tasks on only one host - in this case disable this option for all
+# hosts but one.
+#  (boolean value)
 # from .default.nova.conf.periodic_enable
 {{ if not .default.nova.conf.periodic_enable }}#{{ end }}periodic_enable = {{ .default.nova.conf.periodic_enable | default "true" }}
 
-# Range of seconds to randomly delay when starting the periodic task scheduler
-# to reduce stampeding. (Disable by setting to 0) (integer value)
+#
+# Number of seconds to randomly delay when starting the periodic task
+# scheduler to reduce stampeding.
+#
+# When compute workers are restarted in unison across a cluster,
+# they all end up running the periodic tasks at the same time
+# causing problems for the external services. To mitigate this
+# behavior, periodic_fuzzy_delay option allows you to introduce a
+# random initial delay when starting the periodic task scheduler.
+#
+# Possible Values:
+#
+# * Any positive integer (in seconds)
+# * 0 : disable the random delay
+#  (integer value)
+# Minimum value: 0
 # from .default.nova.conf.periodic_fuzzy_delay
 {{ if not .default.nova.conf.periodic_fuzzy_delay }}#{{ end }}periodic_fuzzy_delay = {{ .default.nova.conf.periodic_fuzzy_delay | default "60" }}
 
-# A list of APIs to enable by default (list value)
+# List of APIs to be enabled by default. (list value)
 # from .default.nova.conf.enabled_apis
 {{ if not .default.nova.conf.enabled_apis }}#{{ end }}enabled_apis = {{ .default.nova.conf.enabled_apis | default "osapi_compute,metadata" }}
 
-# A list of APIs with enabled SSL (list value)
+#
+# List of APIs with enabled SSL.
+#
+# Nova provides SSL support for the API servers. enabled_ssl_apis option
+# allows configuring the SSL support.
+#  (list value)
 # from .default.nova.conf.enabled_ssl_apis
 {{ if not .default.nova.conf.enabled_ssl_apis }}#{{ end }}enabled_ssl_apis = {{ .default.nova.conf.enabled_ssl_apis | default "" }}
 
-# The IP address on which the OpenStack API will listen. (string value)
+#
+# IP address on which the OpenStack API will listen.
+#
+# The OpenStack API service listens on this IP address for incoming
+# requests.
+#  (string value)
 # from .default.nova.conf.osapi_compute_listen
 {{ if not .default.nova.conf.osapi_compute_listen }}#{{ end }}osapi_compute_listen = {{ .default.nova.conf.osapi_compute_listen | default "0.0.0.0" }}
 
-# The port on which the OpenStack API will listen. (port value)
+#
+# Port on which the OpenStack API will listen.
+#
+# The OpenStack API service listens on this port number for incoming
+# requests.
+#  (port value)
 # Minimum value: 0
 # Maximum value: 65535
 # from .default.nova.conf.osapi_compute_listen_port
 {{ if not .default.nova.conf.osapi_compute_listen_port }}#{{ end }}osapi_compute_listen_port = {{ .default.nova.conf.osapi_compute_listen_port | default "8774" }}
 
-# Number of workers for OpenStack API service. The default will be the number of
-# CPUs available. (integer value)
+#
+# Number of workers for OpenStack API service. The default will be the number
+# of CPUs available.
+#
+# OpenStack API services can be configured to run as multi-process (workers).
+# This overcomes the problem of reduction in throughput when API request
+# concurrency increases. OpenStack API service will run in the specified
+# number of processes.
+#
+# Possible Values:
+#
+# * Any positive integer
+# * None (default value)
+#  (integer value)
+# Minimum value: 1
 # from .default.nova.conf.osapi_compute_workers
 {{ if not .default.nova.conf.osapi_compute_workers }}#{{ end }}osapi_compute_workers = {{ .default.nova.conf.osapi_compute_workers | default "<None>" }}
 
-# DEPRECATED: OpenStack metadata service manager (string value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-# from .default.nova.conf.metadata_manager
-{{ if not .default.nova.conf.metadata_manager }}#{{ end }}metadata_manager = {{ .default.nova.conf.metadata_manager | default "nova.api.manager.MetadataManager" }}
-
-# The IP address on which the metadata API will listen. (string value)
+#
+# IP address on which the metadata API will listen.
+#
+# The metadata API service listens on this IP address for incoming
+# requests.
+#  (string value)
 # from .default.nova.conf.metadata_listen
 {{ if not .default.nova.conf.metadata_listen }}#{{ end }}metadata_listen = {{ .default.nova.conf.metadata_listen | default "0.0.0.0" }}
 
-# The port on which the metadata API will listen. (port value)
+#
+# Port on which the metadata API will listen.
+#
+# The metadata API service listens on this port number for incoming
+# requests.
+#  (port value)
 # Minimum value: 0
 # Maximum value: 65535
 # from .default.nova.conf.metadata_listen_port
 {{ if not .default.nova.conf.metadata_listen_port }}#{{ end }}metadata_listen_port = {{ .default.nova.conf.metadata_listen_port | default "8775" }}
 
-# Number of workers for metadata service. The default will be the number of CPUs
-# available. (integer value)
+#
+# Number of workers for metadata service. If not specified the number of
+# available CPUs will be used.
+#
+# The metadata service can be configured to run as multi-process (workers).
+# This overcomes the problem of reduction in throughput when API request
+# concurrency increases. The metadata service will run in the specified
+# number of processes.
+#
+# Possible Values:
+#
+# * Any positive integer
+# * None (default value)
+#  (integer value)
+# Minimum value: 1
 # from .default.nova.conf.metadata_workers
 {{ if not .default.nova.conf.metadata_workers }}#{{ end }}metadata_workers = {{ .default.nova.conf.metadata_workers | default "<None>" }}
 
-# DEPRECATED: Full class name for the Manager for compute (string value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-# from .default.nova.conf.compute_manager
-{{ if not .default.nova.conf.compute_manager }}#{{ end }}compute_manager = {{ .default.nova.conf.compute_manager | default "nova.compute.manager.ComputeManager" }}
-
-# DEPRECATED: Full class name for the Manager for console proxy (string value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-# from .default.nova.conf.console_manager
-{{ if not .default.nova.conf.console_manager }}#{{ end }}console_manager = {{ .default.nova.conf.console_manager | default "nova.console.manager.ConsoleProxyManager" }}
-
-# DEPRECATED: Manager for console auth (string value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-# from .default.nova.conf.consoleauth_manager
-{{ if not .default.nova.conf.consoleauth_manager }}#{{ end }}consoleauth_manager = {{ .default.nova.conf.consoleauth_manager | default "nova.consoleauth.manager.ConsoleAuthManager" }}
-
-# DEPRECATED: Full class name for the Manager for cert (string value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-# from .default.nova.conf.cert_manager
-{{ if not .default.nova.conf.cert_manager }}#{{ end }}cert_manager = {{ .default.nova.conf.cert_manager | default "nova.cert.manager.CertManager" }}
-
 # Full class name for the Manager for network (string value)
+# Allowed values: nova.network.manager.FlatManager, nova.network.manager.FlatDHCPManager, nova.network.manager.VlanManager
 # from .default.nova.conf.network_manager
 {{ if not .default.nova.conf.network_manager }}#{{ end }}network_manager = {{ .default.nova.conf.network_manager | default "nova.network.manager.VlanManager" }}
-
-# DEPRECATED: Full class name for the Manager for scheduler (string value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-# from .default.nova.conf.scheduler_manager
-{{ if not .default.nova.conf.scheduler_manager }}#{{ end }}scheduler_manager = {{ .default.nova.conf.scheduler_manager | default "nova.scheduler.manager.SchedulerManager" }}
-
-# Maximum time since last check-in for up service (integer value)
-# from .default.nova.conf.service_down_time
-{{ if not .default.nova.conf.service_down_time }}#{{ end }}service_down_time = {{ .default.nova.conf.service_down_time | default "60" }}
 
 #
 # This option specifies the driver to be used for the servicegroup service.
@@ -3571,279 +3129,6 @@
 # Allowed values: db, mc
 # from .default.nova.conf.servicegroup_driver
 {{ if not .default.nova.conf.servicegroup_driver }}#{{ end }}servicegroup_driver = {{ .default.nova.conf.servicegroup_driver | default "db" }}
-
-#
-# Defines which physical CPUs (pCPUs) can be used by instance
-# virtual CPUs (vCPUs).
-#
-# Possible values:
-#
-# * A comma-separated list of physical CPU numbers that virtual CPUs can be
-#   allocated to by default. Each element should be either a single CPU number,
-#   a range of CPU numbers, or a caret followed by a CPU number to be
-#   excluded from a previous range. For example:
-#
-#     vcpu_pin_set = "4-12,^8,15"
-#  (string value)
-# from .default.nova.conf.vcpu_pin_set
-{{ if not .default.nova.conf.vcpu_pin_set }}#{{ end }}vcpu_pin_set = {{ .default.nova.conf.vcpu_pin_set | default "<None>" }}
-
-#
-# Defines which driver to use for controlling virtualization.
-#
-# Possible values:
-#
-# * ``libvirt.LibvirtDriver``
-# * ``xenapi.XenAPIDriver``
-# * ``fake.FakeDriver``
-# * ``ironic.IronicDriver``
-# * ``vmwareapi.VMwareVCDriver``
-# * ``hyperv.HyperVDriver``
-#  (string value)
-# from .default.nova.conf.compute_driver
-{{ if not .default.nova.conf.compute_driver }}#{{ end }}compute_driver = {{ .default.nova.conf.compute_driver | default "<None>" }}
-
-#
-# The default format an ephemeral_volume will be formatted with on creation.
-#
-# Possible values:
-#
-# * ``ext2``
-# * ``ext3``
-# * ``ext4``
-# * ``xfs``
-# * ``ntfs`` (only for Windows guests)
-#  (string value)
-# from .default.nova.conf.default_ephemeral_format
-{{ if not .default.nova.conf.default_ephemeral_format }}#{{ end }}default_ephemeral_format = {{ .default.nova.conf.default_ephemeral_format | default "<None>" }}
-
-#
-# The image preallocation mode to use. Image preallocation allows
-# storage for instance images to be allocated up front when the instance is
-# initially provisioned. This ensures immediate feedback is given if enough
-# space isn't available. In addition, it should significantly improve
-# performance on writes to new blocks and may even improve I/O performance to
-# prewritten blocks due to reduced fragmentation.
-#
-# Possible values:
-#
-# * "none"  => no storage provisioning is done up front
-# * "space" => storage is fully allocated at instance start
-#  (string value)
-# Allowed values: none, space
-# from .default.nova.conf.preallocate_images
-{{ if not .default.nova.conf.preallocate_images }}#{{ end }}preallocate_images = {{ .default.nova.conf.preallocate_images | default "none" }}
-
-#
-# Enable use of copy-on-write (cow) images.
-#
-# QEMU/KVM allow the use of qcow2 as backing files. By disabling this,
-# backing files will not be used.
-#  (boolean value)
-# from .default.nova.conf.use_cow_images
-{{ if not .default.nova.conf.use_cow_images }}#{{ end }}use_cow_images = {{ .default.nova.conf.use_cow_images | default "true" }}
-
-#
-# Determine if instance should boot or fail on VIF plugging timeout.
-#
-# Nova sends a port update to Neutron after an instance has been scheduled,
-# providing Neutron with the necessary information to finish setup of the port.
-# Once completed, Neutron notifies Nova that it has finished setting up the
-# port, at which point Nova resumes the boot of the instance since network
-# connectivity is now supposed to be present. A timeout will occur if the reply
-# is not received after a given interval.
-#
-# This option determines what Nova does when the VIF plugging timeout event
-# happens. When enabled, the instance will error out. When disabled, the
-# instance will continue to boot on the assumption that the port is ready.
-#
-# Possible values:
-#
-# * True: Instances should fail after VIF plugging timeout
-# * False: Instances should continue booting after VIF plugging timeout
-#  (boolean value)
-# from .default.nova.conf.vif_plugging_is_fatal
-{{ if not .default.nova.conf.vif_plugging_is_fatal }}#{{ end }}vif_plugging_is_fatal = {{ .default.nova.conf.vif_plugging_is_fatal | default "true" }}
-
-#
-# Timeout for Neutron VIF plugging event message arrival.
-#
-# Number of seconds to wait for Neutron vif plugging events to
-# arrive before continuing or failing (see 'vif_plugging_is_fatal').
-#
-# Interdependencies to other options:
-#
-# * vif_plugging_is_fatal - If ``vif_plugging_timeout`` is set to zero and
-#   ``vif_plugging_is_fatal`` is False, events should not be expected to
-#   arrive at all.
-#  (integer value)
-# Minimum value: 0
-# from .default.nova.conf.vif_plugging_timeout
-{{ if not .default.nova.conf.vif_plugging_timeout }}#{{ end }}vif_plugging_timeout = {{ .default.nova.conf.vif_plugging_timeout | default "300" }}
-
-#
-# Firewall driver to use with ``nova-network`` service.
-#
-# This option only applies when using the ``nova-network`` service. When using
-# another networking services, such as Neutron, this should be to set to the
-# ``nova.virt.firewall.NoopFirewallDriver``.
-#
-# If unset (the default), this will default to the hypervisor-specified
-# default driver.
-#
-# Possible values:
-#
-# * nova.virt.firewall.IptablesFirewallDriver
-# * nova.virt.firewall.NoopFirewallDriver
-# * nova.virt.libvirt.firewall.IptablesFirewallDriver
-# * [...]
-#
-# Interdependencies to other options:
-#
-# * ``use_neutron``: This must be set to ``False`` to enable ``nova-network``
-#   networking
-#  (string value)
-# from .default.nova.conf.firewall_driver
-{{ if not .default.nova.conf.firewall_driver }}#{{ end }}firewall_driver = {{ .default.nova.conf.firewall_driver | default "<None>" }}
-
-#
-# Determine whether to allow network traffic from same network.
-#
-# When set to true, hosts on the same subnet are not filtered and are allowed
-# to pass all types of traffic between them. On a flat network, this allows
-# all instances from all projects unfiltered communication. With VLAN
-# networking, this allows access between instances within the same project.
-#
-# This option only applies when using the ``nova-network`` service. When using
-# another networking services, such as Neutron, security groups or other
-# approaches should be used.
-#
-# Possible values:
-#
-# * True: Network traffic should be allowed pass between all instances on the
-#   same network, regardless of their tenant and security policies
-# * False: Network traffic should not be allowed pass between instances unless
-#   it is unblocked in a security group
-#
-# Interdependencies to other options:
-#
-# * ``use_neutron``: This must be set to ``False`` to enable ``nova-network``
-#   networking
-# * ``firewall_driver``: This must be set to
-#   ``nova.virt.libvirt.firewall.IptablesFirewallDriver`` to ensure the
-#   libvirt firewall driver is enabled.
-#  (boolean value)
-# from .default.nova.conf.allow_same_net_traffic
-{{ if not .default.nova.conf.allow_same_net_traffic }}#{{ end }}allow_same_net_traffic = {{ .default.nova.conf.allow_same_net_traffic | default "true" }}
-
-#
-# Force conversion of backing images to raw format.
-#
-# Possible values:
-#
-# * True: Backing image files will be converted to raw image format
-# * False: Backing image files will not be converted
-#
-# Interdependencies to other options:
-#
-# * ``compute_driver``: Only the libvirt driver uses this option.
-#  (boolean value)
-# from .default.nova.conf.force_raw_images
-{{ if not .default.nova.conf.force_raw_images }}#{{ end }}force_raw_images = {{ .default.nova.conf.force_raw_images | default "true" }}
-
-# Template file for injected network (string value)
-# from .default.nova.conf.injected_network_template
-{{ if not .default.nova.conf.injected_network_template }}#{{ end }}injected_network_template = {{ .default.nova.conf.injected_network_template | default "$pybasedir/nova/virt/interfaces.template" }}
-
-#
-# Name of the mkfs commands for ephemeral device. The format is
-# <os_type>=<mkfs command>
-#  (multi valued)
-# from .default.nova.conf.virt_mkfs (multiopt)
-{{ if not .default.nova.conf.virt_mkfs }}#virt_mkfs = {{ .default.nova.conf.virt_mkfs | default "" }}{{ else }}{{ range .default.nova.conf.virt_mkfs }}virt_mkfs = {{ . }}{{ end }}{{ end }}
-
-#
-# If enabled, attempt to resize the filesystem by accessing the image over a
-# block device. This is done by the host and may not be necessary if the image
-# contains a recent version of cloud-init. Possible mechanisms require the nbd
-# driver (for qcow and raw), or loop (for raw).
-#  (boolean value)
-# from .default.nova.conf.resize_fs_using_block_device
-{{ if not .default.nova.conf.resize_fs_using_block_device }}#{{ end }}resize_fs_using_block_device = {{ .default.nova.conf.resize_fs_using_block_device | default "false" }}
-
-# Amount of time, in seconds, to wait for NBD device start up. (integer value)
-# Minimum value: 0
-# from .default.nova.conf.timeout_nbd
-{{ if not .default.nova.conf.timeout_nbd }}#{{ end }}timeout_nbd = {{ .default.nova.conf.timeout_nbd | default "10" }}
-
-#
-# Number of seconds to wait between runs of the image cache manager.
-# Set to -1 to disable. Setting this to 0 will run at the default rate.
-#  (integer value)
-# Minimum value: -1
-# from .default.nova.conf.image_cache_manager_interval
-{{ if not .default.nova.conf.image_cache_manager_interval }}#{{ end }}image_cache_manager_interval = {{ .default.nova.conf.image_cache_manager_interval | default "2400" }}
-
-#
-# Where cached images are stored under $instances_path. This is NOT the full
-# path - just a folder name. For per-compute-host cached images, set to
-# _base_$my_ip
-#  (string value)
-# from .default.nova.conf.image_cache_subdirectory_name
-{{ if not .default.nova.conf.image_cache_subdirectory_name }}#{{ end }}image_cache_subdirectory_name = {{ .default.nova.conf.image_cache_subdirectory_name | default "_base" }}
-
-# Should unused base images be removed? (boolean value)
-# from .default.nova.conf.remove_unused_base_images
-{{ if not .default.nova.conf.remove_unused_base_images }}#{{ end }}remove_unused_base_images = {{ .default.nova.conf.remove_unused_base_images | default "true" }}
-
-#
-# Unused unresized base images younger than this will not be removed
-#  (integer value)
-# from .default.nova.conf.remove_unused_original_minimum_age_seconds
-{{ if not .default.nova.conf.remove_unused_original_minimum_age_seconds }}#{{ end }}remove_unused_original_minimum_age_seconds = {{ .default.nova.conf.remove_unused_original_minimum_age_seconds | default "86400" }}
-
-#
-# Generic property to specify the pointer type.
-#
-# Input devices allow interaction with a graphical framebuffer. For
-# example to provide a graphic tablet for absolute cursor movement.
-#
-# If set, the 'hw_pointer_model' image property takes precedence over
-# this configuration option.
-#
-# Possible values:
-#
-# * None: Uses default behavior provided by drivers (mouse on PS2 for
-#         libvirt x86)
-# * ps2mouse: Uses relative movement. Mouse connected by PS2
-# * usbtablet: Uses absolute movement. Tablet connect by USB
-#
-# Interdependencies to other options:
-#
-# * usbtablet must be configured with VNC enabled or SPICE enabled and SPICE
-#   agent disabled. When used with libvirt the instance mode should be
-#   configured as HVM.
-#   (string value)
-# Allowed values: <None>, ps2mouse, usbtablet
-# from .default.nova.conf.pointer_model
-{{ if not .default.nova.conf.pointer_model }}#{{ end }}pointer_model = {{ .default.nova.conf.pointer_model | default "usbtablet" }}
-
-#
-# Reserves a number of huge/large memory pages per NUMA host cells
-#
-# Possible values:
-#
-# * A list of valid key=value which reflect NUMA node ID, page size
-#   (Default unit is KiB) and number of pages to be reserved.
-#
-#     reserved_huge_pages = node:0,size:2048,count:64
-#     reserved_huge_pages = node:1,size:1GB,count:1
-#
-#   In this example we are reserving on NUMA node 0 64 pages of 2MiB
-#   and on NUMA node 1 1 page of 1GiB.
-#  (dict value)
-# from .default.nova.conf.reserved_huge_pages (multiopt)
-{{ if not .default.nova.conf.reserved_huge_pages }}#reserved_huge_pages = {{ .default.nova.conf.reserved_huge_pages | default "<None>" }}{{ else }}{{ range .default.nova.conf.reserved_huge_pages }}reserved_huge_pages = {{ . }}{{ end }}{{ end }}
 
 #
 # From oslo.log
@@ -3914,7 +3199,7 @@
 # Log output to standard error. This option is ignored if log_config_append is
 # set. (boolean value)
 # from .default.oslo.log.use_stderr
-{{ if not .default.oslo.log.use_stderr }}#{{ end }}use_stderr = {{ .default.oslo.log.use_stderr | default "true" }}
+{{ if not .default.oslo.log.use_stderr }}#{{ end }}use_stderr = {{ .default.oslo.log.use_stderr | default "false" }}
 
 # Format string to use for log messages with context. (string value)
 # from .default.oslo.log.logging_context_format_string
@@ -3957,6 +3242,21 @@
 # from .default.oslo.log.instance_uuid_format
 {{ if not .default.oslo.log.instance_uuid_format }}#{{ end }}instance_uuid_format = {{ .default.oslo.log.instance_uuid_format | default "\"[instance: %(uuid)s] \"" }}
 
+# Interval, number of seconds, of log rate limiting. (integer value)
+# from .default.oslo.log.rate_limit_interval
+{{ if not .default.oslo.log.rate_limit_interval }}#{{ end }}rate_limit_interval = {{ .default.oslo.log.rate_limit_interval | default "0" }}
+
+# Maximum number of logged messages per rate_limit_interval. (integer value)
+# from .default.oslo.log.rate_limit_burst
+{{ if not .default.oslo.log.rate_limit_burst }}#{{ end }}rate_limit_burst = {{ .default.oslo.log.rate_limit_burst | default "0" }}
+
+# Log level name used by rate limiting: CRITICAL, ERROR, INFO, WARNING, DEBUG or
+# empty string. Logs with level greater or equal to rate_limit_except_level are
+# not filtered. An empty string means that all levels are filtered. (string
+# value)
+# from .default.oslo.log.rate_limit_except_level
+{{ if not .default.oslo.log.rate_limit_except_level }}#{{ end }}rate_limit_except_level = {{ .default.oslo.log.rate_limit_except_level | default "CRITICAL" }}
+
 # Enables or disables fatal status of deprecations. (boolean value)
 # from .default.oslo.log.fatal_deprecations
 {{ if not .default.oslo.log.fatal_deprecations }}#{{ end }}fatal_deprecations = {{ .default.oslo.log.fatal_deprecations | default "false" }}
@@ -3985,7 +3285,7 @@
 {{ if not .default.oslo.messaging.rpc_zmq_bind_address }}#{{ end }}rpc_zmq_bind_address = {{ .default.oslo.messaging.rpc_zmq_bind_address | default "*" }}
 
 # MatchMaker driver. (string value)
-# Allowed values: redis, dummy
+# Allowed values: redis, sentinel, dummy
 # Deprecated group/name - [DEFAULT]/rpc_zmq_matchmaker
 # from .default.oslo.messaging.rpc_zmq_matchmaker
 {{ if not .default.oslo.messaging.rpc_zmq_matchmaker }}#{{ end }}rpc_zmq_matchmaker = {{ .default.oslo.messaging.rpc_zmq_matchmaker | default "redis" }}
@@ -4012,13 +3312,14 @@
 # from .default.oslo.messaging.rpc_zmq_host
 {{ if not .default.oslo.messaging.rpc_zmq_host }}#{{ end }}rpc_zmq_host = {{ .default.oslo.messaging.rpc_zmq_host | default "localhost" }}
 
-# Seconds to wait before a cast expires (TTL). The default value of -1 specifies
-# an infinite linger period. The value of 0 specifies no linger period. Pending
-# messages shall be discarded immediately when the socket is closed. Only
-# supported by impl_zmq. (integer value)
+# Number of seconds to wait before all pending messages will be sent after
+# closing a socket. The default value of -1 specifies an infinite linger period.
+# The value of 0 specifies no linger period. Pending messages shall be discarded
+# immediately when the socket is closed. Positive values specify an upper bound
+# for the linger period. (integer value)
 # Deprecated group/name - [DEFAULT]/rpc_cast_timeout
-# from .default.oslo.messaging.rpc_cast_timeout
-{{ if not .default.oslo.messaging.rpc_cast_timeout }}#{{ end }}rpc_cast_timeout = {{ .default.oslo.messaging.rpc_cast_timeout | default "-1" }}
+# from .default.oslo.messaging.zmq_linger
+{{ if not .default.oslo.messaging.zmq_linger }}#{{ end }}zmq_linger = {{ .default.oslo.messaging.zmq_linger | default "-1" }}
 
 # The default number of seconds that poll should wait. Poll raises timeout
 # exception when timeout expired. (integer value)
@@ -4042,12 +3343,23 @@
 # value)
 # Deprecated group/name - [DEFAULT]/use_pub_sub
 # from .default.oslo.messaging.use_pub_sub
-{{ if not .default.oslo.messaging.use_pub_sub }}#{{ end }}use_pub_sub = {{ .default.oslo.messaging.use_pub_sub | default "true" }}
+{{ if not .default.oslo.messaging.use_pub_sub }}#{{ end }}use_pub_sub = {{ .default.oslo.messaging.use_pub_sub | default "false" }}
 
 # Use ROUTER remote proxy. (boolean value)
 # Deprecated group/name - [DEFAULT]/use_router_proxy
 # from .default.oslo.messaging.use_router_proxy
-{{ if not .default.oslo.messaging.use_router_proxy }}#{{ end }}use_router_proxy = {{ .default.oslo.messaging.use_router_proxy | default "true" }}
+{{ if not .default.oslo.messaging.use_router_proxy }}#{{ end }}use_router_proxy = {{ .default.oslo.messaging.use_router_proxy | default "false" }}
+
+# This option makes direct connections dynamic or static. It makes sense only
+# with use_router_proxy=False which means to use direct connections for direct
+# message types (ignored otherwise). (boolean value)
+# from .default.oslo.messaging.use_dynamic_connections
+{{ if not .default.oslo.messaging.use_dynamic_connections }}#{{ end }}use_dynamic_connections = {{ .default.oslo.messaging.use_dynamic_connections | default "false" }}
+
+# How many additional connections to a host will be made for failover reasons.
+# This option is actual only in dynamic connections mode. (integer value)
+# from .default.oslo.messaging.zmq_failover_connections
+{{ if not .default.oslo.messaging.zmq_failover_connections }}#{{ end }}zmq_failover_connections = {{ .default.oslo.messaging.zmq_failover_connections | default "2" }}
 
 # Minimal port number for random ports range. (port value)
 # Minimum value: 0
@@ -4081,7 +3393,73 @@
 # even if server is disconnected, when the server appears we send all
 # accumulated messages to it. (boolean value)
 # from .default.oslo.messaging.zmq_immediate
-{{ if not .default.oslo.messaging.zmq_immediate }}#{{ end }}zmq_immediate = {{ .default.oslo.messaging.zmq_immediate | default "false" }}
+{{ if not .default.oslo.messaging.zmq_immediate }}#{{ end }}zmq_immediate = {{ .default.oslo.messaging.zmq_immediate | default "true" }}
+
+# Enable/disable TCP keepalive (KA) mechanism. The default value of -1 (or any
+# other negative value) means to skip any overrides and leave it to OS default;
+# 0 and 1 (or any other positive value) mean to disable and enable the option
+# respectively. (integer value)
+# from .default.oslo.messaging.zmq_tcp_keepalive
+{{ if not .default.oslo.messaging.zmq_tcp_keepalive }}#{{ end }}zmq_tcp_keepalive = {{ .default.oslo.messaging.zmq_tcp_keepalive | default "-1" }}
+
+# The duration between two keepalive transmissions in idle condition. The unit
+# is platform dependent, for example, seconds in Linux, milliseconds in Windows
+# etc. The default value of -1 (or any other negative value and 0) means to skip
+# any overrides and leave it to OS default. (integer value)
+# from .default.oslo.messaging.zmq_tcp_keepalive_idle
+{{ if not .default.oslo.messaging.zmq_tcp_keepalive_idle }}#{{ end }}zmq_tcp_keepalive_idle = {{ .default.oslo.messaging.zmq_tcp_keepalive_idle | default "-1" }}
+
+# The number of retransmissions to be carried out before declaring that remote
+# end is not available. The default value of -1 (or any other negative value and
+# 0) means to skip any overrides and leave it to OS default. (integer value)
+# from .default.oslo.messaging.zmq_tcp_keepalive_cnt
+{{ if not .default.oslo.messaging.zmq_tcp_keepalive_cnt }}#{{ end }}zmq_tcp_keepalive_cnt = {{ .default.oslo.messaging.zmq_tcp_keepalive_cnt | default "-1" }}
+
+# The duration between two successive keepalive retransmissions, if
+# acknowledgement to the previous keepalive transmission is not received. The
+# unit is platform dependent, for example, seconds in Linux, milliseconds in
+# Windows etc. The default value of -1 (or any other negative value and 0) means
+# to skip any overrides and leave it to OS default. (integer value)
+# from .default.oslo.messaging.zmq_tcp_keepalive_intvl
+{{ if not .default.oslo.messaging.zmq_tcp_keepalive_intvl }}#{{ end }}zmq_tcp_keepalive_intvl = {{ .default.oslo.messaging.zmq_tcp_keepalive_intvl | default "-1" }}
+
+# Maximum number of (green) threads to work concurrently. (integer value)
+# from .default.oslo.messaging.rpc_thread_pool_size
+{{ if not .default.oslo.messaging.rpc_thread_pool_size }}#{{ end }}rpc_thread_pool_size = {{ .default.oslo.messaging.rpc_thread_pool_size | default "100" }}
+
+# Expiration timeout in seconds of a sent/received message after which it is not
+# tracked anymore by a client/server. (integer value)
+# from .default.oslo.messaging.rpc_message_ttl
+{{ if not .default.oslo.messaging.rpc_message_ttl }}#{{ end }}rpc_message_ttl = {{ .default.oslo.messaging.rpc_message_ttl | default "300" }}
+
+# Wait for message acknowledgements from receivers. This mechanism works only
+# via proxy without PUB/SUB. (boolean value)
+# from .default.oslo.messaging.rpc_use_acks
+{{ if not .default.oslo.messaging.rpc_use_acks }}#{{ end }}rpc_use_acks = {{ .default.oslo.messaging.rpc_use_acks | default "false" }}
+
+# Number of seconds to wait for an ack from a cast/call. After each retry
+# attempt this timeout is multiplied by some specified multiplier. (integer
+# value)
+# from .default.oslo.messaging.rpc_ack_timeout_base
+{{ if not .default.oslo.messaging.rpc_ack_timeout_base }}#{{ end }}rpc_ack_timeout_base = {{ .default.oslo.messaging.rpc_ack_timeout_base | default "15" }}
+
+# Number to multiply base ack timeout by after each retry attempt. (integer
+# value)
+# from .default.oslo.messaging.rpc_ack_timeout_multiplier
+{{ if not .default.oslo.messaging.rpc_ack_timeout_multiplier }}#{{ end }}rpc_ack_timeout_multiplier = {{ .default.oslo.messaging.rpc_ack_timeout_multiplier | default "2" }}
+
+# Default number of message sending attempts in case of any problems occurred:
+# positive value N means at most N retries, 0 means no retries, None or -1 (or
+# any other negative values) mean to retry forever. This option is used only if
+# acknowledgments are enabled. (integer value)
+# from .default.oslo.messaging.rpc_retry_attempts
+{{ if not .default.oslo.messaging.rpc_retry_attempts }}#{{ end }}rpc_retry_attempts = {{ .default.oslo.messaging.rpc_retry_attempts | default "3" }}
+
+# List of publisher hosts SubConsumer can subscribe on. This option has higher
+# priority then the default publishers list taken from the matchmaker. (list
+# value)
+# from .default.oslo.messaging.subscribe_on
+{{ if not .default.oslo.messaging.subscribe_on }}#{{ end }}subscribe_on = {{ .default.oslo.messaging.subscribe_on | default "" }}
 
 # Size of executor thread pool. (integer value)
 # Deprecated group/name - [DEFAULT]/rpc_thread_pool_size
@@ -4148,6 +3526,324 @@
 # value means endless wait. (integer value)
 # from .default.oslo.service.service.graceful_shutdown_timeout
 {{ if not .default.oslo.service.service.graceful_shutdown_timeout }}#{{ end }}graceful_shutdown_timeout = {{ .default.oslo.service.service.graceful_shutdown_timeout | default "60" }}
+
+
+[api]
+#
+# Options under this group are used to define Nova API.
+
+#
+# From nova.conf
+#
+
+#
+# This determines the strategy to use for authentication: keystone or noauth2.
+# 'noauth2' is designed for testing only, as it does no actual credential
+# checking. 'noauth2' provides administrative credentials only if 'admin' is
+# specified as the username.
+#  (string value)
+# Allowed values: keystone, noauth2
+# Deprecated group/name - [DEFAULT]/auth_strategy
+# from .api.nova.conf.auth_strategy
+{{ if not .api.nova.conf.auth_strategy }}#{{ end }}auth_strategy = {{ .api.nova.conf.auth_strategy | default "keystone" }}
+
+#
+# When True, the 'X-Forwarded-For' header is treated as the canonical remote
+# address. When False (the default), the 'remote_address' header is used.
+#
+# You should only enable this if you have an HTML sanitizing proxy.
+#  (boolean value)
+# Deprecated group/name - [DEFAULT]/use_forwarded_for
+# from .api.nova.conf.use_forwarded_for
+{{ if not .api.nova.conf.use_forwarded_for }}#{{ end }}use_forwarded_for = {{ .api.nova.conf.use_forwarded_for | default "false" }}
+
+#
+# When gathering the existing metadata for a config drive, the EC2-style
+# metadata is returned for all versions that don't appear in this option.
+# As of the Liberty release, the available versions are:
+#
+# * 1.0
+# * 2007-01-19
+# * 2007-03-01
+# * 2007-08-29
+# * 2007-10-10
+# * 2007-12-15
+# * 2008-02-01
+# * 2008-09-01
+# * 2009-04-04
+#
+# The option is in the format of a single string, with each version separated
+# by a space.
+#
+# Possible values:
+#
+# * Any string that represents zero or more versions, separated by spaces.
+#  (string value)
+# Deprecated group/name - [DEFAULT]/config_drive_skip_versions
+# from .api.nova.conf.config_drive_skip_versions
+{{ if not .api.nova.conf.config_drive_skip_versions }}#{{ end }}config_drive_skip_versions = {{ .api.nova.conf.config_drive_skip_versions | default "1.0 2007-01-19 2007-03-01 2007-08-29 2007-10-10 2007-12-15 2008-02-01 2008-09-01" }}
+
+#
+# A list of vendordata providers.
+#
+# vendordata providers are how deployers can provide metadata via configdrive
+# and metadata that is specific to their deployment. There are currently two
+# supported providers: StaticJSON and DynamicJSON.
+#
+# StaticJSON reads a JSON file configured by the flag vendordata_jsonfile_path
+# and places the JSON from that file into vendor_data.json and
+# vendor_data2.json.
+#
+# DynamicJSON is configured via the vendordata_dynamic_targets flag, which is
+# documented separately. For each of the endpoints specified in that flag, a
+# section is added to the vendor_data2.json.
+#
+# For more information on the requirements for implementing a vendordata
+# dynamic endpoint, please see the vendordata.rst file in the nova developer
+# reference.
+#
+# Possible values:
+#
+# * A list of vendordata providers, with StaticJSON and DynamicJSON being
+#   current options.
+#
+# Related options:
+#
+# * vendordata_dynamic_targets
+# * vendordata_dynamic_ssl_certfile
+# * vendordata_dynamic_connect_timeout
+# * vendordata_dynamic_read_timeout
+# * vendordata_dynamic_failure_fatal
+#  (list value)
+# Deprecated group/name - [DEFAULT]/vendordata_providers
+# from .api.nova.conf.vendordata_providers
+{{ if not .api.nova.conf.vendordata_providers }}#{{ end }}vendordata_providers = {{ .api.nova.conf.vendordata_providers | default "" }}
+
+#
+# A list of targets for the dynamic vendordata provider. These targets are of
+# the form <name>@<url>.
+#
+# The dynamic vendordata provider collects metadata by contacting external REST
+# services and querying them for information about the instance. This behaviour
+# is documented in the vendordata.rst file in the nova developer reference.
+#  (list value)
+# Deprecated group/name - [DEFAULT]/vendordata_dynamic_targets
+# from .api.nova.conf.vendordata_dynamic_targets
+{{ if not .api.nova.conf.vendordata_dynamic_targets }}#{{ end }}vendordata_dynamic_targets = {{ .api.nova.conf.vendordata_dynamic_targets | default "" }}
+
+#
+# Path to an optional certificate file or CA bundle to verify dynamic
+# vendordata REST services ssl certificates against.
+#
+# Possible values:
+#
+# * An empty string, or a path to a valid certificate file
+#
+# Related options:
+#
+# * vendordata_providers
+# * vendordata_dynamic_targets
+# * vendordata_dynamic_connect_timeout
+# * vendordata_dynamic_read_timeout
+# * vendordata_dynamic_failure_fatal
+#  (string value)
+# Deprecated group/name - [DEFAULT]/vendordata_dynamic_ssl_certfile
+# from .api.nova.conf.vendordata_dynamic_ssl_certfile
+{{ if not .api.nova.conf.vendordata_dynamic_ssl_certfile }}#{{ end }}vendordata_dynamic_ssl_certfile = {{ .api.nova.conf.vendordata_dynamic_ssl_certfile | default "" }}
+
+#
+# Maximum wait time for an external REST service to connect.
+#
+# Possible values:
+#
+# * Any integer with a value greater than three (the TCP packet retransmission
+#   timeout). Note that instance start may be blocked during this wait time,
+#   so this value should be kept small.
+#
+# Related options:
+#
+# * vendordata_providers
+# * vendordata_dynamic_targets
+# * vendordata_dynamic_ssl_certfile
+# * vendordata_dynamic_read_timeout
+# * vendordata_dynamic_failure_fatal
+#  (integer value)
+# Minimum value: 3
+# Deprecated group/name - [DEFAULT]/vendordata_dynamic_connect_timeout
+# from .api.nova.conf.vendordata_dynamic_connect_timeout
+{{ if not .api.nova.conf.vendordata_dynamic_connect_timeout }}#{{ end }}vendordata_dynamic_connect_timeout = {{ .api.nova.conf.vendordata_dynamic_connect_timeout | default "5" }}
+
+#
+# Maximum wait time for an external REST service to return data once connected.
+#
+# Possible values:
+#
+# * Any integer. Note that instance start is blocked during this wait time,
+#   so this value should be kept small.
+#
+# Related options:
+#
+# * vendordata_providers
+# * vendordata_dynamic_targets
+# * vendordata_dynamic_ssl_certfile
+# * vendordata_dynamic_connect_timeout
+# * vendordata_dynamic_failure_fatal
+#  (integer value)
+# Minimum value: 0
+# Deprecated group/name - [DEFAULT]/vendordata_dynamic_read_timeout
+# from .api.nova.conf.vendordata_dynamic_read_timeout
+{{ if not .api.nova.conf.vendordata_dynamic_read_timeout }}#{{ end }}vendordata_dynamic_read_timeout = {{ .api.nova.conf.vendordata_dynamic_read_timeout | default "5" }}
+
+#
+# Should failures to fetch dynamic vendordata be fatal to instance boot?
+#
+# Related options:
+#
+# * vendordata_providers
+# * vendordata_dynamic_targets
+# * vendordata_dynamic_ssl_certfile
+# * vendordata_dynamic_connect_timeout
+# * vendordata_dynamic_read_timeout
+#  (boolean value)
+# from .api.nova.conf.vendordata_dynamic_failure_fatal
+{{ if not .api.nova.conf.vendordata_dynamic_failure_fatal }}#{{ end }}vendordata_dynamic_failure_fatal = {{ .api.nova.conf.vendordata_dynamic_failure_fatal | default "false" }}
+
+#
+# This option is the time (in seconds) to cache metadata. When set to 0,
+# metadata caching is disabled entirely; this is generally not recommended for
+# performance reasons. Increasing this setting should improve response times
+# of the metadata API when under heavy load. Higher values may increase memory
+# usage, and result in longer times for host metadata changes to take effect.
+#  (integer value)
+# Minimum value: 0
+# Deprecated group/name - [DEFAULT]/metadata_cache_expiration
+# from .api.nova.conf.metadata_cache_expiration
+{{ if not .api.nova.conf.metadata_cache_expiration }}#{{ end }}metadata_cache_expiration = {{ .api.nova.conf.metadata_cache_expiration | default "15" }}
+
+#
+# Cloud providers may store custom data in vendor data file that will then be
+# available to the instances via the metadata service, and to the rendering of
+# config-drive. The default class for this, JsonFileVendorData, loads this
+# information from a JSON file, whose path is configured by this option. If
+# there is no path set by this option, the class returns an empty dictionary.
+#
+# Possible values:
+#
+# * Any string representing the path to the data file, or an empty string
+#     (default).
+#  (string value)
+# Deprecated group/name - [DEFAULT]/vendordata_jsonfile_path
+# from .api.nova.conf.vendordata_jsonfile_path
+{{ if not .api.nova.conf.vendordata_jsonfile_path }}#{{ end }}vendordata_jsonfile_path = {{ .api.nova.conf.vendordata_jsonfile_path | default "<None>" }}
+
+#
+# As a query can potentially return many thousands of items, you can limit the
+# maximum number of items in a single response by setting this option.
+#  (integer value)
+# Minimum value: 0
+# Deprecated group/name - [DEFAULT]/osapi_max_limit
+# from .api.nova.conf.max_limit
+{{ if not .api.nova.conf.max_limit }}#{{ end }}max_limit = {{ .api.nova.conf.max_limit | default "1000" }}
+
+#
+# This string is prepended to the normal URL that is returned in links to the
+# OpenStack Compute API. If it is empty (the default), the URLs are returned
+# unchanged.
+#
+# Possible values:
+#
+# * Any string, including an empty string (the default).
+#  (string value)
+# Deprecated group/name - [DEFAULT]/osapi_compute_link_prefix
+# from .api.nova.conf.compute_link_prefix
+{{ if not .api.nova.conf.compute_link_prefix }}#{{ end }}compute_link_prefix = {{ .api.nova.conf.compute_link_prefix | default "<None>" }}
+
+#
+# This string is prepended to the normal URL that is returned in links to
+# Glance resources. If it is empty (the default), the URLs are returned
+# unchanged.
+#
+# Possible values:
+#
+# * Any string, including an empty string (the default).
+#  (string value)
+# Deprecated group/name - [DEFAULT]/osapi_glance_link_prefix
+# from .api.nova.conf.glance_link_prefix
+{{ if not .api.nova.conf.glance_link_prefix }}#{{ end }}glance_link_prefix = {{ .api.nova.conf.glance_link_prefix | default "<None>" }}
+
+#
+# Operators can turn off the ability for a user to take snapshots of their
+# instances by setting this option to False. When disabled, any attempt to
+# take a snapshot will result in a HTTP 400 response ("Bad Request").
+#  (boolean value)
+# Deprecated group/name - [DEFAULT]/allow_instance_snapshots
+# from .api.nova.conf.allow_instance_snapshots
+{{ if not .api.nova.conf.allow_instance_snapshots }}#{{ end }}allow_instance_snapshots = {{ .api.nova.conf.allow_instance_snapshots | default "true" }}
+
+#
+# This option is a list of all instance states for which network address
+# information should not be returned from the API.
+#
+# Possible values:
+#
+#   A list of strings, where each string is a valid VM state, as defined in
+#   nova/compute/vm_states.py. As of the Newton release, they are:
+#
+# * "active"
+# * "building"
+# * "paused"
+# * "suspended"
+# * "stopped"
+# * "rescued"
+# * "resized"
+# * "soft-delete"
+# * "deleted"
+# * "error"
+# * "shelved"
+# * "shelved_offloaded"
+#  (list value)
+# Deprecated group/name - [DEFAULT]/osapi_hide_server_address_states
+# from .api.nova.conf.hide_server_address_states
+{{ if not .api.nova.conf.hide_server_address_states }}#{{ end }}hide_server_address_states = {{ .api.nova.conf.hide_server_address_states | default "building" }}
+
+# The full path to the fping binary. (string value)
+# Deprecated group/name - [DEFAULT]/fping_path
+# from .api.nova.conf.fping_path
+{{ if not .api.nova.conf.fping_path }}#{{ end }}fping_path = {{ .api.nova.conf.fping_path | default "/usr/sbin/fping" }}
+
+#
+# When True, the TenantNetworkController will query the Neutron API to get the
+# default networks to use.
+#
+# Related options:
+#
+# * neutron_default_tenant_id
+#  (boolean value)
+# Deprecated group/name - [DEFAULT]/use_neutron_default_nets
+# from .api.nova.conf.use_neutron_default_nets
+{{ if not .api.nova.conf.use_neutron_default_nets }}#{{ end }}use_neutron_default_nets = {{ .api.nova.conf.use_neutron_default_nets | default "false" }}
+
+#
+# Tenant ID for getting the default network from Neutron API (also referred in
+# some places as the 'project ID') to use.
+#
+# Related options:
+#
+# * use_neutron_default_nets
+#  (string value)
+# Deprecated group/name - [DEFAULT]/neutron_default_tenant_id
+# from .api.nova.conf.neutron_default_tenant_id
+{{ if not .api.nova.conf.neutron_default_tenant_id }}#{{ end }}neutron_default_tenant_id = {{ .api.nova.conf.neutron_default_tenant_id | default "default" }}
+
+#
+# Enables returning of the instance password by the relevant server API calls
+# such as create, rebuild, evacuate, or rescue. If the hypervisor does not
+# support password injection, then the password returned will not be correct,
+# so if your hypervisor does not support password injection, set this to False.
+#  (boolean value)
+# Deprecated group/name - [DEFAULT]/enable_instance_password
+# from .api.nova.conf.enable_instance_password
+{{ if not .api.nova.conf.enable_instance_password }}#{{ end }}enable_instance_password = {{ .api.nova.conf.enable_instance_password | default "true" }}
 
 
 [api_database]
@@ -4234,35 +3930,6 @@
 #
 # From nova.conf
 #
-
-# DEPRECATED:
-# Info to match when looking for barbican in the service
-# catalog. Format is: separated values of the form:
-# <service_type>:<service_name>:<endpoint_type>
-#  (string value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-# Reason: This option have been moved to the Castellan library
-# from .barbican.nova.conf.catalog_info
-{{ if not .barbican.nova.conf.catalog_info }}#{{ end }}catalog_info = {{ .barbican.nova.conf.catalog_info | default "key-manager:barbican:public" }}
-
-# DEPRECATED:
-# Override service catalog lookup with template for
-# barbican endpoint e.g.
-# http://localhost:9311/v1/%(project_id)s
-#  (string value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-# Reason: This option have been moved to the Castellan library
-# from .barbican.nova.conf.endpoint_template
-{{ if not .barbican.nova.conf.endpoint_template }}#{{ end }}endpoint_template = {{ .barbican.nova.conf.endpoint_template | default "<None>" }}
-
-# DEPRECATED: Region name of this node (string value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-# Reason: This option have been moved to the Castellan library
-# from .barbican.nova.conf.os_region_name
-{{ if not .barbican.nova.conf.os_region_name }}#{{ end }}os_region_name = {{ .barbican.nova.conf.os_region_name | default "<None>" }}
 
 # Use this endpoint to connect to Barbican, for example:
 # "http://localhost:9311/" (string value)
@@ -4374,13 +4041,43 @@
 # Cells options allow you to use cells functionality in openstack
 # deployment.
 #
+# Note that the options in this group are only for cells v1 functionality, which
+# is considered experimental and not recommended for new deployments. Cells v1
+# is being replaced with cells v2, which starting in the 15.0.0 Ocata release is
+# required and all Nova deployments will be at least a cells v2 cell of one.
+#
 
 #
 # From nova.conf
 #
 
+# DEPRECATED:
+# Topic.
 #
-# Enable cell functionality
+# This is the message queue topic that cells nodes listen on. It is
+# used when the cells service is started up to configure the queue,
+# and whenever an RPC call to the scheduler is made.
+#
+# Possible values:
+#
+# * cells: This is the recommended and the default value.
+#  (string value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# Configurable RPC topics provide little value and can result in a wide variety
+# of errors. They should not be used.
+# from .cells.nova.conf.topic
+{{ if not .cells.nova.conf.topic }}#{{ end }}topic = {{ .cells.nova.conf.topic | default "cells" }}
+
+#
+# Enable cell v1 functionality.
+#
+# Note that cells v1 is considered experimental and not recommended for new
+# Nova deployments. Cells v1 is being replaced by cells v2 which starting in
+# the 15.0.0 Ocata release, all Nova deployments are at least a cells v2 cell
+# of one. Setting this option, or any other options in the [cells] group, is
+# not required for cells v2.
 #
 # When this functionality is enabled, it lets you to scale an OpenStack
 # Compute cloud in a more distributed fashion without having to use
@@ -4397,28 +4094,12 @@
 # * name: A unique cell name must be given when this functionality
 #   is enabled.
 # * cell_type: Cell type should be defined for all cells.
-#
 #  (boolean value)
 # from .cells.nova.conf.enable
 {{ if not .cells.nova.conf.enable }}#{{ end }}enable = {{ .cells.nova.conf.enable | default "false" }}
 
 #
-# Topic
-#
-# This is the message queue topic that cells nodes listen on. It is
-# used when the cells service is started up to configure the queue,
-# and whenever an RPC call to the scheduler is made.
-#
-# Possible values:
-#
-# * cells: This is the recommended and the default value.
-#
-#  (string value)
-# from .cells.nova.conf.topic
-{{ if not .cells.nova.conf.topic }}#{{ end }}topic = {{ .cells.nova.conf.topic | default "cells" }}
-
-#
-# Name of the current cell
+# Name of the current cell.
 #
 # This value must be unique for each cell. Name of a cell is used as
 # its id, leaving this option unset or setting the same name for
@@ -4428,13 +4109,12 @@
 #
 # * enabled: This option is meaningful only when cells service
 #   is enabled
-#
 #  (string value)
 # from .cells.nova.conf.name
 {{ if not .cells.nova.conf.name }}#{{ end }}name = {{ .cells.nova.conf.name | default "nova" }}
 
 #
-# Cell capabilities
+# Cell capabilities.
 #
 # List of arbitrary key=value pairs defining capabilities of the
 # current cell to be sent to the parent cells. These capabilities
@@ -4444,13 +4124,12 @@
 #
 # * key=value pairs list for example;
 #   ``hypervisor=xenserver;kvm,os=linux;windows``
-#
 #  (list value)
 # from .cells.nova.conf.capabilities
 {{ if not .cells.nova.conf.capabilities }}#{{ end }}capabilities = {{ .cells.nova.conf.capabilities | default "hypervisor=xenserver;kvm,os=linux;windows" }}
 
 #
-# Call timeout
+# Call timeout.
 #
 # Cell messaging module waits for response(s) to be put into the
 # eventlet queue. This option defines the seconds waited for
@@ -4458,8 +4137,7 @@
 #
 # Possible values:
 #
-# * Time in seconds.
-#
+# * An integer, corresponding to the interval time in seconds.
 #  (integer value)
 # Minimum value: 0
 # from .cells.nova.conf.call_timeout
@@ -4470,29 +4148,34 @@
 #
 # Percentage of cell capacity to hold in reserve, so the minimum
 # amount of free resource is considered to be;
-#   min_free = total * (reserve_percent / 100.0)
+#
+#     min_free = total * (reserve_percent / 100.0)
+#
 # This option affects both memory and disk utilization.
+#
 # The primary purpose of this reserve is to ensure some space is
 # available for users who want to resize their instance to be larger.
 # Note that currently once the capacity expands into this reserve
 # space this option is ignored.
 #
+# Possible values:
+#
+# * An integer or float, corresponding to the percentage of cell capacity to
+#   be held in reserve.
 #  (floating point value)
 # from .cells.nova.conf.reserve_percent
 {{ if not .cells.nova.conf.reserve_percent }}#{{ end }}reserve_percent = {{ .cells.nova.conf.reserve_percent | default "10.0" }}
 
 #
-# Type of cell
+# Type of cell.
 #
 # When cells feature is enabled the hosts in the OpenStack Compute
 # cloud are partitioned into groups. Cells are configured as a tree.
 # The top-level cell's cell_type must be set to ``api``. All other
 # cells are defined as a ``compute cell`` by default.
 #
-# Related options:
+# Related option:
 #
-# * compute_api_class: This option must be set to cells api driver
-#   for the top-level cell (nova.compute.cells_api.ComputeCellsAPI)
 # * quota_driver: Disable quota checking for the child cells.
 #   (nova.quota.NoopQuotaDriver)
 #  (string value)
@@ -4501,7 +4184,7 @@
 {{ if not .cells.nova.conf.cell_type }}#{{ end }}cell_type = {{ .cells.nova.conf.cell_type | default "compute" }}
 
 #
-# Mute child interval
+# Mute child interval.
 #
 # Number of seconds after which a lack of capability and capacity
 # update the child cell is to be treated as a mute cell. Then the
@@ -4509,27 +4192,25 @@
 #
 # Possible values:
 #
-# * Time in seconds.
-#
+# * An integer, corresponding to the interval time in seconds.
 #  (integer value)
 # from .cells.nova.conf.mute_child_interval
 {{ if not .cells.nova.conf.mute_child_interval }}#{{ end }}mute_child_interval = {{ .cells.nova.conf.mute_child_interval | default "300" }}
 
 #
-# Bandwidth update interval
+# Bandwidth update interval.
 #
 # Seconds between bandwidth usage cache updates for cells.
 #
 # Possible values:
 #
-# * Time in seconds.
-#
+# * An integer, corresponding to the interval time in seconds.
 #  (integer value)
 # from .cells.nova.conf.bandwidth_update_interval
 {{ if not .cells.nova.conf.bandwidth_update_interval }}#{{ end }}bandwidth_update_interval = {{ .cells.nova.conf.bandwidth_update_interval | default "600" }}
 
 #
-# Instance update sync database limit
+# Instance update sync database limit.
 #
 # Number of instances to pull from the database at one time for
 # a sync. If there are more instances to update the results will
@@ -4537,14 +4218,13 @@
 #
 # Possible values:
 #
-# * Number of instances.
-#
+# * An integer, corresponding to a number of instances.
 #  (integer value)
 # from .cells.nova.conf.instance_update_sync_database_limit
 {{ if not .cells.nova.conf.instance_update_sync_database_limit }}#{{ end }}instance_update_sync_database_limit = {{ .cells.nova.conf.instance_update_sync_database_limit | default "100" }}
 
 #
-# Mute weight multiplier
+# Mute weight multiplier.
 #
 # Multiplier used to weigh mute children. Mute children cells are
 # recommended to be skipped so their weight is multiplied by this
@@ -4553,13 +4233,12 @@
 # Possible values:
 #
 # * Negative numeric number
-#
 #  (floating point value)
 # from .cells.nova.conf.mute_weight_multiplier
 {{ if not .cells.nova.conf.mute_weight_multiplier }}#{{ end }}mute_weight_multiplier = {{ .cells.nova.conf.mute_weight_multiplier | default "-10000.0" }}
 
 #
-# Ram weight multiplier
+# Ram weight multiplier.
 #
 # Multiplier used for weighing ram. Negative numbers indicate that
 # Compute should stack VMs on one host instead of spreading out new
@@ -4568,7 +4247,6 @@
 # Possible values:
 #
 # * Numeric multiplier
-#
 #  (floating point value)
 # from .cells.nova.conf.ram_weight_multiplier
 {{ if not .cells.nova.conf.ram_weight_multiplier }}#{{ end }}ram_weight_multiplier = {{ .cells.nova.conf.ram_weight_multiplier | default "10.0" }}
@@ -4585,24 +4263,9 @@
 # Possible values:
 #
 # * Numeric multiplier
-#
 #  (floating point value)
 # from .cells.nova.conf.offset_weight_multiplier
 {{ if not .cells.nova.conf.offset_weight_multiplier }}#{{ end }}offset_weight_multiplier = {{ .cells.nova.conf.offset_weight_multiplier | default "1.0" }}
-
-# DEPRECATED: Cells communication driver
-#
-# Driver for cell<->cell communication via RPC. This is used to
-# setup the RPC consumers as well as to send a message to another cell.
-# 'nova.cells.rpc_driver.CellsRPCDriver' starts up 2 separate servers
-# for handling inter-cell communication via RPC.
-#
-#  (string value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-# Reason: The only available driver is the RPC driver.
-# from .cells.nova.conf.driver
-{{ if not .cells.nova.conf.driver }}#{{ end }}driver = {{ .cells.nova.conf.driver | default "nova.cells.rpc_driver.CellsRPCDriver" }}
 
 #
 # Instance updated at threshold
@@ -4621,7 +4284,6 @@
 #
 # * This value is used with the ``instance_update_num_instances``
 #   value in a periodic task run.
-#
 #  (integer value)
 # from .cells.nova.conf.instance_updated_at_threshold
 {{ if not .cells.nova.conf.instance_updated_at_threshold }}#{{ end }}instance_updated_at_threshold = {{ .cells.nova.conf.instance_updated_at_threshold | default "3600" }}
@@ -4643,7 +4305,6 @@
 #
 # * This value is used with the ``instance_updated_at_threshold``
 #   value in a periodic task run.
-#
 #  (integer value)
 # from .cells.nova.conf.instance_update_num_instances
 {{ if not .cells.nova.conf.instance_update_num_instances }}#{{ end }}instance_update_num_instances = {{ .cells.nova.conf.instance_update_num_instances | default "1" }}
@@ -4659,24 +4320,22 @@
 # Possible values:
 #
 # * Positive integer value
-#
 #  (integer value)
 # from .cells.nova.conf.max_hop_count
 {{ if not .cells.nova.conf.max_hop_count }}#{{ end }}max_hop_count = {{ .cells.nova.conf.max_hop_count | default "10" }}
 
 #
-# Cells scheduler
+# Cells scheduler.
 #
 # The class of the driver used by the cells scheduler. This should be
 # the full Python path to the class to be used. If nothing is specified
 # in this option, the CellsScheduler is used.
-#
 #  (string value)
 # from .cells.nova.conf.scheduler
 {{ if not .cells.nova.conf.scheduler }}#{{ end }}scheduler = {{ .cells.nova.conf.scheduler | default "nova.cells.scheduler.CellsScheduler" }}
 
 #
-# RPC driver queue base
+# RPC driver queue base.
 #
 # When sending a message to another cell by JSON-ifying the message
 # and making an RPC cast to 'process_message', a base queue is used.
@@ -4686,13 +4345,12 @@
 # Possible values:
 #
 # * The base queue name to be used when communicating between cells.
-#
 #  (string value)
 # from .cells.nova.conf.rpc_driver_queue_base
 {{ if not .cells.nova.conf.rpc_driver_queue_base }}#{{ end }}rpc_driver_queue_base = {{ .cells.nova.conf.rpc_driver_queue_base | default "cells.intercell" }}
 
 #
-# Scheduler filter classes
+# Scheduler filter classes.
 #
 # Filter classes the cells scheduler should use. An entry of
 # "nova.cells.filters.all_filters" maps to all cells filters
@@ -4724,7 +4382,7 @@
 {{ if not .cells.nova.conf.scheduler_filter_classes }}#{{ end }}scheduler_filter_classes = {{ .cells.nova.conf.scheduler_filter_classes | default "nova.cells.filters.all_filters" }}
 
 #
-# Scheduler weight classes
+# Scheduler weight classes.
 #
 # Weigher classes the cells scheduler should use. An entry of
 # "nova.cells.weights.all_weighers" maps to all cell weighers
@@ -4752,13 +4410,12 @@
 # have a lower weight, like if they're full. And when the weight_offset
 # is set to a very high value (for example, '999999999999999'), it is
 # likely to be picked if another cell do not have a higher weight.
-#
 #  (list value)
 # from .cells.nova.conf.scheduler_weight_classes
 {{ if not .cells.nova.conf.scheduler_weight_classes }}#{{ end }}scheduler_weight_classes = {{ .cells.nova.conf.scheduler_weight_classes | default "nova.cells.weights.all_weighers" }}
 
 #
-# Scheduler retries
+# Scheduler retries.
 #
 # How many retries when no cells are available. Specifies how many
 # times the scheduler tries to launch a new instance when no cells
@@ -4772,13 +4429,12 @@
 #
 # * This value is used with the ``scheduler_retry_delay`` value
 #   while retrying to find a suitable cell.
-#
 #  (integer value)
 # from .cells.nova.conf.scheduler_retries
 {{ if not .cells.nova.conf.scheduler_retries }}#{{ end }}scheduler_retries = {{ .cells.nova.conf.scheduler_retries | default "10" }}
 
 #
-# Scheduler retry delay
+# Scheduler retry delay.
 #
 # Specifies the delay (in seconds) between scheduling retries when no
 # cell can be found to place the new instance on. When the instance
@@ -4794,13 +4450,12 @@
 #
 # * This value is used with the ``scheduler_retries`` value
 #   while retrying to find a suitable cell.
-#
 #  (integer value)
 # from .cells.nova.conf.scheduler_retry_delay
 {{ if not .cells.nova.conf.scheduler_retry_delay }}#{{ end }}scheduler_retry_delay = {{ .cells.nova.conf.scheduler_retry_delay | default "2" }}
 
 #
-# DB check interval
+# DB check interval.
 #
 # Cell state manager updates cell status for all cells from the DB
 # only after this particular interval time is passed. Otherwise cached
@@ -4816,7 +4471,7 @@
 {{ if not .cells.nova.conf.db_check_interval }}#{{ end }}db_check_interval = {{ .cells.nova.conf.db_check_interval | default "60" }}
 
 #
-# Optional cells configuration
+# Optional cells configuration.
 #
 # Configuration file from which to read cells configuration. If given,
 # overrides reading cells from the database.
@@ -4884,6 +4539,9 @@
 # * Format is separated values of the form:
 #   <service_type>:<service_name>:<endpoint_type>
 #
+# Note: Nova does not support the Cinder v1 API since the Nova 15.0.0 Ocata
+# release.
+#
 # Related options:
 #
 # * endpoint_template - Setting this option will override catalog_info
@@ -4898,7 +4556,10 @@
 # Possible values:
 #
 # * URL for cinder endpoint API
-#   e.g. http://localhost:8776/v1/%(project_id)s
+#   e.g. http://localhost:8776/v2/%(project_id)s
+#
+# Note: Nova does not support the Cinder v1 API since the Nova 15.0.0 Ocata
+# release.
 #
 # Related options:
 #
@@ -5062,32 +4723,16 @@
 #
 
 # DEPRECATED:
-# Perform nova-conductor operations locally. This legacy mode was
-# introduced to bridge a gap during the transition to the conductor service.
-# It no longer represents a reasonable alternative for deployers.
-#
-# Removal may be as early as 14.0.
-#  (boolean value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-# from .conductor.nova.conf.use_local
-{{ if not .conductor.nova.conf.use_local }}#{{ end }}use_local = {{ .conductor.nova.conf.use_local | default "false" }}
-
-#
 # Topic exchange name on which conductor nodes listen.
 #  (string value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# There is no need to let users choose the RPC topic for all services - there
+# is little gain from this. Furthermore, it makes it really easy to break Nova
+# by using this option.
 # from .conductor.nova.conf.topic
 {{ if not .conductor.nova.conf.topic }}#{{ end }}topic = {{ .conductor.nova.conf.topic | default "conductor" }}
-
-# DEPRECATED:
-# Full class name for the Manager for conductor.
-#
-# Removal in 14.0
-#  (string value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-# from .conductor.nova.conf.manager
-{{ if not .conductor.nova.conf.manager }}#{{ end }}manager = {{ .conductor.nova.conf.manager | default "nova.conductor.manager.ConductorManager" }}
 
 #
 # Number of workers for OpenStack Conductor service. The default will be the
@@ -5095,6 +4740,53 @@
 #  (integer value)
 # from .conductor.nova.conf.workers
 {{ if not .conductor.nova.conf.workers }}#{{ end }}workers = {{ .conductor.nova.conf.workers | default "<None>" }}
+
+
+[console]
+#
+# Options under this group allow to tune the configuration of the console proxy
+# service.
+#
+# Note: in configuration of every compute is a ``console_host`` option,
+# which allows to select the console proxy service to connect to.
+
+#
+# From nova.conf
+#
+
+#
+# Adds list of allowed origins to the console websocket proxy to allow
+# connections from other origin hostnames.
+# Websocket proxy matches the host header with the origin header to
+# prevent cross-site requests. This list specifies if any there are
+# values other than host are allowed in the origin header.
+#
+# Possible values:
+#
+# * A list where each element is an allowed origin hostnames, else an empty list
+#  (list value)
+# Deprecated group/name - [DEFAULT]/console_allowed_origins
+# from .console.nova.conf.allowed_origins
+{{ if not .console.nova.conf.allowed_origins }}#{{ end }}allowed_origins = {{ .console.nova.conf.allowed_origins | default "" }}
+
+
+[consoleauth]
+
+#
+# From nova.conf
+#
+
+#
+# The lifetime of a console auth token.
+#
+# A console auth token is used in authorizing console access for a user.
+# Once the auth token time to live count has elapsed, the token is
+# considered expired.  Expired tokens are then deleted.
+#  (integer value)
+# Minimum value: 0
+# Deprecated group/name - [DEFAULT]/console_token_ttl
+# from .consoleauth.nova.conf.token_ttl
+{{ if not .consoleauth.nova.conf.token_ttl }}#{{ end }}token_ttl = {{ .consoleauth.nova.conf.token_ttl | default "600" }}
 
 
 [cors]
@@ -5407,86 +5099,538 @@
 {{ if not .ephemeral_storage_encryption.nova.conf.enabled }}#{{ end }}enabled = {{ .ephemeral_storage_encryption.nova.conf.enabled | default "false" }}
 
 #
-# Cipher-mode string to be used
+# Cipher-mode string to be used.
 #
-# The cipher and mode to be used to encrypt ephemeral
-# storage. The set of cipher-mode combinations available
-# depends on kernel support.
+# The cipher and mode to be used to encrypt ephemeral storage. The set of
+# cipher-mode combinations available depends on kernel support. According
+# to the dm-crypt documentation, the cipher is expected to be in the format:
+# "<cipher>-<chainmode>-<ivmode>".
 #
 # Possible values:
 #
-#     * aes-xts-plain64 (Default), see /proc/crypto for available options.
+# * Any crypto option listed in ``/proc/crypto``.
 #  (string value)
 # from .ephemeral_storage_encryption.nova.conf.cipher
 {{ if not .ephemeral_storage_encryption.nova.conf.cipher }}#{{ end }}cipher = {{ .ephemeral_storage_encryption.nova.conf.cipher | default "aes-xts-plain64" }}
 
 #
-# Encryption key length in bits
+# Encryption key length in bits.
 #
-# The bit length of the encryption key to be used to
-# encrypt ephemeral storage (in XTS mode only half of
-# the bits are used for encryption key).
+# The bit length of the encryption key to be used to encrypt ephemeral storage.
+# In XTS mode only half of the bits are used for encryption key.
 #  (integer value)
 # Minimum value: 1
 # from .ephemeral_storage_encryption.nova.conf.key_size
 {{ if not .ephemeral_storage_encryption.nova.conf.key_size }}#{{ end }}key_size = {{ .ephemeral_storage_encryption.nova.conf.key_size | default "512" }}
 
 
-[glance]
+[filter_scheduler]
 
 #
 # From nova.conf
 #
 
 #
-# A list of the glance api servers endpoints available to nova. These
-# should be fully qualified urls of the form
-# "scheme://hostname:port[/path]" (i.e. "http://10.0.1.0:9292" or
-# "https://my.glance.server/image") (list value)
+# Size of subset of best hosts selected by scheduler.
+#
+# New instances will be scheduled on a host chosen randomly from a subset of the
+# N best hosts, where N is the value set by this option.
+#
+# Setting this to a value greater than 1 will reduce the chance that multiple
+# scheduler processes handling similar requests will select the same host,
+# creating a potential race condition. By selecting a host randomly from the N
+# hosts that best fit the request, the chance of a conflict is reduced. However,
+# the higher you set this value, the less optimal the chosen host may be for a
+# given request.
+#
+# This option is only used by the FilterScheduler and its subclasses; if you use
+# a different scheduler, this option has no effect.
+#
+# Possible values:
+#
+# * An integer, where the integer corresponds to the size of a host subset. Any
+#   integer is valid, although any value less than 1 will be treated as 1
+#  (integer value)
+# Minimum value: 1
+# Deprecated group/name - [DEFAULT]/scheduler_host_subset_size
+# from .filter_scheduler.nova.conf.host_subset_size
+{{ if not .filter_scheduler.nova.conf.host_subset_size }}#{{ end }}host_subset_size = {{ .filter_scheduler.nova.conf.host_subset_size | default "1" }}
+
+#
+# The number of instances that can be actively performing IO on a host.
+#
+# Instances performing IO includes those in the following states: build, resize,
+# snapshot, migrate, rescue, unshelve.
+#
+# This option is only used by the FilterScheduler and its subclasses; if you use
+# a different scheduler, this option has no effect. Also note that this setting
+# only affects scheduling if the 'io_ops_filter' filter is enabled.
+#
+# Possible values:
+#
+# * An integer, where the integer corresponds to the max number of instances
+#   that can be actively performing IO on any given host.
+#  (integer value)
+# Deprecated group/name - [DEFAULT]/max_io_ops_per_host
+# from .filter_scheduler.nova.conf.max_io_ops_per_host
+{{ if not .filter_scheduler.nova.conf.max_io_ops_per_host }}#{{ end }}max_io_ops_per_host = {{ .filter_scheduler.nova.conf.max_io_ops_per_host | default "8" }}
+
+#
+# Maximum number of instances that be active on a host.
+#
+# If you need to limit the number of instances on any given host, set this
+# option
+# to the maximum number of instances you want to allow. The num_instances_filter
+# will reject any host that has at least as many instances as this option's
+# value.
+#
+# This option is only used by the FilterScheduler and its subclasses; if you use
+# a different scheduler, this option has no effect. Also note that this setting
+# only affects scheduling if the 'num_instances_filter' filter is enabled.
+#
+# Possible values:
+#
+# * An integer, where the integer corresponds to the max instances that can be
+#   scheduled on a host.
+#  (integer value)
+# Deprecated group/name - [DEFAULT]/max_instances_per_host
+# from .filter_scheduler.nova.conf.max_instances_per_host
+{{ if not .filter_scheduler.nova.conf.max_instances_per_host }}#{{ end }}max_instances_per_host = {{ .filter_scheduler.nova.conf.max_instances_per_host | default "50" }}
+
+#
+# Enable querying of individual hosts for instance information.
+#
+# The scheduler may need information about the instances on a host in order to
+# evaluate its filters and weighers. The most common need for this information
+# is
+# for the (anti-)affinity filters, which need to choose a host based on the
+# instances already running on a host.
+#
+# If the configured filters and weighers do not need this information, disabling
+# this option will improve performance. It may also be disabled when the
+# tracking
+# overhead proves too heavy, although this will cause classes requiring host
+# usage data to query the database on each request instead.
+#
+# This option is only used by the FilterScheduler and its subclasses; if you use
+# a different scheduler, this option has no effect.
+#  (boolean value)
+# Deprecated group/name - [DEFAULT]/scheduler_tracks_instance_changes
+# from .filter_scheduler.nova.conf.track_instance_changes
+{{ if not .filter_scheduler.nova.conf.track_instance_changes }}#{{ end }}track_instance_changes = {{ .filter_scheduler.nova.conf.track_instance_changes | default "true" }}
+
+#
+# Filters that the scheduler can use.
+#
+# An unordered list of the filter classes the nova scheduler may apply.  Only
+# the
+# filters specified in the 'scheduler_enabled_filters' option will be used, but
+# any filter appearing in that option must also be included in this list.
+#
+# By default, this is set to all filters that are included with nova.
+#
+# This option is only used by the FilterScheduler and its subclasses; if you use
+# a different scheduler, this option has no effect.
+#
+# Possible values:
+#
+# * A list of zero or more strings, where each string corresponds to the name of
+#   a filter that may be used for selecting a host
+#
+# Related options:
+#
+# * scheduler_enabled_filters
+#  (multi valued)
+# Deprecated group/name - [DEFAULT]/scheduler_available_filters
+# from .filter_scheduler.nova.conf.available_filters (multiopt)
+{{ if not .filter_scheduler.nova.conf.available_filters }}#available_filters = {{ .filter_scheduler.nova.conf.available_filters | default "nova.scheduler.filters.all_filters" }}{{ else }}{{ range .filter_scheduler.nova.conf.available_filters }}available_filters = {{ . }}{{ end }}{{ end }}
+
+#
+# Filters that the scheduler will use.
+#
+# An ordered list of filter class names that will be used for filtering
+# hosts. Ignore the word 'default' in the name of this option: these filters
+# will
+# *always* be applied, and they will be applied in the order they are listed so
+# place your most restrictive filters first to make the filtering process more
+# efficient.
+#
+# This option is only used by the FilterScheduler and its subclasses; if you use
+# a different scheduler, this option has no effect.
+#
+# Possible values:
+#
+# * A list of zero or more strings, where each string corresponds to the name of
+#   a filter to be used for selecting a host
+#
+# Related options:
+#
+# * All of the filters in this option *must* be present in the
+#   'scheduler_available_filters' option, or a SchedulerHostFilterNotFound
+#   exception will be raised.
+#  (list value)
+# Deprecated group/name - [DEFAULT]/scheduler_default_filters
+# from .filter_scheduler.nova.conf.enabled_filters
+{{ if not .filter_scheduler.nova.conf.enabled_filters }}#{{ end }}enabled_filters = {{ .filter_scheduler.nova.conf.enabled_filters | default "RetryFilter,AvailabilityZoneFilter,RamFilter,DiskFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,ServerGroupAntiAffinityFilter,ServerGroupAffinityFilter" }}
+
+#
+# Filters used for filtering baremetal hosts.
+#
+# Filters are applied in order, so place your most restrictive filters first to
+# make the filtering process more efficient.
+#
+# This option is only used by the FilterScheduler and its subclasses; if you use
+# a different scheduler, this option has no effect.
+#
+# Possible values:
+#
+# * A list of zero or more strings, where each string corresponds to the name of
+#   a filter to be used for selecting a baremetal host
+#
+# Related options:
+#
+# * If the 'scheduler_use_baremetal_filters' option is False, this option has
+#   no effect.
+#  (list value)
+# Deprecated group/name - [DEFAULT]/baremetal_scheduler_default_filters
+# from .filter_scheduler.nova.conf.baremetal_enabled_filters
+{{ if not .filter_scheduler.nova.conf.baremetal_enabled_filters }}#{{ end }}baremetal_enabled_filters = {{ .filter_scheduler.nova.conf.baremetal_enabled_filters | default "RetryFilter,AvailabilityZoneFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,ExactRamFilter,ExactDiskFilter,ExactCoreFilter" }}
+
+#
+# Enable baremetal filters.
+#
+# Set this to True to tell the nova scheduler that it should use the filters
+# specified in the 'baremetal_scheduler_enabled_filters' option. If you are not
+# scheduling baremetal nodes, leave this at the default setting of False.
+#
+# This option is only used by the FilterScheduler and its subclasses; if you use
+# a different scheduler, this option has no effect.
+#
+# Related options:
+#
+# * If this option is set to True, then the filters specified in the
+#   'baremetal_scheduler_enabled_filters' are used instead of the filters
+#   specified in 'scheduler_enabled_filters'.
+#  (boolean value)
+# Deprecated group/name - [DEFAULT]/scheduler_use_baremetal_filters
+# from .filter_scheduler.nova.conf.use_baremetal_filters
+{{ if not .filter_scheduler.nova.conf.use_baremetal_filters }}#{{ end }}use_baremetal_filters = {{ .filter_scheduler.nova.conf.use_baremetal_filters | default "false" }}
+
+#
+# Weighers that the scheduler will use.
+#
+# Only hosts which pass the filters are weighed. The weight for any host starts
+# at 0, and the weighers order these hosts by adding to or subtracting from the
+# weight assigned by the previous weigher. Weights may become negative. An
+# instance will be scheduled to one of the N most-weighted hosts, where N is
+# 'scheduler_host_subset_size'.
+#
+# By default, this is set to all weighers that are included with Nova.
+#
+# This option is only used by the FilterScheduler and its subclasses; if you use
+# a different scheduler, this option has no effect.
+#
+# Possible values:
+#
+# * A list of zero or more strings, where each string corresponds to the name of
+#   a weigher that will be used for selecting a host
+#  (list value)
+# Deprecated group/name - [DEFAULT]/scheduler_weight_classes
+# from .filter_scheduler.nova.conf.weight_classes
+{{ if not .filter_scheduler.nova.conf.weight_classes }}#{{ end }}weight_classes = {{ .filter_scheduler.nova.conf.weight_classes | default "nova.scheduler.weights.all_weighers" }}
+
+#
+# Ram weight multipler ratio.
+#
+# This option determines how hosts with more or less available RAM are weighed.
+# A
+# positive value will result in the scheduler preferring hosts with more
+# available RAM, and a negative number will result in the scheduler preferring
+# hosts with less available RAM. Another way to look at it is that positive
+# values for this option will tend to spread instances across many hosts, while
+# negative values will tend to fill up (stack) hosts as much as possible before
+# scheduling to a less-used host. The absolute value, whether positive or
+# negative, controls how strong the RAM weigher is relative to other weighers.
+#
+# This option is only used by the FilterScheduler and its subclasses; if you use
+# a different scheduler, this option has no effect. Also note that this setting
+# only affects scheduling if the 'ram' weigher is enabled.
+#
+# Possible values:
+#
+# * An integer or float value, where the value corresponds to the multipler
+#   ratio for this weigher.
+#  (floating point value)
+# Deprecated group/name - [DEFAULT]/ram_weight_multiplier
+# from .filter_scheduler.nova.conf.ram_weight_multiplier
+{{ if not .filter_scheduler.nova.conf.ram_weight_multiplier }}#{{ end }}ram_weight_multiplier = {{ .filter_scheduler.nova.conf.ram_weight_multiplier | default "1.0" }}
+
+#
+# Disk weight multipler ratio.
+#
+# Multiplier used for weighing free disk space. Negative numbers mean to
+# stack vs spread.
+#
+# This option is only used by the FilterScheduler and its subclasses; if you use
+# a different scheduler, this option has no effect. Also note that this setting
+# only affects scheduling if the 'ram' weigher is enabled.
+#
+# Possible values:
+#
+# * An integer or float value, where the value corresponds to the multipler
+#   ratio for this weigher.
+#  (floating point value)
+# Deprecated group/name - [DEFAULT]/disk_weight_multiplier
+# from .filter_scheduler.nova.conf.disk_weight_multiplier
+{{ if not .filter_scheduler.nova.conf.disk_weight_multiplier }}#{{ end }}disk_weight_multiplier = {{ .filter_scheduler.nova.conf.disk_weight_multiplier | default "1.0" }}
+
+#
+# IO operations weight multipler ratio.
+#
+# This option determines how hosts with differing workloads are weighed.
+# Negative
+# values, such as the default, will result in the scheduler preferring hosts
+# with
+# lighter workloads whereas positive values will prefer hosts with heavier
+# workloads. Another way to look at it is that positive values for this option
+# will tend to schedule instances onto hosts that are already busy, while
+# negative values will tend to distribute the workload across more hosts. The
+# absolute value, whether positive or negative, controls how strong the io_ops
+# weigher is relative to other weighers.
+#
+# This option is only used by the FilterScheduler and its subclasses; if you use
+# a different scheduler, this option has no effect. Also note that this setting
+# only affects scheduling if the 'io_ops' weigher is enabled.
+#
+# Possible values:
+#
+# * An integer or float value, where the value corresponds to the multipler
+#   ratio for this weigher.
+#  (floating point value)
+# Deprecated group/name - [DEFAULT]/io_ops_weight_multiplier
+# from .filter_scheduler.nova.conf.io_ops_weight_multiplier
+{{ if not .filter_scheduler.nova.conf.io_ops_weight_multiplier }}#{{ end }}io_ops_weight_multiplier = {{ .filter_scheduler.nova.conf.io_ops_weight_multiplier | default "-1.0" }}
+
+#
+# Multiplier used for weighing hosts for group soft-affinity.
+#
+# Possible values:
+#
+# * An integer or float value, where the value corresponds to weight multiplier
+#   for hosts with group soft affinity. Only a positive value are meaningful, as
+#   negative values would make this behave as a soft anti-affinity weigher.
+#  (floating point value)
+# Deprecated group/name - [DEFAULT]/soft_affinity_weight_multiplier
+# from .filter_scheduler.nova.conf.soft_affinity_weight_multiplier
+{{ if not .filter_scheduler.nova.conf.soft_affinity_weight_multiplier }}#{{ end }}soft_affinity_weight_multiplier = {{ .filter_scheduler.nova.conf.soft_affinity_weight_multiplier | default "1.0" }}
+
+#
+# Multiplier used for weighing hosts for group soft-anti-affinity.
+#
+# Possible values:
+#
+# * An integer or float value, where the value corresponds to weight multiplier
+#   for hosts with group soft anti-affinity. Only a positive value are
+#   meaningful, as negative values would make this behave as a soft affinity
+#   weigher.
+#  (floating point value)
+# Deprecated group/name - [DEFAULT]/soft_anti_affinity_weight_multiplier
+# from .filter_scheduler.nova.conf.soft_anti_affinity_weight_multiplier
+{{ if not .filter_scheduler.nova.conf.soft_anti_affinity_weight_multiplier }}#{{ end }}soft_anti_affinity_weight_multiplier = {{ .filter_scheduler.nova.conf.soft_anti_affinity_weight_multiplier | default "1.0" }}
+
+#
+# List of UUIDs for images that can only be run on certain hosts.
+#
+# If there is a need to restrict some images to only run on certain designated
+# hosts, list those image UUIDs here.
+#
+# This option is only used by the FilterScheduler and its subclasses; if you use
+# a different scheduler, this option has no effect. Also note that this setting
+# only affects scheduling if the 'IsolatedHostsFilter' filter is enabled.
+#
+# Possible values:
+#
+# * A list of UUID strings, where each string corresponds to the UUID of an
+#   image
+#
+# Related options:
+#
+# * scheduler/isolated_hosts
+# * scheduler/restrict_isolated_hosts_to_isolated_images
+#  (list value)
+# Deprecated group/name - [DEFAULT]/isolated_images
+# from .filter_scheduler.nova.conf.isolated_images
+{{ if not .filter_scheduler.nova.conf.isolated_images }}#{{ end }}isolated_images = {{ .filter_scheduler.nova.conf.isolated_images | default "" }}
+
+#
+# List of hosts that can only run certain images.
+#
+# If there is a need to restrict some images to only run on certain designated
+# hosts, list those host names here.
+#
+# This option is only used by the FilterScheduler and its subclasses; if you use
+# a different scheduler, this option has no effect. Also note that this setting
+# only affects scheduling if the 'IsolatedHostsFilter' filter is enabled.
+#
+# Possible values:
+#
+# * A list of strings, where each string corresponds to the name of a host
+#
+# Related options:
+#
+# * scheduler/isolated_images
+# * scheduler/restrict_isolated_hosts_to_isolated_images
+#  (list value)
+# Deprecated group/name - [DEFAULT]/isolated_hosts
+# from .filter_scheduler.nova.conf.isolated_hosts
+{{ if not .filter_scheduler.nova.conf.isolated_hosts }}#{{ end }}isolated_hosts = {{ .filter_scheduler.nova.conf.isolated_hosts | default "" }}
+
+#
+# Prevent non-isolated images from being built on isolated hosts.
+#
+# This option is only used by the FilterScheduler and its subclasses; if you use
+# a different scheduler, this option has no effect. Also note that this setting
+# only affects scheduling if the 'IsolatedHostsFilter' filter is enabled. Even
+# then, this option doesn't affect the behavior of requests for isolated images,
+# which will *always* be restricted to isolated hosts.
+#
+# Related options:
+#
+# * scheduler/isolated_images
+# * scheduler/isolated_hosts
+#  (boolean value)
+# Deprecated group/name - [DEFAULT]/restrict_isolated_hosts_to_isolated_images
+# from .filter_scheduler.nova.conf.restrict_isolated_hosts_to_isolated_images
+{{ if not .filter_scheduler.nova.conf.restrict_isolated_hosts_to_isolated_images }}#{{ end }}restrict_isolated_hosts_to_isolated_images = {{ .filter_scheduler.nova.conf.restrict_isolated_hosts_to_isolated_images | default "true" }}
+
+#
+# Image property namespace for use in the host aggregate.
+#
+# Images and hosts can be configured so that certain images can only be
+# scheduled
+# to hosts in a particular aggregate. This is done with metadata values set on
+# the host aggregate that are identified by beginning with the value of this
+# option. If the host is part of an aggregate with such a metadata key, the
+# image
+# in the request spec must have the value of that metadata in its properties in
+# order for the scheduler to consider the host as acceptable.
+#
+# This option is only used by the FilterScheduler and its subclasses; if you use
+# a different scheduler, this option has no effect. Also note that this setting
+# only affects scheduling if the 'aggregate_image_properties_isolation' filter
+# is
+# enabled.
+#
+# Possible values:
+#
+# * A string, where the string corresponds to an image property namespace
+#
+# Related options:
+#
+# * aggregate_image_properties_isolation_separator
+#  (string value)
+# Deprecated group/name - [DEFAULT]/aggregate_image_properties_isolation_namespace
+# from .filter_scheduler.nova.conf.aggregate_image_properties_isolation_namespace
+{{ if not .filter_scheduler.nova.conf.aggregate_image_properties_isolation_namespace }}#{{ end }}aggregate_image_properties_isolation_namespace = {{ .filter_scheduler.nova.conf.aggregate_image_properties_isolation_namespace | default "<None>" }}
+
+#
+# Separator character(s) for image property namespace and name.
+#
+# When using the aggregate_image_properties_isolation filter, the relevant
+# metadata keys are prefixed with the namespace defined in the
+# aggregate_image_properties_isolation_namespace configuration option plus a
+# separator. This option defines the separator to be used.
+#
+# This option is only used by the FilterScheduler and its subclasses; if you use
+# a different scheduler, this option has no effect. Also note that this setting
+# only affects scheduling if the 'aggregate_image_properties_isolation' filter
+# is enabled.
+#
+# Possible values:
+#
+# * A string, where the string corresponds to an image property namespace
+#   separator character
+#
+# Related options:
+#
+# * aggregate_image_properties_isolation_namespace
+#  (string value)
+# Deprecated group/name - [DEFAULT]/aggregate_image_properties_isolation_separator
+# from .filter_scheduler.nova.conf.aggregate_image_properties_isolation_separator
+{{ if not .filter_scheduler.nova.conf.aggregate_image_properties_isolation_separator }}#{{ end }}aggregate_image_properties_isolation_separator = {{ .filter_scheduler.nova.conf.aggregate_image_properties_isolation_separator | default "." }}
+
+
+[glance]
+# Configuration options for the Image service
+
+#
+# From nova.conf
+#
+
+#
+# List of glance api servers endpoints available to nova.
+#
+# https is used for ssl-based glance api servers.
+#
+# Possible values:
+#
+# * A list of any fully qualified url of the form
+# "scheme://hostname:port[/path]"
+#   (i.e. "http://10.0.1.0:9292" or "https://my.glance.server/image").
+#  (list value)
 # from .glance.nova.conf.api_servers
 {{ if not .glance.nova.conf.api_servers }}#{{ end }}api_servers = {{ .glance.nova.conf.api_servers | default "<None>" }}
 
-# Allow to perform insecure SSL (https) requests to glance (boolean value)
+#
+# Enable insecure SSL (https) requests to glance.
+#
+# This setting can be used to turn off verification of the glance server
+# certificate against the certificate authorities.
+#  (boolean value)
 # from .glance.nova.conf.api_insecure
 {{ if not .glance.nova.conf.api_insecure }}#{{ end }}api_insecure = {{ .glance.nova.conf.api_insecure | default "false" }}
 
-# Number of retries when uploading / downloading an image to / from glance.
-# (integer value)
+#
+# Enable glance operation retries.
+#
+# Specifies the number of retries when uploading / downloading
+# an image to / from glance. 0 means no retries.
+#  (integer value)
+# Minimum value: 0
 # from .glance.nova.conf.num_retries
 {{ if not .glance.nova.conf.num_retries }}#{{ end }}num_retries = {{ .glance.nova.conf.num_retries | default "0" }}
 
-# A list of url scheme that can be downloaded directly via the direct_url.
-# Currently supported schemes: [file]. (list value)
+#
+# List of url schemes that can be directly accessed.
+#
+# This option specifies a list of url schemes that can be downloaded
+# directly via the direct_url. This direct_URL can be fetched from
+# Image metadata which can be used by nova to get the
+# image more efficiently. nova-compute could benefit from this by
+# invoking a copy when it has access to the same file system as glance.
+#
+# Possible values:
+#
+# * [file], Empty list (default)
+#  (list value)
 # from .glance.nova.conf.allowed_direct_url_schemes
 {{ if not .glance.nova.conf.allowed_direct_url_schemes }}#{{ end }}allowed_direct_url_schemes = {{ .glance.nova.conf.allowed_direct_url_schemes | default "" }}
 
-# DEPRECATED:
-# This flag allows reverting to glance v1 if for some reason glance v2 doesn't
-# work in your environment. This will only exist in Newton, and a fully working
-# Glance v2 will be a hard requirement in Ocata.
 #
-# * Possible values:
+# Enable image signature verification.
 #
-#     True or False
+# nova uses the image signature metadata from glance and verifies the signature
+# of a signed image while downloading that image. If the image signature cannot
+# be verified or if the image signature metadata is either incomplete or
+# unavailable, then nova will not boot the image and instead will place the
+# instance into an error state. This provides end users with stronger assurances
+# of the integrity of the image data they are using to create servers.
 #
-# * Services that use this:
+# Related options:
 #
-#     ``nova-api``
-#     ``nova-compute``
-#     ``nova-conductor``
-#
-# * Related options:
-#
-#     None
+# * The options in the `key_manager` group, as the key_manager is used
+#   for the signature validation.
 #  (boolean value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-# Reason: Glance v1 support will be removed in Ocata
-# from .glance.nova.conf.use_glance_v1
-{{ if not .glance.nova.conf.use_glance_v1 }}#{{ end }}use_glance_v1 = {{ .glance.nova.conf.use_glance_v1 | default "false" }}
-
-# Require Nova to perform signature verification on each image downloaded from
-# Glance. (boolean value)
 # from .glance.nova.conf.verify_glance_signatures
 {{ if not .glance.nova.conf.verify_glance_signatures }}#{{ end }}verify_glance_signatures = {{ .glance.nova.conf.verify_glance_signatures | default "false" }}
 
@@ -5524,6 +5668,39 @@
 #  (boolean value)
 # from .guestfs.nova.conf.debug
 {{ if not .guestfs.nova.conf.debug }}#{{ end }}debug = {{ .guestfs.nova.conf.debug | default "false" }}
+
+
+[healthcheck]
+
+#
+# From oslo.middleware
+#
+
+# DEPRECATED: The path to respond to healtcheck requests on. (string value)
+# This option is deprecated for removal.
+# Its value may be silently ignored in the future.
+# from .healthcheck.oslo.middleware.path
+{{ if not .healthcheck.oslo.middleware.path }}#{{ end }}path = {{ .healthcheck.oslo.middleware.path | default "/healthcheck" }}
+
+# Show more detailed information as part of the response (boolean value)
+# from .healthcheck.oslo.middleware.detailed
+{{ if not .healthcheck.oslo.middleware.detailed }}#{{ end }}detailed = {{ .healthcheck.oslo.middleware.detailed | default "false" }}
+
+# Additional backends that can perform health checks and report that information
+# back as part of a request. (list value)
+# from .healthcheck.oslo.middleware.backends
+{{ if not .healthcheck.oslo.middleware.backends }}#{{ end }}backends = {{ .healthcheck.oslo.middleware.backends | default "" }}
+
+# Check the presence of a file to determine if an application is running on a
+# port. Used by DisableByFileHealthcheck plugin. (string value)
+# from .healthcheck.oslo.middleware.disable_by_file_path
+{{ if not .healthcheck.oslo.middleware.disable_by_file_path }}#{{ end }}disable_by_file_path = {{ .healthcheck.oslo.middleware.disable_by_file_path | default "<None>" }}
+
+# Check the presence of a file based on a port to determine if an application is
+# running on a port. Expects a "port:path" list of strings. Used by
+# DisableByFilesPortsHealthcheck plugin. (list value)
+# from .healthcheck.oslo.middleware.disable_by_file_paths
+{{ if not .healthcheck.oslo.middleware.disable_by_file_paths }}#{{ end }}disable_by_file_paths = {{ .healthcheck.oslo.middleware.disable_by_file_paths | default "" }}
 
 
 [hyperv]
@@ -5597,11 +5774,9 @@
 #
 # Mounted disk query retry count
 #
-# The number of times to retry checking for a disk mounted via iSCSI.
-# During long stress runs the WMI query that is looking for the iSCSI
-# device number can incorrectly return no data. If the query is
-# retried the appropriate data can then be obtained. The query runs
-# until the device can be found or the retry count is reached.
+# The number of times to retry checking for a mounted disk.
+# The query runs until the device can be found or the retry
+# count is reached.
 #
 # Possible values:
 #
@@ -5620,7 +5795,7 @@
 #
 # Mounted disk query retry interval
 #
-# Interval between checks for a mounted iSCSI disk, in seconds.
+# Interval between checks for a mounted disk, in seconds.
 #
 # Possible values:
 #
@@ -5782,12 +5957,8 @@
 #
 # Volume attach retry count
 #
-# The number of times to retry to attach a volume. This option is used
-# to avoid incorrectly returned no data when the system is under load.
-# Volume attachment is retried until success or the given retry count
-# is reached. To prepare the Hyper-V node to be able to attach to
-# volumes provided by cinder you must first make sure the Windows iSCSI
-# initiator service is running and started automatically.
+# The number of times to retry attaching a volume. Volume attachment
+# is retried until success or the given retry count is reached.
 #
 # Possible values:
 #
@@ -5851,6 +6022,24 @@
 # from .hyperv.nova.conf.enable_remotefx
 {{ if not .hyperv.nova.conf.enable_remotefx }}#{{ end }}enable_remotefx = {{ .hyperv.nova.conf.enable_remotefx | default "false" }}
 
+#
+# Use multipath connections when attaching iSCSI or FC disks.
+#
+# This requires the Multipath IO Windows feature to be enabled. MPIO must be
+# configured to claim such devices.
+#  (boolean value)
+# from .hyperv.nova.conf.use_multipath_io
+{{ if not .hyperv.nova.conf.use_multipath_io }}#{{ end }}use_multipath_io = {{ .hyperv.nova.conf.use_multipath_io | default "false" }}
+
+#
+# List of iSCSI initiators that will be used for estabilishing iSCSI sessions.
+#
+# If none are specified, the Microsoft iSCSI initiator service will choose the
+# initiator.
+#  (list value)
+# from .hyperv.nova.conf.iscsi_initiator_list
+{{ if not .hyperv.nova.conf.iscsi_initiator_list }}#{{ end }}iscsi_initiator_list = {{ .hyperv.nova.conf.iscsi_initiator_list | default "" }}
+
 
 [image_file_url]
 
@@ -5862,7 +6051,7 @@
 # List of file systems that are configured in this file in the
 # image_file_url:<list entry name> sections
 #  (list value)
-# This option is deprecated for removal.
+# This option is deprecated for removal since 14.0.0.
 # Its value may be silently ignored in the future.
 # Reason:
 # The feature to download images from glance via filesystem is not used and will
@@ -5882,10 +6071,6 @@
 # * password
 # * project_domain_id or project_domain_name
 # * user_domain_id or user_domain_name
-#
-# Please note that if you are using Identity v2 API (deprecated),
-# you don't need to provide domain information, since domains are
-# a v3 concept.
 
 #
 # From nova.conf
@@ -5894,34 +6079,6 @@
 # URL override for the Ironic API endpoint. (string value)
 # from .ironic.nova.conf.api_endpoint
 {{ if not .ironic.nova.conf.api_endpoint }}#{{ end }}api_endpoint = {{ .ironic.nova.conf.api_endpoint | default "http://ironic.example.org:6385/" }}
-
-# DEPRECATED: Ironic keystone admin name. Use ``username`` instead. (string
-# value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-# from .ironic.nova.conf.admin_username
-{{ if not .ironic.nova.conf.admin_username }}#{{ end }}admin_username = {{ .ironic.nova.conf.admin_username | default "<None>" }}
-
-# DEPRECATED: Ironic keystone admin password. Use ``password`` instead. (string
-# value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-# from .ironic.nova.conf.admin_password
-{{ if not .ironic.nova.conf.admin_password }}#{{ end }}admin_password = {{ .ironic.nova.conf.admin_password | default "<None>" }}
-
-# DEPRECATED: Keystone public API endpoint. Use ``auth_url`` instead. (string
-# value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-# from .ironic.nova.conf.admin_url
-{{ if not .ironic.nova.conf.admin_url }}#{{ end }}admin_url = {{ .ironic.nova.conf.admin_url | default "<None>" }}
-
-# DEPRECATED: Ironic keystone tenant name. Use ``project_name`` instead. (string
-# value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-# from .ironic.nova.conf.admin_tenant_name
-{{ if not .ironic.nova.conf.admin_tenant_name }}#{{ end }}admin_tenant_name = {{ .ironic.nova.conf.admin_tenant_name | default "<None>" }}
 
 #
 # The number of times to retry when a request conflicts.
@@ -5945,6 +6102,12 @@
 # Minimum value: 0
 # from .ironic.nova.conf.api_retry_interval
 {{ if not .ironic.nova.conf.api_retry_interval }}#{{ end }}api_retry_interval = {{ .ironic.nova.conf.api_retry_interval | default "2" }}
+
+# Timeout (seconds) to wait for node serial console state changed. Set to 0 to
+# disable timeout. (integer value)
+# Minimum value: 0
+# from .ironic.nova.conf.serial_console_state_timeout
+{{ if not .ironic.nova.conf.serial_console_state_timeout }}#{{ end }}serial_console_state_timeout = {{ .ironic.nova.conf.serial_console_state_timeout | default "10" }}
 
 # PEM encoded Certificate Authority to use when verifying HTTPs connections.
 # (string value)
@@ -6130,22 +6293,6 @@
 
 [keystone_authtoken]
 
-# FIXME(alanmeadows) - added the next several lines because oslo gen config refuses to generate the line items required in keystonemiddleware
-# for authentication - while it does support an "auth_section" parameter to locate these elsewhere, it would be a strange divergence
-# from how neutron keystone authentication is stored today - ocata and later appear to use a "service" user section which can house these details
-# and does successfully generate beyond newton, so likely this whole section will be removed the next time we generate this file
-
-{{ if not .keystone_authtoken.keystonemiddleware.auth_token.auth_url }}#{{ end }}auth_url = {{ .keystone_authtoken.keystonemiddleware.auth_token.auth_url | default "<None>" }}
-{{ if not .keystone_authtoken.keystonemiddleware.auth_token.region_name }}#{{ end }}region_name = {{ .keystone_authtoken.keystonemiddleware.auth_token.region_name | default "<None>" }}
-{{ if not .keystone_authtoken.keystonemiddleware.auth_token.project_name }}#{{ end }}project_name = {{ .keystone_authtoken.keystonemiddleware.auth_token.project_name | default "<None>" }}
-{{ if not .keystone_authtoken.keystonemiddleware.auth_token.project_domain_name }}#{{ end }}project_domain_name = {{ .keystone_authtoken.keystonemiddleware.auth_token.project_domain_name | default "<None>" }}
-{{ if not .keystone_authtoken.keystonemiddleware.auth_token.user_domain_name }}#{{ end }}user_domain_name = {{ .keystone_authtoken.keystonemiddleware.auth_token.user_domain_name | default "<None>" }}
-{{ if not .keystone_authtoken.keystonemiddleware.auth_token.username }}#{{ end }}username = {{ .keystone_authtoken.keystonemiddleware.auth_token.username | default "<None>" }}
-{{ if not .keystone_authtoken.keystonemiddleware.auth_token.password }}#{{ end }}password = {{ .keystone_authtoken.keystonemiddleware.auth_token.password | default "<None>" }}
-
-# FIXME(alanmeadows) - added for some newton images using older keystoneauth1 libs but are still "newton"
-{{ if not .keystone_authtoken.keystonemiddleware.auth_token.auth_url }}#{{ end }}auth_url = {{ .keystone_authtoken.keystonemiddleware.auth_token.auth_url | default "<None>" }}
-
 #
 # From keystonemiddleware.auth_token
 #
@@ -6207,7 +6354,12 @@
 # from .keystone_authtoken.keystonemiddleware.auth_token.region_name
 {{ if not .keystone_authtoken.keystonemiddleware.auth_token.region_name }}#{{ end }}region_name = {{ .keystone_authtoken.keystonemiddleware.auth_token.region_name | default "<None>" }}
 
-# Directory used to cache files related to PKI tokens. (string value)
+# DEPRECATED: Directory used to cache files related to PKI tokens. This option
+# has been deprecated in the Ocata release and will be removed in the P release.
+# (string value)
+# This option is deprecated for removal since Ocata.
+# Its value may be silently ignored in the future.
+# Reason: PKI token format is no longer supported.
 # from .keystone_authtoken.keystonemiddleware.auth_token.signing_dir
 {{ if not .keystone_authtoken.keystonemiddleware.auth_token.signing_dir }}#{{ end }}signing_dir = {{ .keystone_authtoken.keystonemiddleware.auth_token.signing_dir | default "<None>" }}
 
@@ -6223,10 +6375,14 @@
 # from .keystone_authtoken.keystonemiddleware.auth_token.token_cache_time
 {{ if not .keystone_authtoken.keystonemiddleware.auth_token.token_cache_time }}#{{ end }}token_cache_time = {{ .keystone_authtoken.keystonemiddleware.auth_token.token_cache_time | default "300" }}
 
-# Determines the frequency at which the list of revoked tokens is retrieved from
-# the Identity service (in seconds). A high number of revocation events combined
-# with a low cache duration may significantly reduce performance. Only valid for
-# PKI tokens. (integer value)
+# DEPRECATED: Determines the frequency at which the list of revoked tokens is
+# retrieved from the Identity service (in seconds). A high number of revocation
+# events combined with a low cache duration may significantly reduce
+# performance. Only valid for PKI tokens. This option has been deprecated in the
+# Ocata release and will be removed in the P release. (integer value)
+# This option is deprecated for removal since Ocata.
+# Its value may be silently ignored in the future.
+# Reason: PKI token format is no longer supported.
 # from .keystone_authtoken.keystonemiddleware.auth_token.revocation_cache_time
 {{ if not .keystone_authtoken.keystonemiddleware.auth_token.revocation_cache_time }}#{{ end }}revocation_cache_time = {{ .keystone_authtoken.keystonemiddleware.auth_token.revocation_cache_time | default "10" }}
 
@@ -6290,21 +6446,44 @@
 # from .keystone_authtoken.keystonemiddleware.auth_token.enforce_token_bind
 {{ if not .keystone_authtoken.keystonemiddleware.auth_token.enforce_token_bind }}#{{ end }}enforce_token_bind = {{ .keystone_authtoken.keystonemiddleware.auth_token.enforce_token_bind | default "permissive" }}
 
-# If true, the revocation list will be checked for cached tokens. This requires
-# that PKI tokens are configured on the identity server. (boolean value)
+# DEPRECATED: If true, the revocation list will be checked for cached tokens.
+# This requires that PKI tokens are configured on the identity server. (boolean
+# value)
+# This option is deprecated for removal since Ocata.
+# Its value may be silently ignored in the future.
+# Reason: PKI token format is no longer supported.
 # from .keystone_authtoken.keystonemiddleware.auth_token.check_revocations_for_cached
 {{ if not .keystone_authtoken.keystonemiddleware.auth_token.check_revocations_for_cached }}#{{ end }}check_revocations_for_cached = {{ .keystone_authtoken.keystonemiddleware.auth_token.check_revocations_for_cached | default "false" }}
 
-# Hash algorithms to use for hashing PKI tokens. This may be a single algorithm
-# or multiple. The algorithms are those supported by Python standard
-# hashlib.new(). The hashes will be tried in the order given, so put the
-# preferred one first for performance. The result of the first hash will be
+# DEPRECATED: Hash algorithms to use for hashing PKI tokens. This may be a
+# single algorithm or multiple. The algorithms are those supported by Python
+# standard hashlib.new(). The hashes will be tried in the order given, so put
+# the preferred one first for performance. The result of the first hash will be
 # stored in the cache. This will typically be set to multiple values only while
 # migrating from a less secure algorithm to a more secure one. Once all the old
 # tokens are expired this option should be set to a single value for better
 # performance. (list value)
+# This option is deprecated for removal since Ocata.
+# Its value may be silently ignored in the future.
+# Reason: PKI token format is no longer supported.
 # from .keystone_authtoken.keystonemiddleware.auth_token.hash_algorithms
 {{ if not .keystone_authtoken.keystonemiddleware.auth_token.hash_algorithms }}#{{ end }}hash_algorithms = {{ .keystone_authtoken.keystonemiddleware.auth_token.hash_algorithms | default "md5" }}
+
+# A choice of roles that must be present in a service token. Service tokens are
+# allowed to request that an expired token can be used and so this check should
+# tightly control that only actual services should be sending this token. Roles
+# here are applied as an ANY check so any role in this list must be present. For
+# backwards compatibility reasons this currently only affects the allow_expired
+# check. (list value)
+# from .keystone_authtoken.keystonemiddleware.auth_token.service_token_roles
+{{ if not .keystone_authtoken.keystonemiddleware.auth_token.service_token_roles }}#{{ end }}service_token_roles = {{ .keystone_authtoken.keystonemiddleware.auth_token.service_token_roles | default "service" }}
+
+# For backwards compatibility reasons we must let valid service tokens pass that
+# don't pass the service_token_roles check as valid. Setting this true will
+# become the default in a future release and should be enabled if possible.
+# (boolean value)
+# from .keystone_authtoken.keystonemiddleware.auth_token.service_token_roles_required
+{{ if not .keystone_authtoken.keystonemiddleware.auth_token.service_token_roles_required }}#{{ end }}service_token_roles_required = {{ .keystone_authtoken.keystonemiddleware.auth_token.service_token_roles_required | default "false" }}
 
 # Authentication type to load (string value)
 # Deprecated group/name - [keystone_authtoken]/auth_plugin
@@ -6320,6 +6499,10 @@
 #
 # Libvirt options allows cloud administrator to configure related
 # libvirt hypervisor driver to be used within an OpenStack deployment.
+#
+# Almost all of the libvirt config options are influence by ``virt_type`` config
+# which describes the virtualization type (or so called domain type) libvirt
+# should use for specific features such as live migration, snapshot.
 
 #
 # From nova.conf
@@ -6527,73 +6710,181 @@
 #   spice agent is disabled, the config value of ``use_usb_tablet`` will have
 #   an effect.
 #  (boolean value)
-# This option is deprecated for removal.
+# This option is deprecated for removal since 14.0.0.
 # Its value may be silently ignored in the future.
 # Reason: This option is being replaced by the 'pointer_model' option.
 # from .libvirt.nova.conf.use_usb_tablet
 {{ if not .libvirt.nova.conf.use_usb_tablet }}#{{ end }}use_usb_tablet = {{ .libvirt.nova.conf.use_usb_tablet | default "true" }}
 
-# Live migration target ip or hostname (if this option is set to None, which is
-# the default, the hostname of the migration target compute node will be used)
-# (string value)
+#
+# The IP address or hostname to be used as the target for live migration
+# traffic.
+#
+# If this option is set to None, the hostname of the migration target compute
+# node will be used.
+#
+# This option is useful in environments where the live-migration traffic can
+# impact the network plane significantly. A separate network for live-migration
+# traffic can then use this config option and avoids the impact on the
+# management network.
+#
+# Possible values:
+#
+# * A valid IP address or hostname, else None.
+#  (string value)
 # from .libvirt.nova.conf.live_migration_inbound_addr
 {{ if not .libvirt.nova.conf.live_migration_inbound_addr }}#{{ end }}live_migration_inbound_addr = {{ .libvirt.nova.conf.live_migration_inbound_addr | default "<None>" }}
 
-# Override the default libvirt live migration target URI (which is dependent on
-# virt_type) (any included "%s" is replaced with the migration target hostname)
-# (string value)
+# DEPRECATED:
+# Live migration target URI to use.
+#
+# Override the default libvirt live migration target URI (which is dependent
+# on virt_type). Any included "%s" is replaced with the migration target
+# hostname.
+#
+# If this option is set to None (which is the default), Nova will automatically
+# generate the `live_migration_uri` value based on only 3 supported `virt_type`
+# in following list:
+# * 'kvm': 'qemu+tcp://%s/system'
+# * 'qemu': 'qemu+tcp://%s/system'
+# * 'xen': 'xenmigr://%s/system'
+#
+# Related options:
+# * ``live_migration_inbound_addr``: If ``live_migration_inbound_addr`` value
+#   is not None, the ip/hostname address of target compute node is used instead
+#   of ``live_migration_uri`` as the uri for live migration.
+# * ``live_migration_scheme``: If ``live_migration_uri`` is not set, the scheme
+#   used for live migration is taken from ``live_migration_scheme`` instead.
+#  (string value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# live_migration_uri is deprecated for removal in favor of two other options
+# that
+# allow to change live migration scheme and target URI:
+# ``live_migration_scheme``
+# and ``live_migration_inbound_addr`` respectively.
 # from .libvirt.nova.conf.live_migration_uri
 {{ if not .libvirt.nova.conf.live_migration_uri }}#{{ end }}live_migration_uri = {{ .libvirt.nova.conf.live_migration_uri | default "<None>" }}
 
-# Whether to use tunnelled migration, where migration data is transported over
-# the libvirtd connection. If True, we use the VIR_MIGRATE_TUNNELLED migration
-# flag, avoiding the need to configure the network to allow direct hypervisor to
-# hypervisor communication. If False, use the native transport. If not set, Nova
-# will choose a sensible default based on, for example the availability of
-# native encryption support in the hypervisor. (boolean value)
+#
+# Schema used for live migration.
+#
+# Override the default libvirt live migration scheme (which is dependant on
+# virt_type). If this option is set to None, nova will automatically choose a
+# sensible default based on the hypervisor. It is not recommended that you
+# change
+# this unless you are very sure that hypervisor supports a particular scheme.
+#
+# Related options:
+# * ``virt_type``: This option is meaningful only when ``virt_type`` is set to
+#   `kvm` or `qemu`.
+# * ``live_migration_uri``: If ``live_migration_uri`` value is not None, the
+#   scheme used for live migration is taken from ``live_migration_uri`` instead.
+#  (string value)
+# from .libvirt.nova.conf.live_migration_scheme
+{{ if not .libvirt.nova.conf.live_migration_scheme }}#{{ end }}live_migration_scheme = {{ .libvirt.nova.conf.live_migration_scheme | default "<None>" }}
+
+#
+# Enable tunnelled migration.
+#
+# This option enables the tunnelled migration feature, where migration data is
+# transported over the libvirtd connection. If enabled, we use the
+# VIR_MIGRATE_TUNNELLED migration flag, avoiding the need to configure
+# the network to allow direct hypervisor to hypervisor communication.
+# If False, use the native transport. If not set, Nova will choose a
+# sensible default based on, for example the availability of native
+# encryption support in the hypervisor. Enable this option will definitely
+# impact performance massively.
+#
+# Note that this option is NOT compatible with use of block migration.
+#
+# Possible values:
+#
+# * Supersedes and (if set) overrides the deprecated 'live_migration_flag' and
+#   'block_migration_flag' to enable tunneled migration.
+#  (boolean value)
 # from .libvirt.nova.conf.live_migration_tunnelled
 {{ if not .libvirt.nova.conf.live_migration_tunnelled }}#{{ end }}live_migration_tunnelled = {{ .libvirt.nova.conf.live_migration_tunnelled | default "false" }}
 
-# Maximum bandwidth(in MiB/s) to be used during migration. If set to 0, will
-# choose a suitable default. Some hypervisors do not support this feature and
-# will return an error if bandwidth is not 0. Please refer to the libvirt
-# documentation for further details (integer value)
+#
+# Maximum bandwidth(in MiB/s) to be used during migration.
+#
+# If set to 0, the hypervisor will choose a suitable default. Some hypervisors
+# do not support this feature and will return an error if bandwidth is not 0.
+# Please refer to the libvirt documentation for further details.
+#  (integer value)
 # from .libvirt.nova.conf.live_migration_bandwidth
 {{ if not .libvirt.nova.conf.live_migration_bandwidth }}#{{ end }}live_migration_bandwidth = {{ .libvirt.nova.conf.live_migration_bandwidth | default "0" }}
 
-# Maximum permitted downtime, in milliseconds, for live migration switchover.
-# Will be rounded up to a minimum of 100ms. Use a large value if guest liveness
-# is unimportant. (integer value)
+#
+# Maximum permitted downtime, in milliseconds, for live migration
+# switchover.
+#
+# Will be rounded up to a minimum of 100ms. You can increase this value
+# if you want to allow live-migrations to complete faster, or avoid
+# live-migration timeout errors by allowing the guest to be paused for
+# longer during the live-migration switch over.
+#
+# Related options:
+#
+# * live_migration_completion_timeout
+#  (integer value)
 # from .libvirt.nova.conf.live_migration_downtime
 {{ if not .libvirt.nova.conf.live_migration_downtime }}#{{ end }}live_migration_downtime = {{ .libvirt.nova.conf.live_migration_downtime | default "500" }}
 
-# Number of incremental steps to reach max downtime value. Will be rounded up to
-# a minimum of 3 steps (integer value)
+#
+# Number of incremental steps to reach max downtime value.
+#
+# Will be rounded up to a minimum of 3 steps.
+#  (integer value)
 # from .libvirt.nova.conf.live_migration_downtime_steps
 {{ if not .libvirt.nova.conf.live_migration_downtime_steps }}#{{ end }}live_migration_downtime_steps = {{ .libvirt.nova.conf.live_migration_downtime_steps | default "10" }}
 
+#
 # Time to wait, in seconds, between each step increase of the migration
-# downtime. Minimum delay is 10 seconds. Value is per GiB of guest RAM + disk to
-# be transferred, with lower bound of a minimum of 2 GiB per device (integer
-# value)
+# downtime.
+#
+# Minimum delay is 10 seconds. Value is per GiB of guest RAM + disk to be
+# transferred, with lower bound of a minimum of 2 GiB per device.
+#  (integer value)
 # from .libvirt.nova.conf.live_migration_downtime_delay
 {{ if not .libvirt.nova.conf.live_migration_downtime_delay }}#{{ end }}live_migration_downtime_delay = {{ .libvirt.nova.conf.live_migration_downtime_delay | default "75" }}
 
+#
 # Time to wait, in seconds, for migration to successfully complete transferring
-# data before aborting the operation. Value is per GiB of guest RAM + disk to be
-# transferred, with lower bound of a minimum of 2 GiB. Should usually be larger
-# than downtime delay * downtime steps. Set to 0 to disable timeouts. (integer
-# value)
+# data before aborting the operation.
+#
+# Value is per GiB of guest RAM + disk to be transferred, with lower bound of
+# a minimum of 2 GiB. Should usually be larger than downtime delay * downtime
+# steps. Set to 0 to disable timeouts.
+#
+# Related options:
+#
+# * live_migration_downtime
+# * live_migration_downtime_steps
+# * live_migration_downtime_delay
+#  (integer value)
 # Note: This option can be changed without restarting.
 # from .libvirt.nova.conf.live_migration_completion_timeout
 {{ if not .libvirt.nova.conf.live_migration_completion_timeout }}#{{ end }}live_migration_completion_timeout = {{ .libvirt.nova.conf.live_migration_completion_timeout | default "800" }}
 
+# DEPRECATED:
 # Time to wait, in seconds, for migration to make forward progress in
-# transferring data before aborting the operation. Set to 0 to disable timeouts.
-# (integer value)
+# transferring data before aborting the operation.
+#
+# Set to 0 to disable timeouts.
+#
+# This is deprecated, and now disabled by default because we have found serious
+# bugs in this feature that caused false live-migration timeout failures. This
+# feature will be removed or replaced in a future release.
+#  (integer value)
 # Note: This option can be changed without restarting.
+# This option is deprecated for removal.
+# Its value may be silently ignored in the future.
+# Reason: Serious bugs found in this feature.
 # from .libvirt.nova.conf.live_migration_progress_timeout
-{{ if not .libvirt.nova.conf.live_migration_progress_timeout }}#{{ end }}live_migration_progress_timeout = {{ .libvirt.nova.conf.live_migration_progress_timeout | default "150" }}
+{{ if not .libvirt.nova.conf.live_migration_progress_timeout }}#{{ end }}live_migration_progress_timeout = {{ .libvirt.nova.conf.live_migration_progress_timeout | default "0" }}
 
 #
 # This option allows nova to switch an on-going live migration to post-copy
@@ -6622,6 +6913,7 @@
 
 #
 # This option allows nova to start live migration with auto converge on.
+#
 # Auto converge throttles down CPU if a progress of on-going live migration
 # is slow. Auto converge will only be used if this flag is set to True and
 # post copy is not permitted or post copy is unavailable due to the version
@@ -6635,7 +6927,21 @@
 # from .libvirt.nova.conf.live_migration_permit_auto_converge
 {{ if not .libvirt.nova.conf.live_migration_permit_auto_converge }}#{{ end }}live_migration_permit_auto_converge = {{ .libvirt.nova.conf.live_migration_permit_auto_converge | default "false" }}
 
-# Snapshot image format. Defaults to same as source image (string value)
+#
+# Determine the snapshot image format when sending to the image service.
+#
+# If set, this decides what format is used when sending the snapshot to the
+# image service.
+# If not set, defaults to same type as source image.
+#
+# Possible values:
+#
+# * ``raw``: RAW disk format
+# * ``qcow2``: KVM default disk format
+# * ``vmdk``: VMWare default disk format
+# * ``vdi``: VirtualBox default disk format
+# * If not set, defaults to same type as source image.
+#  (string value)
 # Allowed values: raw, qcow2, vmdk, vdi
 # from .libvirt.nova.conf.snapshot_image_format
 {{ if not .libvirt.nova.conf.snapshot_image_format }}#{{ end }}snapshot_image_format = {{ .libvirt.nova.conf.snapshot_image_format | default "<None>" }}
@@ -6765,39 +7071,43 @@
 # libvirt version is 2.0.0. For more information about `Performance monitoring
 # events`, refer https://libvirt.org/formatdomain.html#elementsPerf .
 #
-# * Possible values:
-#     A string list.
-#     For example:
-#     ``enabled_perf_events = cmt, mbml, mbmt``
-#
-#     The supported events list can be found in
-#     https://libvirt.org/html/libvirt-libvirt-domain.html , which
-#     you may need to search key words ``VIR_PERF_PARAM_*``
-#
-# * Services that use this:
-#
-#     ``nova-compute``
-#
-# * Related options:
-#     None
-#
+# Possible values:
+# * A string list. For example: ``enabled_perf_events = cmt, mbml, mbmt``
+#   The supported events list can be found in
+#   https://libvirt.org/html/libvirt-libvirt-domain.html ,
+#   which you may need to search key words ``VIR_PERF_PARAM_*``
 #  (list value)
 # from .libvirt.nova.conf.enabled_perf_events
 {{ if not .libvirt.nova.conf.enabled_perf_events }}#{{ end }}enabled_perf_events = {{ .libvirt.nova.conf.enabled_perf_events | default "" }}
 
-# VM Images format. If default is specified, then use_cow_images flag is used
-# instead of this one. (string value)
+#
+# VM Images format.
+#
+# If default is specified, then use_cow_images flag is used instead of this
+# one.
+#
+# Related options:
+#
+# * virt.use_cow_images
+# * images_volume_group
+#  (string value)
 # Allowed values: raw, flat, qcow2, lvm, rbd, ploop, default
 # from .libvirt.nova.conf.images_type
 {{ if not .libvirt.nova.conf.images_type }}#{{ end }}images_type = {{ .libvirt.nova.conf.images_type | default "default" }}
 
-# LVM Volume Group that is used for VM images, when you specify images_type=lvm.
-# (string value)
+#
+# LVM Volume Group that is used for VM images, when you specify images_type=lvm
+#
+# Related options:
+#
+# * images_type
+#  (string value)
 # from .libvirt.nova.conf.images_volume_group
 {{ if not .libvirt.nova.conf.images_volume_group }}#{{ end }}images_volume_group = {{ .libvirt.nova.conf.images_volume_group | default "<None>" }}
 
+#
 # Create sparse logical volumes (with virtualsize) if this flag is set to True.
-# (boolean value)
+#  (boolean value)
 # from .libvirt.nova.conf.sparse_logical_volumes
 {{ if not .libvirt.nova.conf.sparse_logical_volumes }}#{{ end }}sparse_logical_volumes = {{ .libvirt.nova.conf.sparse_logical_volumes | default "false" }}
 
@@ -6809,15 +7119,22 @@
 # from .libvirt.nova.conf.images_rbd_ceph_conf
 {{ if not .libvirt.nova.conf.images_rbd_ceph_conf }}#{{ end }}images_rbd_ceph_conf = {{ .libvirt.nova.conf.images_rbd_ceph_conf | default "" }}
 
-# Discard option for nova managed disks. Need Libvirt(1.0.6) Qemu1.5 (raw
-# format) Qemu1.6(qcow2 format) (string value)
+#
+# Discard option for nova managed disks.
+#
+# Requires:
+#
+# * Libvirt >= 1.0.6
+# * Qemu >= 1.5 (raw format)
+# * Qemu >= 1.6 (qcow2 format)
+#  (string value)
 # Allowed values: ignore, unmap
 # from .libvirt.nova.conf.hw_disk_discard
 {{ if not .libvirt.nova.conf.hw_disk_discard }}#{{ end }}hw_disk_discard = {{ .libvirt.nova.conf.hw_disk_discard | default "<None>" }}
 
 # DEPRECATED: Allows image information files to be stored in non-standard
 # locations (string value)
-# This option is deprecated for removal.
+# This option is deprecated for removal since 14.0.0.
 # Its value may be silently ignored in the future.
 # Reason: Image info files are no longer used by the image cache
 # from .libvirt.nova.conf.image_info_filename_pattern
@@ -6829,7 +7146,7 @@
 {{ if not .libvirt.nova.conf.remove_unused_resized_minimum_age_seconds }}#{{ end }}remove_unused_resized_minimum_age_seconds = {{ .libvirt.nova.conf.remove_unused_resized_minimum_age_seconds | default "3600" }}
 
 # DEPRECATED: Write a checksum for files in _base to disk (boolean value)
-# This option is deprecated for removal.
+# This option is deprecated for removal since 14.0.0.
 # Its value may be silently ignored in the future.
 # Reason: The image cache no longer periodically calculates checksums of stored
 # images. Data integrity can be checked at the block or filesystem level.
@@ -6837,24 +7154,62 @@
 {{ if not .libvirt.nova.conf.checksum_base_images }}#{{ end }}checksum_base_images = {{ .libvirt.nova.conf.checksum_base_images | default "false" }}
 
 # DEPRECATED: How frequently to checksum base images (integer value)
-# This option is deprecated for removal.
+# This option is deprecated for removal since 14.0.0.
 # Its value may be silently ignored in the future.
 # Reason: The image cache no longer periodically calculates checksums of stored
 # images. Data integrity can be checked at the block or filesystem level.
 # from .libvirt.nova.conf.checksum_interval_seconds
 {{ if not .libvirt.nova.conf.checksum_interval_seconds }}#{{ end }}checksum_interval_seconds = {{ .libvirt.nova.conf.checksum_interval_seconds | default "3600" }}
 
-# Method used to wipe old volumes. (string value)
+#
+# Method used to wipe ephemeral disks when they are deleted. Only takes effect
+# if LVM is set as backing storage.
+#
+# Possible values:
+#
+# * none - do not wipe deleted volumes
+# * zero - overwrite volumes with zeroes
+# * shred - overwrite volume repeatedly
+#
+# Related options:
+#
+# * images_type - must be set to ``lvm``
+# * volume_clear_size
+#  (string value)
 # Allowed values: none, zero, shred
 # from .libvirt.nova.conf.volume_clear
 {{ if not .libvirt.nova.conf.volume_clear }}#{{ end }}volume_clear = {{ .libvirt.nova.conf.volume_clear | default "zero" }}
 
-# Size in MiB to wipe at start of old volumes. 0 => all (integer value)
+#
+# Size of area in MiB, counting from the beginning of the allocated volume,
+# that will be cleared using method set in ``volume_clear`` option.
+#
+# Possible values:
+#
+# * 0 - clear whole volume
+# * >0 - clear specified amount of MiB
+#
+# Related options:
+#
+# * images_type - must be set to ``lvm``
+# * volume_clear - must be set and the value must be different than ``none``
+#   for this option to have any impact
+#  (integer value)
+# Minimum value: 0
 # from .libvirt.nova.conf.volume_clear_size
 {{ if not .libvirt.nova.conf.volume_clear_size }}#{{ end }}volume_clear_size = {{ .libvirt.nova.conf.volume_clear_size | default "0" }}
 
-# Compress snapshot images when possible. This currently applies exclusively to
-# qcow2 images (boolean value)
+#
+# Enable snapshot compression for ``qcow2`` images.
+#
+# Note: you can set ``snapshot_image_format`` to ``qcow2`` to force all
+# snapshots to be in ``qcow2`` format, independently from their original image
+# type.
+#
+# Related options:
+#
+# * snapshot_image_format
+#  (boolean value)
 # from .libvirt.nova.conf.snapshot_compression
 {{ if not .libvirt.nova.conf.snapshot_compression }}#{{ end }}snapshot_compression = {{ .libvirt.nova.conf.snapshot_compression | default "false" }}
 
@@ -6862,66 +7217,143 @@
 # from .libvirt.nova.conf.use_virtio_for_bridges
 {{ if not .libvirt.nova.conf.use_virtio_for_bridges }}#{{ end }}use_virtio_for_bridges = {{ .libvirt.nova.conf.use_virtio_for_bridges | default "true" }}
 
-# Protocols listed here will be accessed directly from QEMU. Currently supported
-# protocols: [gluster] (list value)
+#
+# Protocols listed here will be accessed directly from QEMU.
+#
+# If gluster is present in qemu_allowed_storage_drivers, glusterfs's backend
+# will
+# pass a disk configuration to QEMU. This allows QEMU to access the volume using
+# libgfapi rather than mounting GlusterFS via fuse.
+#
+# Possible values:
+#
+# * [gluster]
+#  (list value)
 # from .libvirt.nova.conf.qemu_allowed_storage_drivers
 {{ if not .libvirt.nova.conf.qemu_allowed_storage_drivers }}#{{ end }}qemu_allowed_storage_drivers = {{ .libvirt.nova.conf.qemu_allowed_storage_drivers | default "" }}
 
-# Use multipath connection of the iSCSI or FC volume (boolean value)
+#
+# Use multipath connection of the iSCSI or FC volume
+#
+# Volumes can be connected in the LibVirt as multipath devices. This will
+# provide high availability and fault tolerance.
+#  (boolean value)
 # Deprecated group/name - [libvirt]/iscsi_use_multipath
 # from .libvirt.nova.conf.volume_use_multipath
 {{ if not .libvirt.nova.conf.volume_use_multipath }}#{{ end }}volume_use_multipath = {{ .libvirt.nova.conf.volume_use_multipath | default "false" }}
 
-# Number of times to rediscover AoE target to find volume (integer value)
+#
+# Number of times to rediscover AoE target to find volume.
+#
+# Nova provides support for block storage attaching to hosts via AOE (ATA over
+# Ethernet). This option allows the user to specify the maximum number of retry
+# attempts that can be made to discover the AoE device.
+#  (integer value)
 # from .libvirt.nova.conf.num_aoe_discover_tries
 {{ if not .libvirt.nova.conf.num_aoe_discover_tries }}#{{ end }}num_aoe_discover_tries = {{ .libvirt.nova.conf.num_aoe_discover_tries | default "3" }}
 
-# Directory where the glusterfs volume is mounted on the compute node (string
-# value)
+#
+# Absolute path to the directory where the glusterfs volume is mounted on the
+# compute node.
+#  (string value)
 # from .libvirt.nova.conf.glusterfs_mount_point_base
 {{ if not .libvirt.nova.conf.glusterfs_mount_point_base }}#{{ end }}glusterfs_mount_point_base = {{ .libvirt.nova.conf.glusterfs_mount_point_base | default "$state_path/mnt" }}
 
-# Number of times to rescan iSCSI target to find volume (integer value)
+#
+# Number of times to scan iSCSI target to find volume.
+#  (integer value)
 # from .libvirt.nova.conf.num_iscsi_scan_tries
 {{ if not .libvirt.nova.conf.num_iscsi_scan_tries }}#{{ end }}num_iscsi_scan_tries = {{ .libvirt.nova.conf.num_iscsi_scan_tries | default "5" }}
 
+#
 # The iSCSI transport iface to use to connect to target in case offload support
-# is desired. Default format is of the form <transport_name>.<hwaddress> where
+# is desired.
+#
+# Default format is of the form <transport_name>.<hwaddress> where
 # <transport_name> is one of (be2iscsi, bnx2i, cxgb3i, cxgb4i, qla4xxx, ocs) and
 # <hwaddress> is the MAC address of the interface and can be generated via the
 # iscsiadm -m iface command. Do not confuse the iscsi_iface parameter to be
-# provided here with the actual transport name. (string value)
+# provided here with the actual transport name.
+#  (string value)
 # Deprecated group/name - [libvirt]/iscsi_transport
 # from .libvirt.nova.conf.iscsi_iface
 {{ if not .libvirt.nova.conf.iscsi_iface }}#{{ end }}iscsi_iface = {{ .libvirt.nova.conf.iscsi_iface | default "<None>" }}
 
-# Number of times to rescan iSER target to find volume (integer value)
+#
+# Number of times to scan iSER target to find volume.
+#
+# iSER is a server network protocol that extends iSCSI protocol to use Remote
+# Direct Memory Access (RDMA). This option allows the user to specify the
+# maximum
+# number of scan attempts that can be made to find iSER volume.
+#  (integer value)
 # from .libvirt.nova.conf.num_iser_scan_tries
 {{ if not .libvirt.nova.conf.num_iser_scan_tries }}#{{ end }}num_iser_scan_tries = {{ .libvirt.nova.conf.num_iser_scan_tries | default "5" }}
 
-# Use multipath connection of the iSER volume (boolean value)
+#
+# Use multipath connection of the iSER volume.
+#
+# iSER volumes can be connected as multipath devices. This will provide high
+# availability and fault tolerance.
+#  (boolean value)
 # from .libvirt.nova.conf.iser_use_multipath
 {{ if not .libvirt.nova.conf.iser_use_multipath }}#{{ end }}iser_use_multipath = {{ .libvirt.nova.conf.iser_use_multipath | default "false" }}
 
-# The RADOS client name for accessing rbd volumes (string value)
+#
+# The RADOS client name for accessing rbd(RADOS Block Devices) volumes.
+#
+# Libvirt will refer to this user when connecting and authenticating with
+# the Ceph RBD server.
+#  (string value)
 # from .libvirt.nova.conf.rbd_user
 {{ if not .libvirt.nova.conf.rbd_user }}#{{ end }}rbd_user = {{ .libvirt.nova.conf.rbd_user | default "<None>" }}
 
-# The libvirt UUID of the secret for the rbd_uservolumes (string value)
+#
+# The libvirt UUID of the secret for the rbd_user volumes.
+#  (string value)
 # from .libvirt.nova.conf.rbd_secret_uuid
 {{ if not .libvirt.nova.conf.rbd_secret_uuid }}#{{ end }}rbd_secret_uuid = {{ .libvirt.nova.conf.rbd_secret_uuid | default "<None>" }}
 
-# Directory where the NFS volume is mounted on the compute node (string value)
+#
+# Directory where the NFS volume is mounted on the compute node.
+# The default is 'mnt' directory of the location where nova's Python module
+# is installed.
+#
+# NFS provides shared storage for the OpenStack Block Storage service.
+#
+# Possible values:
+#
+# * A string representing absolute path of mount point.
+#  (string value)
 # from .libvirt.nova.conf.nfs_mount_point_base
 {{ if not .libvirt.nova.conf.nfs_mount_point_base }}#{{ end }}nfs_mount_point_base = {{ .libvirt.nova.conf.nfs_mount_point_base | default "$state_path/mnt" }}
 
-# Mount options passed to the NFS client. See section of the nfs man page for
-# details (string value)
+#
+# Mount options passed to the NFS client. See section of the nfs man page
+# for details.
+#
+# Mount options controls the way the filesystem is mounted and how the
+# NFS client behaves when accessing files on this mount point.
+#
+# Possible values:
+#
+# * Any string representing mount options separated by commas.
+# * Example string: vers=3,lookupcache=pos
+#  (string value)
 # from .libvirt.nova.conf.nfs_mount_options
 {{ if not .libvirt.nova.conf.nfs_mount_options }}#{{ end }}nfs_mount_options = {{ .libvirt.nova.conf.nfs_mount_options | default "<None>" }}
 
-# Directory where the Quobyte volume is mounted on the compute node (string
-# value)
+#
+# Directory where the Quobyte volume is mounted on the compute node.
+#
+# Nova supports Quobyte volume driver that enables storing Block Storage
+# service volumes on a Quobyte storage back end. This Option sepcifies the
+# path of the directory where Quobyte volume is mounted.
+#
+# Possible values:
+#
+# * A string representing absolute path of mount point.
+#  (string value)
 # from .libvirt.nova.conf.quobyte_mount_point_base
 {{ if not .libvirt.nova.conf.quobyte_mount_point_base }}#{{ end }}quobyte_mount_point_base = {{ .libvirt.nova.conf.quobyte_mount_point_base | default "$state_path/mnt" }}
 
@@ -6929,26 +7361,58 @@
 # from .libvirt.nova.conf.quobyte_client_cfg
 {{ if not .libvirt.nova.conf.quobyte_client_cfg }}#{{ end }}quobyte_client_cfg = {{ .libvirt.nova.conf.quobyte_client_cfg | default "<None>" }}
 
-# Path or URL to Scality SOFS configuration file (string value)
+#
+# Path or URL to Scality SOFS(Scale-Out File Server) configuration file.
+#
+# The Scality SOFS provides OpenStack users the option of storing their
+# data on a high capacity, replicated, highly available Scality Ring object
+# storage cluster.
+#  (string value)
 # from .libvirt.nova.conf.scality_sofs_config
 {{ if not .libvirt.nova.conf.scality_sofs_config }}#{{ end }}scality_sofs_config = {{ .libvirt.nova.conf.scality_sofs_config | default "<None>" }}
 
-# Base dir where Scality SOFS shall be mounted (string value)
+#
+# Base dir where Scality SOFS shall be mounted.
+#
+# The Scality volume driver in Nova mounts SOFS and lets the hypervisor access
+# the volumes.
+#
+# Possible values:
+#
+# * $state_path/scality where state_path is a config option that specifies
+#   the top-level directory for maintaining nova's state or Any string
+#   containing the full directory path.
+#  (string value)
 # from .libvirt.nova.conf.scality_sofs_mount_point
 {{ if not .libvirt.nova.conf.scality_sofs_mount_point }}#{{ end }}scality_sofs_mount_point = {{ .libvirt.nova.conf.scality_sofs_mount_point | default "$state_path/scality" }}
 
-# Directory where the SMBFS shares are mounted on the compute node (string
-# value)
+#
+# Directory where the SMBFS shares are mounted on the compute node.
+#  (string value)
 # from .libvirt.nova.conf.smbfs_mount_point_base
 {{ if not .libvirt.nova.conf.smbfs_mount_point_base }}#{{ end }}smbfs_mount_point_base = {{ .libvirt.nova.conf.smbfs_mount_point_base | default "$state_path/mnt" }}
 
-# Mount options passed to the SMBFS client. See mount.cifs man page for details.
-# Note that the libvirt-qemu uid and gid must be specified. (string value)
+#
+# Mount options passed to the SMBFS client.
+#
+# Provide SMBFS options as a single string containing all parameters.
+# See mount.cifs man page for  details. Note that the libvirt-qemu ``uid``
+# and ``gid`` must be specified.
+#  (string value)
 # from .libvirt.nova.conf.smbfs_mount_options
 {{ if not .libvirt.nova.conf.smbfs_mount_options }}#{{ end }}smbfs_mount_options = {{ .libvirt.nova.conf.smbfs_mount_options | default "" }}
 
-# Use ssh or rsync transport for creating, copying, removing files on the remote
-# host. (string value)
+#
+# libvirt's transport method for remote file operations.
+#
+# Because libvirt cannot use RPC to copy files over network to/from other
+# compute nodes, other method must be used for:
+#
+# * creating directory on remote host
+# * creating file on remote host
+# * removing file from remote host
+# * copying file to remote host
+#  (string value)
 # Allowed values: ssh, rsync
 # from .libvirt.nova.conf.remote_filesystem_transport
 {{ if not .libvirt.nova.conf.remote_filesystem_transport }}#{{ end }}remote_filesystem_transport = {{ .libvirt.nova.conf.remote_filesystem_transport | default "ssh" }}
@@ -6959,13 +7423,9 @@
 #
 # This option defines non-standard mountpoint for Vzstorage cluster.
 #
-# * Services that use this:
+# Related options:
 #
-#     ``nova-compute``
-#
-# * Related options:
-#
-#     vzstorage_mount_* group of parameters
+# * vzstorage_mount_* group of parameters
 #  (string value)
 # from .libvirt.nova.conf.vzstorage_mount_point_base
 {{ if not .libvirt.nova.conf.vzstorage_mount_point_base }}#{{ end }}vzstorage_mount_point_base = {{ .libvirt.nova.conf.vzstorage_mount_point_base | default "$state_path/mnt" }}
@@ -6975,13 +7435,9 @@
 #
 # This option defines the owner user of Vzstorage cluster mountpoint.
 #
-# * Services that use this:
+# Related options:
 #
-#     ``nova-compute``
-#
-# * Related options:
-#
-#     vzstorage_mount_* group of parameters
+# * vzstorage_mount_* group of parameters
 #  (string value)
 # from .libvirt.nova.conf.vzstorage_mount_user
 {{ if not .libvirt.nova.conf.vzstorage_mount_user }}#{{ end }}vzstorage_mount_user = {{ .libvirt.nova.conf.vzstorage_mount_user | default "stack" }}
@@ -6991,13 +7447,9 @@
 #
 # This option defines the owner group of Vzstorage cluster mountpoint.
 #
-# * Services that use this:
+# Related options:
 #
-#     ``nova-compute``
-#
-# * Related options:
-#
-#     vzstorage_mount_* group of parameters
+# * vzstorage_mount_* group of parameters
 #  (string value)
 # from .libvirt.nova.conf.vzstorage_mount_group
 {{ if not .libvirt.nova.conf.vzstorage_mount_group }}#{{ end }}vzstorage_mount_group = {{ .libvirt.nova.conf.vzstorage_mount_group | default "qemu" }}
@@ -7010,13 +7462,9 @@
 # It consists of one to four digits ranging from 0 to 7, with missing
 # lead digits assumed to be 0's.
 #
-# * Services that use this:
+# Related options:
 #
-#     ``nova-compute``
-#
-# * Related options:
-#
-#     vzstorage_mount_* group of parameters
+# * vzstorage_mount_* group of parameters
 #  (string value)
 # from .libvirt.nova.conf.vzstorage_mount_perms
 {{ if not .libvirt.nova.conf.vzstorage_mount_perms }}#{{ end }}vzstorage_mount_perms = {{ .libvirt.nova.conf.vzstorage_mount_perms | default "0770" }}
@@ -7028,13 +7476,9 @@
 # it should include "%(cluster_name)s" template to separate
 # logs from multiple shares.
 #
-# * Services that use this:
+# Related options:
 #
-#     ``nova-compute``
-#
-# * Related options:
-#
-#     vzstorage_mount_opts may include more detailed logging options.
+# * vzstorage_mount_opts may include more detailed logging options.
 #  (string value)
 # from .libvirt.nova.conf.vzstorage_log_path
 {{ if not .libvirt.nova.conf.vzstorage_log_path }}#{{ end }}vzstorage_log_path = {{ .libvirt.nova.conf.vzstorage_log_path | default "/var/log/pstorage/%(cluster_name)s/nova.log.gz" }}
@@ -7056,13 +7500,9 @@
 # This option defines the path which should include "%(cluster_name)s"
 # template to separate caches from multiple shares.
 #
-# * Services that use this:
+# Related options:
 #
-#     ``nova-compute``
-#
-# * Related options:
-#
-#     vzstorage_mount_opts may include more detailed cache options.
+# * vzstorage_mount_opts may include more detailed cache options.
 #  (string value)
 # from .libvirt.nova.conf.vzstorage_cache_path
 {{ if not .libvirt.nova.conf.vzstorage_cache_path }}#{{ end }}vzstorage_cache_path = {{ .libvirt.nova.conf.vzstorage_cache_path | default "<None>" }}
@@ -7077,13 +7517,9 @@
 # Shouldn't include -c, -l, -C, -u, -g and -m as those have
 # explicit vzstorage_* options.
 #
-# * Services that use this:
+# Related options:
 #
-#     ``nova-compute``
-#
-# * Related options:
-#
-#     All other vzstorage_* options
+# * All other vzstorage_* options
 #  (list value)
 # from .libvirt.nova.conf.vzstorage_mount_opts
 {{ if not .libvirt.nova.conf.vzstorage_mount_opts }}#{{ end }}vzstorage_mount_opts = {{ .libvirt.nova.conf.vzstorage_mount_opts | default "" }}
@@ -7118,7 +7554,7 @@
 # from .matchmaker_redis.oslo.messaging.password
 {{ if not .matchmaker_redis.oslo.messaging.password }}#{{ end }}password = {{ .matchmaker_redis.oslo.messaging.password | default "" }}
 
-# DEPRECATED: List of Redis Sentinel hosts (fault tolerance mode) e.g.
+# DEPRECATED: List of Redis Sentinel hosts (fault tolerance mode), e.g.,
 # [host:port, host1:port ... ] (list value)
 # This option is deprecated for removal.
 # Its value may be silently ignored in the future.
@@ -7138,12 +7574,17 @@
 # from .matchmaker_redis.oslo.messaging.check_timeout
 {{ if not .matchmaker_redis.oslo.messaging.check_timeout }}#{{ end }}check_timeout = {{ .matchmaker_redis.oslo.messaging.check_timeout | default "20000" }}
 
-# Timeout in ms on blocking socket operations (integer value)
+# Timeout in ms on blocking socket operations. (integer value)
 # from .matchmaker_redis.oslo.messaging.socket_timeout
 {{ if not .matchmaker_redis.oslo.messaging.socket_timeout }}#{{ end }}socket_timeout = {{ .matchmaker_redis.oslo.messaging.socket_timeout | default "10000" }}
 
 
 [metrics]
+#
+# Configuration options for metrics
+#
+# Options under this group allow to adjust how values assigned to metrics are
+# calculated.
 
 #
 # From nova.conf
@@ -7156,30 +7597,26 @@
 # as
 # follows:
 #
-#     * Greater than 1.0: increases the effect of the metric on overall weight.
-#
-#     * Equal to 1.0: No change to the calculated weight.
-#
-#     * Less than 1.0, greater than 0: reduces the effect of the metric on
-#     overall weight.
-#
-#     * 0: The metric value is ignored, and the value of the
-#     'weight_of_unavailable' option is returned instead.
-#
-#     * Greater than -1.0, less than 0: the effect is reduced and reversed.
-#
-#     * -1.0: the effect is reversed
-#
-#     * Less than -1.0: the effect is increased proportionally and reversed.
-#
-# Valid values are numeric, either integer or float.
+# * >1.0: increases the effect of the metric on overall weight
+# * 1.0: no change to the calculated weight
+# * >0.0,<1.0: reduces the effect of the metric on overall weight
+# * 0.0: the metric value is ignored, and the value of the
+#   'weight_of_unavailable' option is returned instead
+# * >-1.0,<0.0: the effect is reduced and reversed
+# * -1.0: the effect is reversed
+# * <-1.0: the effect is increased proportionally and reversed
 #
 # This option is only used by the FilterScheduler and its subclasses; if you use
 # a different scheduler, this option has no effect.
 #
-# * Related options:
+# Possible values:
 #
-#     weight_of_unavailable
+# * An integer or float value, where the value corresponds to the multipler
+#   ratio for this weigher.
+#
+# Related options:
+#
+# * weight_of_unavailable
 #  (floating point value)
 # from .metrics.nova.conf.weight_multiplier
 {{ if not .metrics.nova.conf.weight_multiplier }}#{{ end }}weight_multiplier = {{ .metrics.nova.conf.weight_multiplier | default "1.0" }}
@@ -7205,9 +7642,16 @@
 # This option is only used by the FilterScheduler and its subclasses; if you use
 # a different scheduler, this option has no effect.
 #
-# * Related options:
+# Possible values:
 #
-#     weight_of_unavailable
+# * A list of zero or more key/value pairs separated by commas, where the key is
+#   a string representing the name of a metric and the value is a numeric weight
+#   for that metric. If any value is set to 0, the value is ignored and the
+#   weight will be set to the value of the 'weight_of_unavailable' option.
+#
+# Related options:
+#
+# * weight_of_unavailable
 #  (list value)
 # from .metrics.nova.conf.weight_setting
 {{ if not .metrics.nova.conf.weight_setting }}#{{ end }}weight_setting = {{ .metrics.nova.conf.weight_setting | default "" }}
@@ -7219,16 +7663,17 @@
 # exception, so it is recommended to also use the MetricFilter to filter out
 # those hosts before weighing.
 #
-# When this option is False, any metric being unavailable for a host will set
-# the
-# host weight to 'weight_of_unavailable'.
-#
 # This option is only used by the FilterScheduler and its subclasses; if you use
 # a different scheduler, this option has no effect.
 #
-# * Related options:
+# Possible values:
 #
-#     weight_of_unavailable
+# * True or False, where False ensures any metric being unavailable for a host
+#   will set the host weight to 'weight_of_unavailable'.
+#
+# Related options:
+#
+# * weight_of_unavailable
 #  (boolean value)
 # from .metrics.nova.conf.required
 {{ if not .metrics.nova.conf.required }}#{{ end }}required = {{ .metrics.nova.conf.required | default "true" }}
@@ -7237,22 +7682,24 @@
 # When any of the following conditions are met, this value will be used in place
 # of any actual metric value:
 #
-#     * One of the metrics named in 'weight_setting' is not available for a
-# host,
-#     and the value of 'required' is False.
-#
-#     * The ratio specified for a metric in 'weight_setting' is 0.
-#
-#     * The 'weight_multiplier' option is set to 0.
+# * One of the metrics named in 'weight_setting' is not available for a host,
+#   and the value of 'required' is False
+# * The ratio specified for a metric in 'weight_setting' is 0
+# * The 'weight_multiplier' option is set to 0
 #
 # This option is only used by the FilterScheduler and its subclasses; if you use
 # a different scheduler, this option has no effect.
 #
-# * Related options:
+# Possible values:
 #
-#     weight_setting
-#     required
-#     weight_multiplier
+# * An integer or float value, where the value corresponds to the multipler
+#   ratio for this weigher.
+#
+# Related options:
+#
+# * weight_setting
+# * required
+# * weight_multiplier
 #  (floating point value)
 # from .metrics.nova.conf.weight_of_unavailable
 {{ if not .metrics.nova.conf.weight_of_unavailable }}#{{ end }}weight_of_unavailable = {{ .metrics.nova.conf.weight_of_unavailable | default "-10000.0" }}
@@ -7477,6 +7924,89 @@
 {{ if not .neutron.nova.conf.tenant_name }}#{{ end }}tenant_name = {{ .neutron.nova.conf.tenant_name | default "<None>" }}
 
 
+[notifications]
+#
+# Most of the actions in Nova which manipulate the system state generate
+# notifications which are posted to the messaging component (e.g. RabbitMQ) and
+# can be consumed by any service outside the Openstack. More technical details
+# at http://docs.openstack.org/developer/nova/notifications.html
+
+#
+# From nova.conf
+#
+
+#
+# If set, send compute.instance.update notifications on instance state
+# changes.
+#
+# Please refer to https://wiki.openstack.org/wiki/SystemUsageData for
+# additional information on notifications.
+#
+# Possible values:
+#
+# * None - no notifications
+# * "vm_state" - notifications on VM state changes
+# * "vm_and_task_state" - notifications on VM and task state changes
+#  (string value)
+# Allowed values: <None>, vm_state, vm_and_task_state
+# Deprecated group/name - [DEFAULT]/notify_on_state_change
+# from .notifications.nova.conf.notify_on_state_change
+{{ if not .notifications.nova.conf.notify_on_state_change }}#{{ end }}notify_on_state_change = {{ .notifications.nova.conf.notify_on_state_change | default "<None>" }}
+
+#
+# If enabled, send api.fault notifications on caught exceptions in the
+# API service.
+#  (boolean value)
+# Deprecated group/name - [DEFAULT]/notify_api_faults
+# from .notifications.nova.conf.notify_on_api_faults
+{{ if not .notifications.nova.conf.notify_on_api_faults }}#{{ end }}notify_on_api_faults = {{ .notifications.nova.conf.notify_on_api_faults | default "false" }}
+
+# Default notification level for outgoing notifications. (string value)
+# Allowed values: DEBUG, INFO, WARN, ERROR, CRITICAL
+# Deprecated group/name - [DEFAULT]/default_notification_level
+# from .notifications.nova.conf.default_level
+{{ if not .notifications.nova.conf.default_level }}#{{ end }}default_level = {{ .notifications.nova.conf.default_level | default "INFO" }}
+
+#
+# Default publisher_id for outgoing notifications. If you consider routing
+# notifications using different publisher, change this value accordingly.
+#
+# Possible values:
+#
+# * Defaults to the IPv4 address of this host, but it can be any valid
+#   oslo.messaging publisher_id
+#
+# Related options:
+#
+# *  my_ip - IP address of this host
+#  (string value)
+# Deprecated group/name - [DEFAULT]/default_publisher_id
+# from .notifications.nova.conf.default_publisher_id
+{{ if not .notifications.nova.conf.default_publisher_id }}#{{ end }}default_publisher_id = {{ .notifications.nova.conf.default_publisher_id | default "$my_ip" }}
+
+#
+# Specifies which notification format shall be used by nova.
+#
+# The default value is fine for most deployments and rarely needs to be changed.
+# This value can be set to 'versioned' once the infrastructure moves closer to
+# consuming the newer format of notifications. After this occurs, this option
+# will be removed (possibly in the "P" release).
+#
+# Possible values:
+# * unversioned: Only the legacy unversioned notifications are emitted.
+# * versioned: Only the new versioned notifications are emitted.
+# * both: Both the legacy unversioned and the new versioned notifications are
+#   emitted. (Default)
+#
+# The list of versioned notifications is visible in
+# http://docs.openstack.org/developer/nova/notifications.html
+#  (string value)
+# Allowed values: unversioned, versioned, both
+# Deprecated group/name - [DEFAULT]/notification_format
+# from .notifications.nova.conf.notification_format
+{{ if not .notifications.nova.conf.notification_format }}#{{ end }}notification_format = {{ .notifications.nova.conf.notification_format | default "both" }}
+
+
 [osapi_v21]
 
 #
@@ -7485,10 +8015,6 @@
 
 # DEPRECATED:
 # This option is a list of all of the v2.1 API extensions to never load.
-# However,
-# it will be removed in the near future, after which all the functionality
-# that was previously in extensions will be part of the standard API, and thus
-# always accessible.
 #
 # Possible values:
 #
@@ -7500,9 +8026,11 @@
 # * enabled
 # * extensions_whitelist
 #  (list value)
-# Deprecated group/name - [osapi_v21]/extensions_blacklist
-# This option is deprecated for removal.
+# This option is deprecated for removal since 12.0.0.
 # Its value may be silently ignored in the future.
+# Reason:
+# API extensions are now part of the standard API. API extensions should be
+# disabled using policy, rather than via these configuration options.
 # from .osapi_v21.nova.conf.extensions_blacklist
 {{ if not .osapi_v21.nova.conf.extensions_blacklist }}#{{ end }}extensions_blacklist = {{ .osapi_v21.nova.conf.extensions_blacklist | default "" }}
 
@@ -7511,10 +8039,7 @@
 # those specified in the extensions_blacklist option will be loaded. If it is
 # not
 # empty, then only those extensions in this list will be loaded, provided that
-# they are also not in the extensions_blacklist option. Once this deprecated
-# option is removed, after which the all the functionality that was previously
-# in
-# extensions will be part of the standard API, and thus always accessible.
+# they are also not in the extensions_blacklist option.
 #
 # Possible values:
 #
@@ -7526,9 +8051,11 @@
 # * enabled
 # * extensions_blacklist
 #  (list value)
-# Deprecated group/name - [osapi_v21]/extensions_whitelist
-# This option is deprecated for removal.
+# This option is deprecated for removal since 12.0.0.
 # Its value may be silently ignored in the future.
+# Reason:
+# API extensions are now part of the standard API. API extensions should be
+# disabled using policy, rather than via these configuration options.
 # from .osapi_v21.nova.conf.extensions_whitelist
 {{ if not .osapi_v21.nova.conf.extensions_whitelist }}#{{ end }}extensions_whitelist = {{ .osapi_v21.nova.conf.extensions_whitelist | default "" }}
 
@@ -7541,9 +8068,13 @@
 #
 # * A string representing any legal regular expression
 #  (string value)
-# Deprecated group/name - [osapi_v21]/project_id_regex
-# This option is deprecated for removal.
+# This option is deprecated for removal since 13.0.0.
 # Its value may be silently ignored in the future.
+# Reason:
+# Recent versions of nova constrain project IDs to hexadecimal characters and
+# dashes. If your installation uses IDs outside of this range, you should use
+# this option to provide your own regex and give you time to migrate offending
+# projects to valid IDs before the next release.
 # from .osapi_v21.nova.conf.project_id_regex
 {{ if not .osapi_v21.nova.conf.project_id_regex }}#{{ end }}project_id_regex = {{ .osapi_v21.nova.conf.project_id_regex | default "<None>" }}
 
@@ -7590,17 +8121,18 @@
 # from .oslo_messaging_amqp.oslo.messaging.trace
 {{ if not .oslo_messaging_amqp.oslo.messaging.trace }}#{{ end }}trace = {{ .oslo_messaging_amqp.oslo.messaging.trace | default "false" }}
 
-# CA certificate PEM file to verify server certificate (string value)
+# CA certificate PEM file used to verify the server's certificate (string value)
 # Deprecated group/name - [amqp1]/ssl_ca_file
 # from .oslo_messaging_amqp.oslo.messaging.ssl_ca_file
 {{ if not .oslo_messaging_amqp.oslo.messaging.ssl_ca_file }}#{{ end }}ssl_ca_file = {{ .oslo_messaging_amqp.oslo.messaging.ssl_ca_file | default "" }}
 
-# Identifying certificate PEM file to present to clients (string value)
+# Self-identifying certificate PEM file for client authentication (string value)
 # Deprecated group/name - [amqp1]/ssl_cert_file
 # from .oslo_messaging_amqp.oslo.messaging.ssl_cert_file
 {{ if not .oslo_messaging_amqp.oslo.messaging.ssl_cert_file }}#{{ end }}ssl_cert_file = {{ .oslo_messaging_amqp.oslo.messaging.ssl_cert_file | default "" }}
 
-# Private key PEM file used to sign cert_file certificate (string value)
+# Private key PEM file used to sign ssl_cert_file certificate (optional) (string
+# value)
 # Deprecated group/name - [amqp1]/ssl_key_file
 # from .oslo_messaging_amqp.oslo.messaging.ssl_key_file
 {{ if not .oslo_messaging_amqp.oslo.messaging.ssl_key_file }}#{{ end }}ssl_key_file = {{ .oslo_messaging_amqp.oslo.messaging.ssl_key_file | default "" }}
@@ -7610,8 +8142,11 @@
 # from .oslo_messaging_amqp.oslo.messaging.ssl_key_password
 {{ if not .oslo_messaging_amqp.oslo.messaging.ssl_key_password }}#{{ end }}ssl_key_password = {{ .oslo_messaging_amqp.oslo.messaging.ssl_key_password | default "<None>" }}
 
-# Accept clients using either SSL or plain TCP (boolean value)
+# DEPRECATED: Accept clients using either SSL or plain TCP (boolean value)
 # Deprecated group/name - [amqp1]/allow_insecure_clients
+# This option is deprecated for removal.
+# Its value may be silently ignored in the future.
+# Reason: Not applicable - not a SSL server
 # from .oslo_messaging_amqp.oslo.messaging.allow_insecure_clients
 {{ if not .oslo_messaging_amqp.oslo.messaging.allow_insecure_clients }}#{{ end }}allow_insecure_clients = {{ .oslo_messaging_amqp.oslo.messaging.allow_insecure_clients | default "false" }}
 
@@ -7663,8 +8198,13 @@
 # from .oslo_messaging_amqp.oslo.messaging.link_retry_delay
 {{ if not .oslo_messaging_amqp.oslo.messaging.link_retry_delay }}#{{ end }}link_retry_delay = {{ .oslo_messaging_amqp.oslo.messaging.link_retry_delay | default "10" }}
 
-# The deadline for an rpc reply message delivery. Only used when caller does not
-# provide a timeout expiry. (integer value)
+# The maximum number of attempts to re-send a reply message which failed due to
+# a recoverable error. (integer value)
+# Minimum value: -1
+# from .oslo_messaging_amqp.oslo.messaging.default_reply_retry
+{{ if not .oslo_messaging_amqp.oslo.messaging.default_reply_retry }}#{{ end }}default_reply_retry = {{ .oslo_messaging_amqp.oslo.messaging.default_reply_retry | default "0" }}
+
+# The deadline for an rpc reply message delivery. (integer value)
 # Minimum value: 5
 # from .oslo_messaging_amqp.oslo.messaging.default_reply_timeout
 {{ if not .oslo_messaging_amqp.oslo.messaging.default_reply_timeout }}#{{ end }}default_reply_timeout = {{ .oslo_messaging_amqp.oslo.messaging.default_reply_timeout | default "30" }}
@@ -7680,6 +8220,12 @@
 # Minimum value: 5
 # from .oslo_messaging_amqp.oslo.messaging.default_notify_timeout
 {{ if not .oslo_messaging_amqp.oslo.messaging.default_notify_timeout }}#{{ end }}default_notify_timeout = {{ .oslo_messaging_amqp.oslo.messaging.default_notify_timeout | default "30" }}
+
+# The duration to schedule a purge of idle sender links. Detach link after
+# expiry. (integer value)
+# Minimum value: 1
+# from .oslo_messaging_amqp.oslo.messaging.default_sender_link_timeout
+{{ if not .oslo_messaging_amqp.oslo.messaging.default_sender_link_timeout }}#{{ end }}default_sender_link_timeout = {{ .oslo_messaging_amqp.oslo.messaging.default_sender_link_timeout | default "600" }}
 
 # Indicates the addressing mode used by the driver.
 # Permitted values:
@@ -7762,6 +8308,78 @@
 # Minimum value: 1
 # from .oslo_messaging_amqp.oslo.messaging.notify_server_credit
 {{ if not .oslo_messaging_amqp.oslo.messaging.notify_server_credit }}#{{ end }}notify_server_credit = {{ .oslo_messaging_amqp.oslo.messaging.notify_server_credit | default "100" }}
+
+# Send messages of this type pre-settled.
+# Pre-settled messages will not receive acknowledgement
+# from the peer. Note well: pre-settled messages may be
+# silently discarded if the delivery fails.
+# Permitted values:
+# 'rpc-call' - send RPC Calls pre-settled
+# 'rpc-reply'- send RPC Replies pre-settled
+# 'rpc-cast' - Send RPC Casts pre-settled
+# 'notify'   - Send Notifications pre-settled
+#  (multi valued)
+# from .oslo_messaging_amqp.oslo.messaging.pre_settled (multiopt)
+{{ if not .oslo_messaging_amqp.oslo.messaging.pre_settled }}#pre_settled = {{ .oslo_messaging_amqp.oslo.messaging.pre_settled | default "rpc-cast" }}{{ else }}{{ range .oslo_messaging_amqp.oslo.messaging.pre_settled }}pre_settled = {{ . }}{{ end }}{{ end }}
+# from .oslo_messaging_amqp.oslo.messaging.pre_settled (multiopt)
+{{ if not .oslo_messaging_amqp.oslo.messaging.pre_settled }}#pre_settled = {{ .oslo_messaging_amqp.oslo.messaging.pre_settled | default "rpc-reply" }}{{ else }}{{ range .oslo_messaging_amqp.oslo.messaging.pre_settled }}pre_settled = {{ . }}{{ end }}{{ end }}
+
+
+[oslo_messaging_kafka]
+
+#
+# From oslo.messaging
+#
+
+# DEPRECATED: Default Kafka broker Host (string value)
+# This option is deprecated for removal.
+# Its value may be silently ignored in the future.
+# Reason: Replaced by [DEFAULT]/transport_url
+# from .oslo_messaging_kafka.oslo.messaging.kafka_default_host
+{{ if not .oslo_messaging_kafka.oslo.messaging.kafka_default_host }}#{{ end }}kafka_default_host = {{ .oslo_messaging_kafka.oslo.messaging.kafka_default_host | default "localhost" }}
+
+# DEPRECATED: Default Kafka broker Port (port value)
+# Minimum value: 0
+# Maximum value: 65535
+# This option is deprecated for removal.
+# Its value may be silently ignored in the future.
+# Reason: Replaced by [DEFAULT]/transport_url
+# from .oslo_messaging_kafka.oslo.messaging.kafka_default_port
+{{ if not .oslo_messaging_kafka.oslo.messaging.kafka_default_port }}#{{ end }}kafka_default_port = {{ .oslo_messaging_kafka.oslo.messaging.kafka_default_port | default "9092" }}
+
+# Max fetch bytes of Kafka consumer (integer value)
+# from .oslo_messaging_kafka.oslo.messaging.kafka_max_fetch_bytes
+{{ if not .oslo_messaging_kafka.oslo.messaging.kafka_max_fetch_bytes }}#{{ end }}kafka_max_fetch_bytes = {{ .oslo_messaging_kafka.oslo.messaging.kafka_max_fetch_bytes | default "1048576" }}
+
+# Default timeout(s) for Kafka consumers (integer value)
+# from .oslo_messaging_kafka.oslo.messaging.kafka_consumer_timeout
+{{ if not .oslo_messaging_kafka.oslo.messaging.kafka_consumer_timeout }}#{{ end }}kafka_consumer_timeout = {{ .oslo_messaging_kafka.oslo.messaging.kafka_consumer_timeout | default "1.0" }}
+
+# Pool Size for Kafka Consumers (integer value)
+# from .oslo_messaging_kafka.oslo.messaging.pool_size
+{{ if not .oslo_messaging_kafka.oslo.messaging.pool_size }}#{{ end }}pool_size = {{ .oslo_messaging_kafka.oslo.messaging.pool_size | default "10" }}
+
+# The pool size limit for connections expiration policy (integer value)
+# from .oslo_messaging_kafka.oslo.messaging.conn_pool_min_size
+{{ if not .oslo_messaging_kafka.oslo.messaging.conn_pool_min_size }}#{{ end }}conn_pool_min_size = {{ .oslo_messaging_kafka.oslo.messaging.conn_pool_min_size | default "2" }}
+
+# The time-to-live in sec of idle connections in the pool (integer value)
+# from .oslo_messaging_kafka.oslo.messaging.conn_pool_ttl
+{{ if not .oslo_messaging_kafka.oslo.messaging.conn_pool_ttl }}#{{ end }}conn_pool_ttl = {{ .oslo_messaging_kafka.oslo.messaging.conn_pool_ttl | default "1200" }}
+
+# Group id for Kafka consumer. Consumers in one group will coordinate message
+# consumption (string value)
+# from .oslo_messaging_kafka.oslo.messaging.consumer_group
+{{ if not .oslo_messaging_kafka.oslo.messaging.consumer_group }}#{{ end }}consumer_group = {{ .oslo_messaging_kafka.oslo.messaging.consumer_group | default "oslo_messaging_consumer" }}
+
+# Upper bound on the delay for KafkaProducer batching in seconds (floating point
+# value)
+# from .oslo_messaging_kafka.oslo.messaging.producer_batch_timeout
+{{ if not .oslo_messaging_kafka.oslo.messaging.producer_batch_timeout }}#{{ end }}producer_batch_timeout = {{ .oslo_messaging_kafka.oslo.messaging.producer_batch_timeout | default "0.0" }}
+
+# Size of batch for the producer async send (integer value)
+# from .oslo_messaging_kafka.oslo.messaging.producer_batch_size
+{{ if not .oslo_messaging_kafka.oslo.messaging.producer_batch_size }}#{{ end }}producer_batch_size = {{ .oslo_messaging_kafka.oslo.messaging.producer_batch_size | default "16384" }}
 
 
 [oslo_messaging_notifications]
@@ -7901,6 +8519,7 @@
 {{ if not .oslo_messaging_rabbit.oslo.messaging.rabbit_password }}#{{ end }}rabbit_password = {{ .oslo_messaging_rabbit.oslo.messaging.rabbit_password | default "guest" }}
 
 # The RabbitMQ login method. (string value)
+# Allowed values: PLAIN, AMQPLAIN, RABBIT-CR-DEMO
 # Deprecated group/name - [DEFAULT]/rabbit_login_method
 # from .oslo_messaging_rabbit.oslo.messaging.rabbit_login_method
 {{ if not .oslo_messaging_rabbit.oslo.messaging.rabbit_login_method }}#{{ end }}rabbit_login_method = {{ .oslo_messaging_rabbit.oslo.messaging.rabbit_login_method | default "AMQPLAIN" }}
@@ -7939,7 +8558,7 @@
 # Try to use HA queues in RabbitMQ (x-ha-policy: all). If you change this
 # option, you must wipe the RabbitMQ database. In RabbitMQ 3.0, queue mirroring
 # is no longer controlled by the x-ha-policy argument when declaring a queue. If
-# you just want to make sure that all queues (except  those with auto-generated
+# you just want to make sure that all queues (except those with auto-generated
 # names) are mirrored across all nodes, run: "rabbitmqctl set_policy HA
 # '^(?!amq\.).*' '{"ha-mode": "all"}' " (boolean value)
 # Deprecated group/name - [DEFAULT]/rabbit_ha_queues
@@ -8036,6 +8655,12 @@
 # from .oslo_messaging_rabbit.oslo.messaging.pool_stale
 {{ if not .oslo_messaging_rabbit.oslo.messaging.pool_stale }}#{{ end }}pool_stale = {{ .oslo_messaging_rabbit.oslo.messaging.pool_stale | default "60" }}
 
+# Default serialization mechanism for serializing/deserializing
+# outgoing/incoming messages (string value)
+# Allowed values: json, msgpack
+# from .oslo_messaging_rabbit.oslo.messaging.default_serializer_type
+{{ if not .oslo_messaging_rabbit.oslo.messaging.default_serializer_type }}#{{ end }}default_serializer_type = {{ .oslo_messaging_rabbit.oslo.messaging.default_serializer_type | default "json" }}
+
 # Persist notification messages. (boolean value)
 # from .oslo_messaging_rabbit.oslo.messaging.notification_persistence
 {{ if not .oslo_messaging_rabbit.oslo.messaging.notification_persistence }}#{{ end }}notification_persistence = {{ .oslo_messaging_rabbit.oslo.messaging.notification_persistence | default "false" }}
@@ -8093,7 +8718,7 @@
 
 # Reconnecting retry count in case of connectivity problem during sending RPC
 # message, -1 means infinite retry. If actual retry attempts in not 0 the rpc
-# request could be processed more then one time (integer value)
+# request could be processed more than one time (integer value)
 # from .oslo_messaging_rabbit.oslo.messaging.default_rpc_retry_attempts
 {{ if not .oslo_messaging_rabbit.oslo.messaging.default_rpc_retry_attempts }}#{{ end }}default_rpc_retry_attempts = {{ .oslo_messaging_rabbit.oslo.messaging.default_rpc_retry_attempts | default "-1" }}
 
@@ -8116,7 +8741,7 @@
 {{ if not .oslo_messaging_zmq.oslo.messaging.rpc_zmq_bind_address }}#{{ end }}rpc_zmq_bind_address = {{ .oslo_messaging_zmq.oslo.messaging.rpc_zmq_bind_address | default "*" }}
 
 # MatchMaker driver. (string value)
-# Allowed values: redis, dummy
+# Allowed values: redis, sentinel, dummy
 # Deprecated group/name - [DEFAULT]/rpc_zmq_matchmaker
 # from .oslo_messaging_zmq.oslo.messaging.rpc_zmq_matchmaker
 {{ if not .oslo_messaging_zmq.oslo.messaging.rpc_zmq_matchmaker }}#{{ end }}rpc_zmq_matchmaker = {{ .oslo_messaging_zmq.oslo.messaging.rpc_zmq_matchmaker | default "redis" }}
@@ -8143,13 +8768,14 @@
 # from .oslo_messaging_zmq.oslo.messaging.rpc_zmq_host
 {{ if not .oslo_messaging_zmq.oslo.messaging.rpc_zmq_host }}#{{ end }}rpc_zmq_host = {{ .oslo_messaging_zmq.oslo.messaging.rpc_zmq_host | default "localhost" }}
 
-# Seconds to wait before a cast expires (TTL). The default value of -1 specifies
-# an infinite linger period. The value of 0 specifies no linger period. Pending
-# messages shall be discarded immediately when the socket is closed. Only
-# supported by impl_zmq. (integer value)
+# Number of seconds to wait before all pending messages will be sent after
+# closing a socket. The default value of -1 specifies an infinite linger period.
+# The value of 0 specifies no linger period. Pending messages shall be discarded
+# immediately when the socket is closed. Positive values specify an upper bound
+# for the linger period. (integer value)
 # Deprecated group/name - [DEFAULT]/rpc_cast_timeout
-# from .oslo_messaging_zmq.oslo.messaging.rpc_cast_timeout
-{{ if not .oslo_messaging_zmq.oslo.messaging.rpc_cast_timeout }}#{{ end }}rpc_cast_timeout = {{ .oslo_messaging_zmq.oslo.messaging.rpc_cast_timeout | default "-1" }}
+# from .oslo_messaging_zmq.oslo.messaging.zmq_linger
+{{ if not .oslo_messaging_zmq.oslo.messaging.zmq_linger }}#{{ end }}zmq_linger = {{ .oslo_messaging_zmq.oslo.messaging.zmq_linger | default "-1" }}
 
 # The default number of seconds that poll should wait. Poll raises timeout
 # exception when timeout expired. (integer value)
@@ -8173,12 +8799,23 @@
 # value)
 # Deprecated group/name - [DEFAULT]/use_pub_sub
 # from .oslo_messaging_zmq.oslo.messaging.use_pub_sub
-{{ if not .oslo_messaging_zmq.oslo.messaging.use_pub_sub }}#{{ end }}use_pub_sub = {{ .oslo_messaging_zmq.oslo.messaging.use_pub_sub | default "true" }}
+{{ if not .oslo_messaging_zmq.oslo.messaging.use_pub_sub }}#{{ end }}use_pub_sub = {{ .oslo_messaging_zmq.oslo.messaging.use_pub_sub | default "false" }}
 
 # Use ROUTER remote proxy. (boolean value)
 # Deprecated group/name - [DEFAULT]/use_router_proxy
 # from .oslo_messaging_zmq.oslo.messaging.use_router_proxy
-{{ if not .oslo_messaging_zmq.oslo.messaging.use_router_proxy }}#{{ end }}use_router_proxy = {{ .oslo_messaging_zmq.oslo.messaging.use_router_proxy | default "true" }}
+{{ if not .oslo_messaging_zmq.oslo.messaging.use_router_proxy }}#{{ end }}use_router_proxy = {{ .oslo_messaging_zmq.oslo.messaging.use_router_proxy | default "false" }}
+
+# This option makes direct connections dynamic or static. It makes sense only
+# with use_router_proxy=False which means to use direct connections for direct
+# message types (ignored otherwise). (boolean value)
+# from .oslo_messaging_zmq.oslo.messaging.use_dynamic_connections
+{{ if not .oslo_messaging_zmq.oslo.messaging.use_dynamic_connections }}#{{ end }}use_dynamic_connections = {{ .oslo_messaging_zmq.oslo.messaging.use_dynamic_connections | default "false" }}
+
+# How many additional connections to a host will be made for failover reasons.
+# This option is actual only in dynamic connections mode. (integer value)
+# from .oslo_messaging_zmq.oslo.messaging.zmq_failover_connections
+{{ if not .oslo_messaging_zmq.oslo.messaging.zmq_failover_connections }}#{{ end }}zmq_failover_connections = {{ .oslo_messaging_zmq.oslo.messaging.zmq_failover_connections | default "2" }}
 
 # Minimal port number for random ports range. (port value)
 # Minimum value: 0
@@ -8212,7 +8849,73 @@
 # even if server is disconnected, when the server appears we send all
 # accumulated messages to it. (boolean value)
 # from .oslo_messaging_zmq.oslo.messaging.zmq_immediate
-{{ if not .oslo_messaging_zmq.oslo.messaging.zmq_immediate }}#{{ end }}zmq_immediate = {{ .oslo_messaging_zmq.oslo.messaging.zmq_immediate | default "false" }}
+{{ if not .oslo_messaging_zmq.oslo.messaging.zmq_immediate }}#{{ end }}zmq_immediate = {{ .oslo_messaging_zmq.oslo.messaging.zmq_immediate | default "true" }}
+
+# Enable/disable TCP keepalive (KA) mechanism. The default value of -1 (or any
+# other negative value) means to skip any overrides and leave it to OS default;
+# 0 and 1 (or any other positive value) mean to disable and enable the option
+# respectively. (integer value)
+# from .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive
+{{ if not .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive }}#{{ end }}zmq_tcp_keepalive = {{ .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive | default "-1" }}
+
+# The duration between two keepalive transmissions in idle condition. The unit
+# is platform dependent, for example, seconds in Linux, milliseconds in Windows
+# etc. The default value of -1 (or any other negative value and 0) means to skip
+# any overrides and leave it to OS default. (integer value)
+# from .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive_idle
+{{ if not .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive_idle }}#{{ end }}zmq_tcp_keepalive_idle = {{ .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive_idle | default "-1" }}
+
+# The number of retransmissions to be carried out before declaring that remote
+# end is not available. The default value of -1 (or any other negative value and
+# 0) means to skip any overrides and leave it to OS default. (integer value)
+# from .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive_cnt
+{{ if not .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive_cnt }}#{{ end }}zmq_tcp_keepalive_cnt = {{ .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive_cnt | default "-1" }}
+
+# The duration between two successive keepalive retransmissions, if
+# acknowledgement to the previous keepalive transmission is not received. The
+# unit is platform dependent, for example, seconds in Linux, milliseconds in
+# Windows etc. The default value of -1 (or any other negative value and 0) means
+# to skip any overrides and leave it to OS default. (integer value)
+# from .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive_intvl
+{{ if not .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive_intvl }}#{{ end }}zmq_tcp_keepalive_intvl = {{ .oslo_messaging_zmq.oslo.messaging.zmq_tcp_keepalive_intvl | default "-1" }}
+
+# Maximum number of (green) threads to work concurrently. (integer value)
+# from .oslo_messaging_zmq.oslo.messaging.rpc_thread_pool_size
+{{ if not .oslo_messaging_zmq.oslo.messaging.rpc_thread_pool_size }}#{{ end }}rpc_thread_pool_size = {{ .oslo_messaging_zmq.oslo.messaging.rpc_thread_pool_size | default "100" }}
+
+# Expiration timeout in seconds of a sent/received message after which it is not
+# tracked anymore by a client/server. (integer value)
+# from .oslo_messaging_zmq.oslo.messaging.rpc_message_ttl
+{{ if not .oslo_messaging_zmq.oslo.messaging.rpc_message_ttl }}#{{ end }}rpc_message_ttl = {{ .oslo_messaging_zmq.oslo.messaging.rpc_message_ttl | default "300" }}
+
+# Wait for message acknowledgements from receivers. This mechanism works only
+# via proxy without PUB/SUB. (boolean value)
+# from .oslo_messaging_zmq.oslo.messaging.rpc_use_acks
+{{ if not .oslo_messaging_zmq.oslo.messaging.rpc_use_acks }}#{{ end }}rpc_use_acks = {{ .oslo_messaging_zmq.oslo.messaging.rpc_use_acks | default "false" }}
+
+# Number of seconds to wait for an ack from a cast/call. After each retry
+# attempt this timeout is multiplied by some specified multiplier. (integer
+# value)
+# from .oslo_messaging_zmq.oslo.messaging.rpc_ack_timeout_base
+{{ if not .oslo_messaging_zmq.oslo.messaging.rpc_ack_timeout_base }}#{{ end }}rpc_ack_timeout_base = {{ .oslo_messaging_zmq.oslo.messaging.rpc_ack_timeout_base | default "15" }}
+
+# Number to multiply base ack timeout by after each retry attempt. (integer
+# value)
+# from .oslo_messaging_zmq.oslo.messaging.rpc_ack_timeout_multiplier
+{{ if not .oslo_messaging_zmq.oslo.messaging.rpc_ack_timeout_multiplier }}#{{ end }}rpc_ack_timeout_multiplier = {{ .oslo_messaging_zmq.oslo.messaging.rpc_ack_timeout_multiplier | default "2" }}
+
+# Default number of message sending attempts in case of any problems occurred:
+# positive value N means at most N retries, 0 means no retries, None or -1 (or
+# any other negative values) mean to retry forever. This option is used only if
+# acknowledgments are enabled. (integer value)
+# from .oslo_messaging_zmq.oslo.messaging.rpc_retry_attempts
+{{ if not .oslo_messaging_zmq.oslo.messaging.rpc_retry_attempts }}#{{ end }}rpc_retry_attempts = {{ .oslo_messaging_zmq.oslo.messaging.rpc_retry_attempts | default "3" }}
+
+# List of publisher hosts SubConsumer can subscribe on. This option has higher
+# priority then the default publishers list taken from the matchmaker. (list
+# value)
+# from .oslo_messaging_zmq.oslo.messaging.subscribe_on
+{{ if not .oslo_messaging_zmq.oslo.messaging.subscribe_on }}#{{ end }}subscribe_on = {{ .oslo_messaging_zmq.oslo.messaging.subscribe_on | default "" }}
 
 
 [oslo_middleware]
@@ -8247,7 +8950,7 @@
 # From oslo.policy
 #
 
-# The JSON file that defines policies. (string value)
+# The file that defines policies. (string value)
 # Deprecated group/name - [DEFAULT]/policy_file
 # from .oslo_policy.oslo.policy.policy_file
 {{ if not .oslo_policy.oslo.policy.policy_file }}#{{ end }}policy_file = {{ .oslo_policy.oslo.policy.policy_file | default "policy.json" }}
@@ -8267,6 +8970,109 @@
 {{ if not .oslo_policy.oslo.policy.policy_dirs }}#policy_dirs = {{ .oslo_policy.oslo.policy.policy_dirs | default "policy.d" }}{{ else }}{{ range .oslo_policy.oslo.policy.policy_dirs }}policy_dirs = {{ . }}{{ end }}{{ end }}
 
 
+[pci]
+
+#
+# From nova.conf
+#
+
+#
+# An alias for a PCI passthrough device requirement.
+#
+# This allows users to specify the alias in the extra_spec for a flavor, without
+# needing to repeat all the PCI property requirements.
+#
+# Possible Values:
+#
+# * A list of JSON values which describe the aliases. For example:
+#
+#     alias = {
+#       "name": "QuickAssist",
+#       "product_id": "0443",
+#       "vendor_id": "8086",
+#       "device_type": "type-PCI"
+#     }
+#
+#   defines an alias for the Intel QuickAssist card. (multi valued). Valid key
+#   values are :
+#
+#   * "name": Name of the PCI alias.
+#   * "product_id": Product ID of the device in hexadecimal.
+#   * "vendor_id": Vendor ID of the device in hexadecimal.
+#   * "device_type": Type of PCI device. Valid values are: "type-PCI",
+#     "type-PF" and "type-VF".
+#  (multi valued)
+# Deprecated group/name - [DEFAULT]/pci_alias
+# from .pci.nova.conf.alias (multiopt)
+{{ if not .pci.nova.conf.alias }}#alias = {{ .pci.nova.conf.alias | default "" }}{{ else }}{{ range .pci.nova.conf.alias }}alias = {{ . }}{{ end }}{{ end }}
+
+#
+# White list of PCI devices available to VMs.
+#
+# Possible values:
+#
+# * A JSON dictionary which describe a whitelisted PCI device. It should take
+#   the following format:
+#
+#     ["vendor_id": "<id>",] ["product_id": "<id>",]
+#     ["address": "[[[[<domain>]:]<bus>]:][<slot>][.[<function>]]" |
+#      "devname": "<name>",]
+#     {"<tag>": "<tag_value>",}
+#
+#   Where '[' indicates zero or one occurrences, '{' indicates zero or multiple
+#   occurrences, and '|' mutually exclusive options. Note that any missing
+#   fields are automatically wildcarded.
+#
+#   Valid key values are :
+#
+#   * "vendor_id": Vendor ID of the device in hexadecimal.
+#   * "product_id": Product ID of the device in hexadecimal.
+#   * "address": PCI address of the device.
+#   * "devname": Device name of the device (for e.g. interface name). Not all
+#     PCI devices have a name.
+#   * "<tag>": Additional <tag> and <tag_value> used for matching PCI devices.
+#     Supported <tag>: "physical_network".
+#
+#   The address key supports traditional glob style and regular expression
+#   syntax. Valid examples are:
+#
+#     passthrough_whitelist = {"devname":"eth0",
+#                              "physical_network":"physnet"}
+#     passthrough_whitelist = {"address":"*:0a:00.*"}
+#     passthrough_whitelist = {"address":":0a:00.",
+#                              "physical_network":"physnet1"}
+#     passthrough_whitelist = {"vendor_id":"1137",
+#                              "product_id":"0071"}
+#     passthrough_whitelist = {"vendor_id":"1137",
+#                              "product_id":"0071",
+#                              "address": "0000:0a:00.1",
+#                              "physical_network":"physnet1"}
+#     passthrough_whitelist = {"address":{"domain": ".*",
+#                                         "bus": "02", "slot": "01",
+#                                         "function": "[2-7]"},
+#                              "physical_network":"physnet1"}
+#     passthrough_whitelist = {"address":{"domain": ".*",
+#                                         "bus": "02", "slot": "0[1-2]",
+#                                         "function": ".*"},
+#                              "physical_network":"physnet1"}
+#
+#   The following are invalid, as they specify mutually exclusive options:
+#
+#     passthrough_whitelist = {"devname":"eth0",
+#                              "physical_network":"physnet",
+#                              "address":"*:0a:00.*"}
+#
+# * A JSON list of JSON dictionaries corresponding to the above format. For
+#   example:
+#
+#     passthrough_whitelist = [{"product_id":"0001", "vendor_id":"8086"},
+#                              {"product_id":"0002", "vendor_id":"8086"}]
+#  (multi valued)
+# Deprecated group/name - [DEFAULT]/pci_passthrough_whitelist
+# from .pci.nova.conf.passthrough_whitelist (multiopt)
+{{ if not .pci.nova.conf.passthrough_whitelist }}#passthrough_whitelist = {{ .pci.nova.conf.passthrough_whitelist | default "" }}{{ else }}{{ range .pci.nova.conf.passthrough_whitelist }}passthrough_whitelist = {{ . }}{{ end }}{{ end }}
+
+
 [placement]
 
 #
@@ -8283,6 +9089,13 @@
 #  (string value)
 # from .placement.nova.conf.os_region_name
 {{ if not .placement.nova.conf.os_region_name }}#{{ end }}os_region_name = {{ .placement.nova.conf.os_region_name | default "<None>" }}
+
+#
+# Endpoint interface for this node. This is used when picking the URL in the
+# service catalog.
+#  (string value)
+# from .placement.nova.conf.os_interface
+{{ if not .placement.nova.conf.os_interface }}#{{ end }}os_interface = {{ .placement.nova.conf.os_interface | default "<None>" }}
 
 # PEM encoded Certificate Authority to use when verifying HTTPs connections.
 # (string value)
@@ -8388,88 +9201,294 @@
 {{ if not .placement.nova.conf.tenant_name }}#{{ end }}tenant_name = {{ .placement.nova.conf.tenant_name | default "<None>" }}
 
 
-[placement_database]
+[quota]
 #
-# The *Placement API Database* is a separate database which is used for the new
-# placement-api service. In Ocata release (14.0.0) this database is optional: if
-# connection option is not set, api database will be used instead.  However,
-# this
-# is not recommended, as it implies a potentially lengthy data migration in the
-# future. Operators are advised to use a separate database for Placement API
-# from
-# the start.
+# Quota options allow to manage quotas in openstack deployment.
 
 #
 # From nova.conf
 #
 
-# The SQLAlchemy connection string to use to connect to the database.The
-# SQLAlchemy connection string to use to connect to the database. (string value)
-# from .placement_database.nova.conf.connection
-{{ if not .placement_database.nova.conf.connection }}#{{ end }}connection = {{ .placement_database.nova.conf.connection | default "<None>" }}
+#
+# The number of instances allowed per project.
+#
+# Possible Values
+#
+# * A positive integer or 0.
+# * -1 to disable the quota.
+#  (integer value)
+# Minimum value: -1
+# Deprecated group/name - [DEFAULT]/quota_instances
+# from .quota.nova.conf.instances
+{{ if not .quota.nova.conf.instances }}#{{ end }}instances = {{ .quota.nova.conf.instances | default "10" }}
 
-# If True, SQLite uses synchronous mode.If True, SQLite uses synchronous mode.
-# (boolean value)
-# from .placement_database.nova.conf.sqlite_synchronous
-{{ if not .placement_database.nova.conf.sqlite_synchronous }}#{{ end }}sqlite_synchronous = {{ .placement_database.nova.conf.sqlite_synchronous | default "true" }}
+#
+# The number of instance cores or vCPUs allowed per project.
+#
+# Possible values:
+#
+# * A positive integer or 0.
+# * -1 to disable the quota.
+#  (integer value)
+# Minimum value: -1
+# Deprecated group/name - [DEFAULT]/quota_cores
+# from .quota.nova.conf.cores
+{{ if not .quota.nova.conf.cores }}#{{ end }}cores = {{ .quota.nova.conf.cores | default "20" }}
 
-# The SQLAlchemy connection string to use to connect to the slave database.The
-# SQLAlchemy connection string to use to connect to the slave database. (string
-# value)
-# from .placement_database.nova.conf.slave_connection
-{{ if not .placement_database.nova.conf.slave_connection }}#{{ end }}slave_connection = {{ .placement_database.nova.conf.slave_connection | default "<None>" }}
+#
+# The number of megabytes of instance RAM allowed per project.
+#
+# Possible values:
+#
+# * A positive integer or 0.
+# * -1 to disable the quota.
+#  (integer value)
+# Minimum value: -1
+# Deprecated group/name - [DEFAULT]/quota_ram
+# from .quota.nova.conf.ram
+{{ if not .quota.nova.conf.ram }}#{{ end }}ram = {{ .quota.nova.conf.ram | default "51200" }}
 
-# The SQL mode to be used for MySQL sessions. This option, including the
-# default, overrides any server-set SQL mode. To use whatever SQL mode is set by
-# the server configuration, set this to no value. Example: mysql_sql_mode=The
-# SQL mode to be used for MySQL sessions. This option, including the default,
-# overrides any server-set SQL mode. To use whatever SQL mode is set by the
-# server configuration, set this to no value. Example: mysql_sql_mode= (string
-# value)
-# from .placement_database.nova.conf.mysql_sql_mode
-{{ if not .placement_database.nova.conf.mysql_sql_mode }}#{{ end }}mysql_sql_mode = {{ .placement_database.nova.conf.mysql_sql_mode | default "TRADITIONAL" }}
+# DEPRECATED:
+# The number of floating IPs allowed per project.
+#
+# Floating IPs are not allocated to instances by default. Users need to select
+# them from the pool configured by the OpenStack administrator to attach to
+# their
+# instances.
+#
+# Possible values:
+#
+# * A positive integer or 0.
+# * -1 to disable the quota.
+#  (integer value)
+# Minimum value: -1
+# Deprecated group/name - [DEFAULT]/quota_floating_ips
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# nova-network is deprecated, as are any related configuration options.
+# from .quota.nova.conf.floating_ips
+{{ if not .quota.nova.conf.floating_ips }}#{{ end }}floating_ips = {{ .quota.nova.conf.floating_ips | default "10" }}
 
-# Timeout before idle SQL connections are reaped.Timeout before idle SQL
-# connections are reaped. (integer value)
-# from .placement_database.nova.conf.idle_timeout
-{{ if not .placement_database.nova.conf.idle_timeout }}#{{ end }}idle_timeout = {{ .placement_database.nova.conf.idle_timeout | default "3600" }}
+# DEPRECATED:
+# The number of fixed IPs allowed per project.
+#
+# Unlike floating IPs, fixed IPs are allocated dynamically by the network
+# component when instances boot up.  This quota value should be at least the
+# number of instances allowed
+#
+# Possible values:
+#
+# * A positive integer or 0.
+# * -1 to disable the quota.
+#  (integer value)
+# Minimum value: -1
+# Deprecated group/name - [DEFAULT]/quota_fixed_ips
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# nova-network is deprecated, as are any related configuration options.
+# from .quota.nova.conf.fixed_ips
+{{ if not .quota.nova.conf.fixed_ips }}#{{ end }}fixed_ips = {{ .quota.nova.conf.fixed_ips | default "-1" }}
 
-# Maximum number of SQL connections to keep open in a pool. Setting a value of 0
-# indicates no limit.Maximum number of SQL connections to keep open in a pool.
-# Setting a value of 0 indicates no limit. (integer value)
-# from .placement_database.nova.conf.max_pool_size
-{{ if not .placement_database.nova.conf.max_pool_size }}#{{ end }}max_pool_size = {{ .placement_database.nova.conf.max_pool_size | default "<None>" }}
+#
+# The number of metadata items allowed per instance.
+#
+# Users can associate metadata with an instance during instance creation. This
+# metadata takes the form of key-value pairs.
+#
+# Possible values:
+#
+# * A positive integer or 0.
+# * -1 to disable the quota.
+#  (integer value)
+# Minimum value: -1
+# Deprecated group/name - [DEFAULT]/quota_metadata_items
+# from .quota.nova.conf.metadata_items
+{{ if not .quota.nova.conf.metadata_items }}#{{ end }}metadata_items = {{ .quota.nova.conf.metadata_items | default "128" }}
 
-# Maximum number of database connection retries during startup. Set to -1 to
-# specify an infinite retry count.Maximum number of database connection retries
-# during startup. Set to -1 to specify an infinite retry count. (integer value)
-# from .placement_database.nova.conf.max_retries
-{{ if not .placement_database.nova.conf.max_retries }}#{{ end }}max_retries = {{ .placement_database.nova.conf.max_retries | default "10" }}
+#
+# The number of injected files allowed.
+#
+# File injection allows users to customize the personality of an instance by
+# injecting data into it upon boot. Only text file injection is permitted:
+# binary
+# or ZIP files are not accepted. During file injection, any existing files that
+# match specified files are renamed to include ``.bak`` extension appended with
+# a
+# timestamp.
+#
+# Possible values:
+#
+# * A positive integer or 0.
+# * -1 to disable the quota.
+#  (integer value)
+# Minimum value: -1
+# Deprecated group/name - [DEFAULT]/quota_injected_files
+# from .quota.nova.conf.injected_files
+{{ if not .quota.nova.conf.injected_files }}#{{ end }}injected_files = {{ .quota.nova.conf.injected_files | default "5" }}
 
-# Interval between retries of opening a SQL connection.Interval between retries
-# of opening a SQL connection. (integer value)
-# from .placement_database.nova.conf.retry_interval
-{{ if not .placement_database.nova.conf.retry_interval }}#{{ end }}retry_interval = {{ .placement_database.nova.conf.retry_interval | default "10" }}
+#
+# The number of bytes allowed per injected file.
+#
+# Possible values:
+#
+# * A positive integer or 0.
+# * -1 to disable the quota.
+#  (integer value)
+# Minimum value: -1
+# Deprecated group/name - [DEFAULT]/quota_injected_file_content_bytes
+# from .quota.nova.conf.injected_file_content_bytes
+{{ if not .quota.nova.conf.injected_file_content_bytes }}#{{ end }}injected_file_content_bytes = {{ .quota.nova.conf.injected_file_content_bytes | default "10240" }}
 
-# If set, use this value for max_overflow with SQLAlchemy.If set, use this value
-# for max_overflow with SQLAlchemy. (integer value)
-# from .placement_database.nova.conf.max_overflow
-{{ if not .placement_database.nova.conf.max_overflow }}#{{ end }}max_overflow = {{ .placement_database.nova.conf.max_overflow | default "<None>" }}
+#
+# The maximum allowed injected file path length.
+#
+# Possible values:
+#
+# * A positive integer or 0.
+# * -1 to disable the quota.
+#  (integer value)
+# Minimum value: -1
+# Deprecated group/name - [DEFAULT]/quota_injected_file_path_length
+# from .quota.nova.conf.injected_file_path_length
+{{ if not .quota.nova.conf.injected_file_path_length }}#{{ end }}injected_file_path_length = {{ .quota.nova.conf.injected_file_path_length | default "255" }}
 
-# Verbosity of SQL debugging information: 0=None, 100=Everything.Verbosity of
-# SQL debugging information: 0=None, 100=Everything. (integer value)
-# from .placement_database.nova.conf.connection_debug
-{{ if not .placement_database.nova.conf.connection_debug }}#{{ end }}connection_debug = {{ .placement_database.nova.conf.connection_debug | default "0" }}
+# DEPRECATED:
+# The number of security groups per project.
+#
+# Possible values:
+#
+# * A positive integer or 0.
+# * -1 to disable the quota.
+#  (integer value)
+# Minimum value: -1
+# Deprecated group/name - [DEFAULT]/quota_security_groups
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# nova-network is deprecated, as are any related configuration options.
+# from .quota.nova.conf.security_groups
+{{ if not .quota.nova.conf.security_groups }}#{{ end }}security_groups = {{ .quota.nova.conf.security_groups | default "10" }}
 
-# Add Python stack traces to SQL as comment strings.Add Python stack traces to
-# SQL as comment strings. (boolean value)
-# from .placement_database.nova.conf.connection_trace
-{{ if not .placement_database.nova.conf.connection_trace }}#{{ end }}connection_trace = {{ .placement_database.nova.conf.connection_trace | default "false" }}
+# DEPRECATED:
+# The number of security rules per security group.
+#
+# The associated rules in each security group control the traffic to instances
+# in
+# the group.
+#
+# Possible values:
+#
+# * A positive integer or 0.
+# * -1 to disable the quota.
+#  (integer value)
+# Minimum value: -1
+# Deprecated group/name - [DEFAULT]/quota_security_group_rules
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# nova-network is deprecated, as are any related configuration options.
+# from .quota.nova.conf.security_group_rules
+{{ if not .quota.nova.conf.security_group_rules }}#{{ end }}security_group_rules = {{ .quota.nova.conf.security_group_rules | default "20" }}
 
-# If set, use this value for pool_timeout with SQLAlchemy.If set, use this value
-# for pool_timeout with SQLAlchemy. (integer value)
-# from .placement_database.nova.conf.pool_timeout
-{{ if not .placement_database.nova.conf.pool_timeout }}#{{ end }}pool_timeout = {{ .placement_database.nova.conf.pool_timeout | default "<None>" }}
+#
+# The maximum number of key pairs allowed per user.
+#
+# Users can create at least one key pair for each project and use the key pair
+# for multiple instances that belong to that project.
+#
+# Possible values:
+#
+# * A positive integer or 0.
+# * -1 to disable the quota.
+#  (integer value)
+# Minimum value: -1
+# Deprecated group/name - [DEFAULT]/quota_key_pairs
+# from .quota.nova.conf.key_pairs
+{{ if not .quota.nova.conf.key_pairs }}#{{ end }}key_pairs = {{ .quota.nova.conf.key_pairs | default "100" }}
+
+#
+# The maxiumum number of server groups per project.
+#
+# Server groups are used to control the affinity and anti-affinity scheduling
+# policy for a group of servers or instances. Reducing the quota will not affect
+# any existing group, but new servers will not be allowed into groups that have
+# become over quota.
+#
+# Possible values:
+#
+# * A positive integer or 0.
+# * -1 to disable the quota.
+#  (integer value)
+# Minimum value: -1
+# Deprecated group/name - [DEFAULT]/quota_server_groups
+# from .quota.nova.conf.server_groups
+{{ if not .quota.nova.conf.server_groups }}#{{ end }}server_groups = {{ .quota.nova.conf.server_groups | default "10" }}
+
+#
+# The maximum number of servers per server group.
+#
+# Possible values:
+#
+# * A positive integer or 0.
+# * -1 to disable the quota.
+#  (integer value)
+# Minimum value: -1
+# Deprecated group/name - [DEFAULT]/quota_server_group_members
+# from .quota.nova.conf.server_group_members
+{{ if not .quota.nova.conf.server_group_members }}#{{ end }}server_group_members = {{ .quota.nova.conf.server_group_members | default "10" }}
+
+#
+# The number of seconds until a reservation expires.
+#
+# This quota represents the time period for invalidating quota reservations.
+#  (integer value)
+# Deprecated group/name - [DEFAULT]/reservation_expire
+# from .quota.nova.conf.reservation_expire
+{{ if not .quota.nova.conf.reservation_expire }}#{{ end }}reservation_expire = {{ .quota.nova.conf.reservation_expire | default "86400" }}
+
+#
+# The count of reservations until usage is refreshed.
+#
+# This defaults to 0 (off) to avoid additional load but it is useful to turn on
+# to help keep quota usage up-to-date and reduce the impact of out of sync usage
+# issues.
+#  (integer value)
+# Minimum value: 0
+# Deprecated group/name - [DEFAULT]/until_refresh
+# from .quota.nova.conf.until_refresh
+{{ if not .quota.nova.conf.until_refresh }}#{{ end }}until_refresh = {{ .quota.nova.conf.until_refresh | default "0" }}
+
+#
+# The number of seconds between subsequent usage refreshes.
+#
+# This defaults to 0 (off) to avoid additional load but it is useful to turn on
+# to help keep quota usage up-to-date and reduce the impact of out of sync usage
+# issues. Note that quotas are not updated on a periodic task, they will update
+# on a new reservation if max_age has passed since the last reservation.
+#  (integer value)
+# Minimum value: 0
+# Deprecated group/name - [DEFAULT]/max_age
+# from .quota.nova.conf.max_age
+{{ if not .quota.nova.conf.max_age }}#{{ end }}max_age = {{ .quota.nova.conf.max_age | default "0" }}
+
+# DEPRECATED:
+# The quota enforcer driver.
+#
+# Provides abstraction for quota checks. Users can configure a specific
+# driver to use for quota checks.
+#
+# Possible values:
+#
+# * nova.quota.DbQuotaDriver (default) or any string representing fully
+#   qualified class name.
+#  (string value)
+# Deprecated group/name - [DEFAULT]/quota_driver
+# This option is deprecated for removal since 14.0.0.
+# Its value may be silently ignored in the future.
+# from .quota.nova.conf.driver
+{{ if not .quota.nova.conf.driver }}#{{ end }}driver = {{ .quota.nova.conf.driver | default "nova.quota.DbQuotaDriver" }}
 
 
 [rdp]
@@ -8590,11 +9609,119 @@
 {{ if not .remote_debug.nova.conf.port }}#{{ end }}port = {{ .remote_debug.nova.conf.port | default "<None>" }}
 
 
+[scheduler]
+
+#
+# From nova.conf
+#
+
+#
+# The scheduler host manager to use.
+#
+# The host manager manages the in-memory picture of the hosts that the scheduler
+# uses. The options values are chosen from the entry points under the namespace
+# 'nova.scheduler.host_manager' in 'setup.cfg'.
+#  (string value)
+# Allowed values: host_manager, ironic_host_manager
+# Deprecated group/name - [DEFAULT]/scheduler_host_manager
+# from .scheduler.nova.conf.host_manager
+{{ if not .scheduler.nova.conf.host_manager }}#{{ end }}host_manager = {{ .scheduler.nova.conf.host_manager | default "host_manager" }}
+
+#
+# The class of the driver used by the scheduler.
+#
+# The options are chosen from the entry points under the namespace
+# 'nova.scheduler.driver' in 'setup.cfg'.
+#
+# Possible values:
+#
+# * A string, where the string corresponds to the class name of a scheduler
+#   driver. There are a number of options available:
+# ** 'caching_scheduler', which aggressively caches the system state for better
+#    individual scheduler performance at the risk of more retries when running
+#    multiple schedulers
+# ** 'chance_scheduler', which simply picks a host at random
+# ** 'fake_scheduler', which is used for testing
+# ** A custom scheduler driver. In this case, you will be responsible for
+#    creating and maintaining the entry point in your 'setup.cfg' file
+#  (string value)
+# Allowed values: filter_scheduler, caching_scheduler, chance_scheduler, fake_scheduler
+# Deprecated group/name - [DEFAULT]/scheduler_driver
+# from .scheduler.nova.conf.driver
+{{ if not .scheduler.nova.conf.driver }}#{{ end }}driver = {{ .scheduler.nova.conf.driver | default "filter_scheduler" }}
+
+#
+# Periodic task interval.
+#
+# This value controls how often (in seconds) to run periodic tasks in the
+# scheduler. The specific tasks that are run for each period are determined by
+# the particular scheduler being used.
+#
+# If this is larger than the nova-service 'service_down_time' setting, Nova may
+# report the scheduler service as down. This is because the scheduler driver is
+# responsible for sending a heartbeat and it will only do that as often as this
+# option allows. As each scheduler can work a little differently than the
+# others,
+# be sure to test this with your selected scheduler.
+#
+# Possible values:
+#
+# * An integer, where the integer corresponds to periodic task interval in
+#   seconds. 0 uses the default interval (60 seconds). A negative value disables
+#   periodic tasks.
+#
+# Related options:
+#
+# * ``nova-service service_down_time``
+#  (integer value)
+# Deprecated group/name - [DEFAULT]/scheduler_driver_task_period
+# from .scheduler.nova.conf.periodic_task_interval
+{{ if not .scheduler.nova.conf.periodic_task_interval }}#{{ end }}periodic_task_interval = {{ .scheduler.nova.conf.periodic_task_interval | default "60" }}
+
+#
+# Maximum number of schedule attempts for a chosen host.
+#
+# This is the maximum number of attempts that will be made to schedule an
+# instance before it is assumed that the failures aren't due to normal
+# occasional
+# race conflicts, but rather some other problem. When this is reached a
+# MaxRetriesExceeded exception is raised, and the instance is set to an error
+# state.
+#
+# Possible values:
+#
+# * A positive integer, where the integer corresponds to the max number of
+#   attempts that can be made when scheduling an instance.
+#          (integer value)
+# Minimum value: 1
+# Deprecated group/name - [DEFAULT]/scheduler_max_attempts
+# from .scheduler.nova.conf.max_attempts
+{{ if not .scheduler.nova.conf.max_attempts }}#{{ end }}max_attempts = {{ .scheduler.nova.conf.max_attempts | default "3" }}
+
+#
+# Periodic task interval.
+#
+# This value controls how often (in seconds) the scheduler should attempt
+# to discover new hosts that have been added to cells. If negative (the
+# default), no automatic discovery will occur.
+#
+# Small deployments may want this periodic task enabled, as surveying the
+# cells for new hosts is likely to be lightweight enough to not cause undue
+# burdon to the scheduler. However, larger clouds (and those that are not
+# adding hosts regularly) will likely want to disable this automatic
+# behavior and instead use the `nova-manage cell_v2 discover_hosts` command
+# when hosts have been added to a cell.
+#  (integer value)
+# Minimum value: -1
+# from .scheduler.nova.conf.discover_hosts_in_cells_interval
+{{ if not .scheduler.nova.conf.discover_hosts_in_cells_interval }}#{{ end }}discover_hosts_in_cells_interval = {{ .scheduler.nova.conf.discover_hosts_in_cells_interval | default "-1" }}
+
+
 [serial_console]
 #
 # The serial console feature allows you to connect to a guest in case a
 # graphical console like VNC, RDP or SPICE is not available. This is only
-# currently supported for the libvirt and hyper-v drivers.
+# currently supported for the libvirt, Ironic and hyper-v drivers.
 
 #
 # From nova.conf
@@ -8605,19 +9732,6 @@
 #
 # In order to use this feature, the service ``nova-serialproxy`` needs to run.
 # This service is typically executed on the controller node.
-#
-# Possible values:
-#
-# * True: Enables the feature
-# * False: Disables the feature
-#
-# Services which consume this:
-#
-# * ``nova-compute``
-#
-# Interdependencies to other options:
-#
-# * None
 #  (boolean value)
 # from .serial_console.nova.conf.enabled
 {{ if not .serial_console.nova.conf.enabled }}#{{ end }}enabled = {{ .serial_console.nova.conf.enabled | default "false" }}
@@ -8631,16 +9745,9 @@
 #
 # Possible values:
 #
-# Each string which passes the regex ``\d+:\d+`` For example ``10000:20000``.
-# Be sure that the first port number is lower than the second port number.
-#
-# Services which consume this:
-#
-# * ``nova-compute``
-#
-# Interdependencies to other options:
-#
-# * None
+# * Each string which passes the regex ``\d+:\d+`` For example ``10000:20000``.
+#   Be sure that the first port number is lower than the second port number
+#   and that both are in range from 0 to 65535.
 #  (string value)
 # from .serial_console.nova.conf.port_range
 {{ if not .serial_console.nova.conf.port_range }}#{{ end }}port_range = {{ .serial_console.nova.conf.port_range | default "10000:20000" }}
@@ -8651,15 +9758,7 @@
 # The ``nova-serialproxy`` service is called with this token enriched URL
 # and establishes the connection to the proper instance.
 #
-# Possible values:
-#
-# * <scheme><IP-address><port-number>
-#
-# Services which consume this:
-#
-# * ``nova-compute``
-#
-# Interdependencies to other options:
+# Related options:
 #
 # * The IP address must be identical to the address to which the
 #   ``nova-serialproxy`` service is listening (see option ``serialproxy_host``
@@ -8669,7 +9768,7 @@
 # * If you choose to use a secured websocket connection, then start this option
 #   with ``wss://`` instead of the unsecured ``ws://``. The options ``cert``
 #   and ``key`` in the ``[DEFAULT]`` section have to be set for that.
-#  (string value)
+#  (uri value)
 # from .serial_console.nova.conf.base_url
 {{ if not .serial_console.nova.conf.base_url }}#{{ end }}base_url = {{ .serial_console.nova.conf.base_url | default "ws://127.0.0.1:6083/" }}
 
@@ -8678,18 +9777,6 @@
 # connect to get the serial console of an instance.
 #
 # This is typically the IP address of the host of a ``nova-compute`` service.
-#
-# Possible values:
-#
-# * An IP address
-#
-# Services which consume this:
-#
-# * ``nova-compute``
-#
-# Interdependencies to other options:
-#
-# * None
 #  (string value)
 # from .serial_console.nova.conf.proxyclient_address
 {{ if not .serial_console.nova.conf.proxyclient_address }}#{{ end }}proxyclient_address = {{ .serial_console.nova.conf.proxyclient_address | default "127.0.0.1" }}
@@ -8701,15 +9788,7 @@
 # The ``nova-serialproxy`` service listens on this IP address for incoming
 # connection requests to instances which expose serial console.
 #
-# Possible values:
-#
-# * An IP address
-#
-# Services which consume this:
-#
-# * ``nova-serialproxy``
-#
-# Interdependencies to other options:
+# Related options:
 #
 # * Ensure that this is the same IP address which is defined in the option
 #   ``base_url`` of this section or use ``0.0.0.0`` to listen on all addresses.
@@ -8724,15 +9803,7 @@
 # The ``nova-serialproxy`` service listens on this port number for incoming
 # connection requests to instances which expose serial console.
 #
-# Possible values:
-#
-# * A port number
-#
-# Services which consume this:
-#
-# * ``nova-serialproxy``
-#
-# Interdependencies to other options:
+# Related options:
 #
 # * Ensure that this is the same port number which is defined in the option
 #   ``base_url`` of this section.
@@ -8743,57 +9814,279 @@
 {{ if not .serial_console.nova.conf.serialproxy_port }}#{{ end }}serialproxy_port = {{ .serial_console.nova.conf.serialproxy_port | default "6083" }}
 
 
-[spice]
+[service_user]
+#
+# Configuration options for service to service authentication using a service
+# token. These options allow to send a service token along with the
+# user's token when contacting external REST APIs.
 
 #
 # From nova.conf
 #
 
 #
-# Location of spice HTML5 console proxy, in the form
-# "http://127.0.0.1:6082/spice_auto.html"
-#  (string value)
-# from .spice.nova.conf.html5proxy_base_url
-{{ if not .spice.nova.conf.html5proxy_base_url }}#{{ end }}html5proxy_base_url = {{ .spice.nova.conf.html5proxy_base_url | default "http://127.0.0.1:6082/spice_auto.html" }}
+# When True, if sending a user token to an REST API, also send a service token.
+#
+# Nova often reuses the user token provided to the nova-api to talk to other
+# REST APIs, such as Cinder and Neutron. It is possible that while the
+# user token was valid when the request was made to Nova, the token may expire
+# before it reaches the other service. To avoid any failures, and to
+# make it clear it is Nova calling the service on the users behalf, we include
+# a server token along with the user token. Should the user's token have
+# expired, a valid service token ensures the REST API request will still be
+# accepted by the keystone middleware.
+#
+# This feature is currently experimental, and as such is turned off by default
+# while full testing and performance tuning of this feature is completed.
+#  (boolean value)
+# from .service_user.nova.conf.send_service_user_token
+{{ if not .service_user.nova.conf.send_service_user_token }}#{{ end }}send_service_user_token = {{ .service_user.nova.conf.send_service_user_token | default "false" }}
+
+# PEM encoded Certificate Authority to use when verifying HTTPs connections.
+# (string value)
+# from .service_user.nova.conf.cafile
+{{ if not .service_user.nova.conf.cafile }}#{{ end }}cafile = {{ .service_user.nova.conf.cafile | default "<None>" }}
+
+# PEM encoded client certificate cert file (string value)
+# from .service_user.nova.conf.certfile
+{{ if not .service_user.nova.conf.certfile }}#{{ end }}certfile = {{ .service_user.nova.conf.certfile | default "<None>" }}
+
+# PEM encoded client certificate key file (string value)
+# from .service_user.nova.conf.keyfile
+{{ if not .service_user.nova.conf.keyfile }}#{{ end }}keyfile = {{ .service_user.nova.conf.keyfile | default "<None>" }}
+
+# Verify HTTPS connections. (boolean value)
+# from .service_user.nova.conf.insecure
+{{ if not .service_user.nova.conf.insecure }}#{{ end }}insecure = {{ .service_user.nova.conf.insecure | default "false" }}
+
+# Timeout value for http requests (integer value)
+# from .service_user.nova.conf.timeout
+{{ if not .service_user.nova.conf.timeout }}#{{ end }}timeout = {{ .service_user.nova.conf.timeout | default "<None>" }}
+
+# Authentication type to load (string value)
+# Deprecated group/name - [service_user]/auth_plugin
+# from .service_user.nova.conf.auth_type
+{{ if not .service_user.nova.conf.auth_type }}#{{ end }}auth_type = {{ .service_user.nova.conf.auth_type | default "<None>" }}
+
+# Config Section from which to load plugin specific options (string value)
+# from .service_user.nova.conf.auth_section
+{{ if not .service_user.nova.conf.auth_section }}#{{ end }}auth_section = {{ .service_user.nova.conf.auth_section | default "<None>" }}
+
+# Authentication URL (string value)
+# from .service_user.nova.conf.auth_url
+{{ if not .service_user.nova.conf.auth_url }}#{{ end }}auth_url = {{ .service_user.nova.conf.auth_url | default "<None>" }}
+
+# Domain ID to scope to (string value)
+# from .service_user.nova.conf.domain_id
+{{ if not .service_user.nova.conf.domain_id }}#{{ end }}domain_id = {{ .service_user.nova.conf.domain_id | default "<None>" }}
+
+# Domain name to scope to (string value)
+# from .service_user.nova.conf.domain_name
+{{ if not .service_user.nova.conf.domain_name }}#{{ end }}domain_name = {{ .service_user.nova.conf.domain_name | default "<None>" }}
+
+# Project ID to scope to (string value)
+# from .service_user.nova.conf.project_id
+{{ if not .service_user.nova.conf.project_id }}#{{ end }}project_id = {{ .service_user.nova.conf.project_id | default "<None>" }}
+
+# Project name to scope to (string value)
+# from .service_user.nova.conf.project_name
+{{ if not .service_user.nova.conf.project_name }}#{{ end }}project_name = {{ .service_user.nova.conf.project_name | default "<None>" }}
+
+# Domain ID containing project (string value)
+# from .service_user.nova.conf.project_domain_id
+{{ if not .service_user.nova.conf.project_domain_id }}#{{ end }}project_domain_id = {{ .service_user.nova.conf.project_domain_id | default "<None>" }}
+
+# Domain name containing project (string value)
+# from .service_user.nova.conf.project_domain_name
+{{ if not .service_user.nova.conf.project_domain_name }}#{{ end }}project_domain_name = {{ .service_user.nova.conf.project_domain_name | default "<None>" }}
+
+# Trust ID (string value)
+# from .service_user.nova.conf.trust_id
+{{ if not .service_user.nova.conf.trust_id }}#{{ end }}trust_id = {{ .service_user.nova.conf.trust_id | default "<None>" }}
+
+# Optional domain ID to use with v3 and v2 parameters. It will be used for both
+# the user and project domain in v3 and ignored in v2 authentication. (string
+# value)
+# from .service_user.nova.conf.default_domain_id
+{{ if not .service_user.nova.conf.default_domain_id }}#{{ end }}default_domain_id = {{ .service_user.nova.conf.default_domain_id | default "<None>" }}
+
+# Optional domain name to use with v3 API and v2 parameters. It will be used for
+# both the user and project domain in v3 and ignored in v2 authentication.
+# (string value)
+# from .service_user.nova.conf.default_domain_name
+{{ if not .service_user.nova.conf.default_domain_name }}#{{ end }}default_domain_name = {{ .service_user.nova.conf.default_domain_name | default "<None>" }}
+
+# User ID (string value)
+# from .service_user.nova.conf.user_id
+{{ if not .service_user.nova.conf.user_id }}#{{ end }}user_id = {{ .service_user.nova.conf.user_id | default "<None>" }}
+
+# Username (string value)
+# Deprecated group/name - [service_user]/user-name
+# from .service_user.nova.conf.username
+{{ if not .service_user.nova.conf.username }}#{{ end }}username = {{ .service_user.nova.conf.username | default "<None>" }}
+
+# User's domain id (string value)
+# from .service_user.nova.conf.user_domain_id
+{{ if not .service_user.nova.conf.user_domain_id }}#{{ end }}user_domain_id = {{ .service_user.nova.conf.user_domain_id | default "<None>" }}
+
+# User's domain name (string value)
+# from .service_user.nova.conf.user_domain_name
+{{ if not .service_user.nova.conf.user_domain_name }}#{{ end }}user_domain_name = {{ .service_user.nova.conf.user_domain_name | default "<None>" }}
+
+# User's password (string value)
+# from .service_user.nova.conf.password
+{{ if not .service_user.nova.conf.password }}#{{ end }}password = {{ .service_user.nova.conf.password | default "<None>" }}
+
+# Tenant ID (string value)
+# from .service_user.nova.conf.tenant_id
+{{ if not .service_user.nova.conf.tenant_id }}#{{ end }}tenant_id = {{ .service_user.nova.conf.tenant_id | default "<None>" }}
+
+# Tenant Name (string value)
+# from .service_user.nova.conf.tenant_name
+{{ if not .service_user.nova.conf.tenant_name }}#{{ end }}tenant_name = {{ .service_user.nova.conf.tenant_name | default "<None>" }}
+
+
+[spice]
+#
+# SPICE console feature allows you to connect to a guest virtual machine.
+# SPICE is a replacement for fairly limited VNC protocol.
+#
+# Following requirements must be met in order to use SPICE:
+#
+# * Virtualization driver must be libvirt
+# * spice.enabled set to True
+# * vnc.enabled set to False
+# * update html5proxy_base_url
+# * update server_proxyclient_address
 
 #
-# IP address on which instance spice server should listen
-#  (string value)
-# from .spice.nova.conf.server_listen
-{{ if not .spice.nova.conf.server_listen }}#{{ end }}server_listen = {{ .spice.nova.conf.server_listen | default "127.0.0.1" }}
+# From nova.conf
+#
 
 #
-# The address to which proxy clients (like nova-spicehtml5proxy) should connect
-#  (string value)
-# from .spice.nova.conf.server_proxyclient_address
-{{ if not .spice.nova.conf.server_proxyclient_address }}#{{ end }}server_proxyclient_address = {{ .spice.nova.conf.server_proxyclient_address | default "127.0.0.1" }}
-
+# Enable SPICE related features.
 #
-# Enable spice related features.
+# Related options:
+#
+# * VNC must be explicitly disabled to get access to the SPICE console. Set the
+#   enabled option to False in the [vnc] section to disable the VNC console.
 #  (boolean value)
 # from .spice.nova.conf.enabled
 {{ if not .spice.nova.conf.enabled }}#{{ end }}enabled = {{ .spice.nova.conf.enabled | default "false" }}
 
 #
-# Enable the spice guest agent support.
+# Enable the SPICE guest agent support on the instances.
+#
+# The Spice agent works with the Spice protocol to offer a better guest console
+# experience. However, the Spice console can still be used without the Spice
+# Agent. With the Spice agent installed the following features are enabled:
+#
+# * Copy & Paste of text and images between the guest and client machine
+# * Automatic adjustment of resolution when the client screen changes - e.g.
+#   if you make the Spice console full screen the guest resolution will adjust
+# to
+#   match it rather than letterboxing.
+# * Better mouse integration - The mouse can be captured and released without
+#   needing to click inside the console or press keys to release it. The
+#   performance of mouse movement is also improved.
 #  (boolean value)
 # from .spice.nova.conf.agent_enabled
 {{ if not .spice.nova.conf.agent_enabled }}#{{ end }}agent_enabled = {{ .spice.nova.conf.agent_enabled | default "true" }}
 
 #
-# Keymap for spice
+# Location of the SPICE HTML5 console proxy.
+#
+# End user would use this URL to connect to the `nova-spicehtml5proxy``
+# service. This service will forward request to the console of an instance.
+#
+# In order to use SPICE console, the service ``nova-spicehtml5proxy`` should be
+# running. This service is typically launched on the controller node.
+#
+# Possible values:
+#
+# * Must be a valid URL of the form:  ``http://host:port/spice_auto.html``
+#   where host is the node running ``nova-spicehtml5proxy`` and the port is
+#   typically 6082. Consider not using default value as it is not well defined
+#   for any real deployment.
+#
+# Related options:
+#
+# * This option depends on ``html5proxy_host`` and ``html5proxy_port`` options.
+#   The access URL returned by the compute node must have the host
+#   and port where the ``nova-spicehtml5proxy`` service is listening.
+#  (uri value)
+# from .spice.nova.conf.html5proxy_base_url
+{{ if not .spice.nova.conf.html5proxy_base_url }}#{{ end }}html5proxy_base_url = {{ .spice.nova.conf.html5proxy_base_url | default "http://127.0.0.1:6082/spice_auto.html" }}
+
+#
+# The  address where the SPICE server running on the instances should listen.
+#
+# Typically, the ``nova-spicehtml5proxy`` proxy client runs on the controller
+# node and connects over the private network to this address on the compute
+# node(s).
+#
+# Possible values:
+#
+# * IP address to listen on.
+#  (string value)
+# from .spice.nova.conf.server_listen
+{{ if not .spice.nova.conf.server_listen }}#{{ end }}server_listen = {{ .spice.nova.conf.server_listen | default "127.0.0.1" }}
+
+#
+# The address used by ``nova-spicehtml5proxy`` client to connect to instance
+# console.
+#
+# Typically, the ``nova-spicehtml5proxy`` proxy client runs on the
+# controller node and connects over the private network to this address on the
+# compute node(s).
+#
+# Possible values:
+#
+# * Any valid IP address on the compute node.
+#
+# Related options:
+#
+# * This option depends on the ``server_listen`` option.
+#   The proxy client must be able to access the address specified in
+#   ``server_listen`` using the value of this option.
+#  (string value)
+# from .spice.nova.conf.server_proxyclient_address
+{{ if not .spice.nova.conf.server_proxyclient_address }}#{{ end }}server_proxyclient_address = {{ .spice.nova.conf.server_proxyclient_address | default "127.0.0.1" }}
+
+#
+# A keyboard layout which is supported by the underlying hypervisor on this
+# node.
+#
+# Possible values:
+# * This is usually an 'IETF language tag' (default is 'en-us'). If you
+#   use QEMU as hypervisor, you should find the list of supported keyboard
+#   layouts at /usr/share/qemu/keymaps.
 #  (string value)
 # from .spice.nova.conf.keymap
 {{ if not .spice.nova.conf.keymap }}#{{ end }}keymap = {{ .spice.nova.conf.keymap | default "en-us" }}
 
 #
-# Host on which to listen for incoming requests
+# IP address or a hostname on which the ``nova-spicehtml5proxy`` service
+# listens for incoming requests.
+#
+# Related options:
+#
+# * This option depends on the ``html5proxy_base_url`` option.
+#   The ``nova-spicehtml5proxy`` service must be listening on a host that is
+#   accessible from the HTML5 client.
 #  (string value)
 # from .spice.nova.conf.html5proxy_host
 {{ if not .spice.nova.conf.html5proxy_host }}#{{ end }}html5proxy_host = {{ .spice.nova.conf.html5proxy_host | default "0.0.0.0" }}
 
 #
-# Port on which to listen for incoming requests
+# Port on which the ``nova-spicehtml5proxy`` service listens for incoming
+# requests.
+#
+# Related options:
+#
+# * This option depends on the ``html5proxy_base_url`` option.
+#   The ``nova-spicehtml5proxy`` service must be listening on a port that is
+#   accessible from the HTML5 client.
 #  (port value)
 # Minimum value: 0
 # Maximum value: 65535
@@ -8835,6 +10128,8 @@
 
 
 [trusted_computing]
+#
+# Configuration options for enabling Trusted Platform Module.
 
 #
 # From nova.conf
@@ -8849,20 +10144,23 @@
 # request that their VMs only be placed on nodes that have been verified by the
 # attestation server specified in this option.
 #
-# The value is a string, and can be either an IP address or FQDN.
-#
 # This option is only used by the FilterScheduler and its subclasses; if you use
 # a different scheduler, this option has no effect. Also note that this setting
 # only affects scheduling if the 'TrustedFilter' filter is enabled.
 #
-# * Related options:
+# Possible values:
 #
-#     attestation_server_ca_file
-#     attestation_port
-#     attestation_api_url
-#     attestation_auth_blob
-#     attestation_auth_timeout
-#     attestation_insecure_ssl
+# * A string representing the host name or IP address of the attestation server,
+#   or an empty string.
+#
+# Related options:
+#
+# * attestation_server_ca_file
+# * attestation_port
+# * attestation_api_url
+# * attestation_auth_blob
+# * attestation_auth_timeout
+# * attestation_insecure_ssl
 #  (string value)
 # from .trusted_computing.nova.conf.attestation_server
 {{ if not .trusted_computing.nova.conf.attestation_server }}#{{ end }}attestation_server = {{ .trusted_computing.nova.conf.attestation_server | default "<None>" }}
@@ -8872,21 +10170,23 @@
 # to the attestation server. See the `attestation_server` help text for more
 # information about host verification.
 #
-# The value is a string, and must point to a file that is readable by the
-# scheduler.
-#
 # This option is only used by the FilterScheduler and its subclasses; if you use
 # a different scheduler, this option has no effect. Also note that this setting
 # only affects scheduling if the 'TrustedFilter' filter is enabled.
 #
-# * Related options:
+# Possible values:
 #
-#     attestation_server
-#     attestation_port
-#     attestation_api_url
-#     attestation_auth_blob
-#     attestation_auth_timeout
-#     attestation_insecure_ssl
+# * A string representing the path to the authentication certificate for the
+#   attestation server, or an empty string.
+#
+# Related options:
+#
+# * attestation_server
+# * attestation_port
+# * attestation_api_url
+# * attestation_auth_blob
+# * attestation_auth_timeout
+# * attestation_insecure_ssl
 #  (string value)
 # from .trusted_computing.nova.conf.attestation_server_ca_file
 {{ if not .trusted_computing.nova.conf.attestation_server_ca_file }}#{{ end }}attestation_server_ca_file = {{ .trusted_computing.nova.conf.attestation_server_ca_file | default "<None>" }}
@@ -8895,21 +10195,21 @@
 # The port to use when connecting to the attestation server. See the
 # `attestation_server` help text for more information about host verification.
 #
-# Valid values are strings, not integers, but must be digits only.
-#
 # This option is only used by the FilterScheduler and its subclasses; if you use
 # a different scheduler, this option has no effect. Also note that this setting
 # only affects scheduling if the 'TrustedFilter' filter is enabled.
 #
-# * Related options:
+# Related options:
 #
-#     attestation_server
-#     attestation_server_ca_file
-#     attestation_api_url
-#     attestation_auth_blob
-#     attestation_auth_timeout
-#     attestation_insecure_ssl
-#  (string value)
+# * attestation_server
+# * attestation_server_ca_file
+# * attestation_api_url
+# * attestation_auth_blob
+# * attestation_auth_timeout
+# * attestation_insecure_ssl
+#  (port value)
+# Minimum value: 0
+# Maximum value: 65535
 # from .trusted_computing.nova.conf.attestation_port
 {{ if not .trusted_computing.nova.conf.attestation_port }}#{{ end }}attestation_port = {{ .trusted_computing.nova.conf.attestation_port | default "8443" }}
 
@@ -8925,14 +10225,18 @@
 # a different scheduler, this option has no effect. Also note that this setting
 # only affects scheduling if the 'TrustedFilter' filter is enabled.
 #
-# * Related options:
+# Possible values:
 #
-#     attestation_server
-#     attestation_server_ca_file
-#     attestation_port
-#     attestation_auth_blob
-#     attestation_auth_timeout
-#     attestation_insecure_ssl
+# * A valid URL string of the attestation server, or an empty string.
+#
+# Related options:
+#
+# * attestation_server
+# * attestation_server_ca_file
+# * attestation_port
+# * attestation_auth_blob
+# * attestation_auth_timeout
+# * attestation_insecure_ssl
 #  (string value)
 # from .trusted_computing.nova.conf.attestation_api_url
 {{ if not .trusted_computing.nova.conf.attestation_api_url }}#{{ end }}attestation_api_url = {{ .trusted_computing.nova.conf.attestation_api_url | default "/OpenAttestationWebServices/V1.0" }}
@@ -8948,14 +10252,19 @@
 # a different scheduler, this option has no effect. Also note that this setting
 # only affects scheduling if the 'TrustedFilter' filter is enabled.
 #
-# * Related options:
+# Possible values:
 #
-#     attestation_server
-#     attestation_server_ca_file
-#     attestation_port
-#     attestation_api_url
-#     attestation_auth_timeout
-#     attestation_insecure_ssl
+# * A string containing the specific blob required by the attestation server, or
+#   an empty string.
+#
+# Related options:
+#
+# * attestation_server
+# * attestation_server_ca_file
+# * attestation_port
+# * attestation_api_url
+# * attestation_auth_timeout
+# * attestation_insecure_ssl
 #  (string value)
 # from .trusted_computing.nova.conf.attestation_auth_blob
 {{ if not .trusted_computing.nova.conf.attestation_auth_blob }}#{{ end }}attestation_auth_blob = {{ .trusted_computing.nova.conf.attestation_auth_blob | default "<None>" }}
@@ -8965,22 +10274,24 @@
 # period has elapsed, a new attestation request will be made. See the
 # `attestation_server` help text for more information about host verification.
 #
-# The value is in seconds. Valid values must be positive integers for any
-# caching; setting this to zero or a negative value will result in calls to the
-# attestation_server for every request, which may impact performance.
-#
 # This option is only used by the FilterScheduler and its subclasses; if you use
 # a different scheduler, this option has no effect. Also note that this setting
 # only affects scheduling if the 'TrustedFilter' filter is enabled.
 #
-# * Related options:
+# Possible values:
 #
-#     attestation_server
-#     attestation_server_ca_file
-#     attestation_port
-#     attestation_api_url
-#     attestation_auth_blob
-#     attestation_insecure_ssl
+# * A integer value, corresponding to the timeout interval for attestations in
+#   seconds. Any integer is valid, although setting this to zero or negative
+#   values can greatly impact performance when using an attestation service.
+#
+# Related options:
+#
+# * attestation_server
+# * attestation_server_ca_file
+# * attestation_port
+# * attestation_api_url
+# * attestation_auth_blob
+# * attestation_insecure_ssl
 #  (integer value)
 # from .trusted_computing.nova.conf.attestation_auth_timeout
 {{ if not .trusted_computing.nova.conf.attestation_auth_timeout }}#{{ end }}attestation_auth_timeout = {{ .trusted_computing.nova.conf.attestation_auth_timeout | default "60" }}
@@ -8990,159 +10301,218 @@
 # attestation service. See the `attestation_server` help text for more
 # information about host verification.
 #
-# Valid values are True or False. The default is False.
-#
 # This option is only used by the FilterScheduler and its subclasses; if you use
 # a different scheduler, this option has no effect. Also note that this setting
 # only affects scheduling if the 'TrustedFilter' filter is enabled.
 #
-# * Related options:
+# Related options:
 #
-#     attestation_server
-#     attestation_server_ca_file
-#     attestation_port
-#     attestation_api_url
-#     attestation_auth_blob
-#     attestation_auth_timeout
+# * attestation_server
+# * attestation_server_ca_file
+# * attestation_port
+# * attestation_api_url
+# * attestation_auth_blob
+# * attestation_auth_timeout
 #  (boolean value)
 # from .trusted_computing.nova.conf.attestation_insecure_ssl
 {{ if not .trusted_computing.nova.conf.attestation_insecure_ssl }}#{{ end }}attestation_insecure_ssl = {{ .trusted_computing.nova.conf.attestation_insecure_ssl | default "false" }}
 
 
 [upgrade_levels]
+#
+# upgrade_levels options are used to set version cap for RPC
+# messages sent between different nova services.
+#
+# By default all services send messages using the latest version
+# they know about.
+#
+# The compute upgrade level is an important part of rolling upgrades
+# where old and new nova-compute services run side by side.
+#
+# The other options can largely be ignored, and are only kept to
+# help with a possible future backport issue.
 
 #
 # From nova.conf
 #
 
 #
-# Cells version
+# Compute RPC API version cap.
 #
-# Cells client-side RPC API version. Use this option to set a version
-# cap for messages sent to local cells services.
+# By default, we always send messages using the most recent version
+# the client knows about.
 #
-# Possible values:
+# Where you have old and new compute services running, you should set
+# this to the lowest deployed version. This is to guarantee that all
+# services never send messages that one of the compute nodes can't
+# understand. Note that we only support upgrading from release N to
+# release N+1.
 #
-# * None: This is the default value.
-# * grizzly: message version 1.6.
-# * havana: message version 1.24.
-# * icehouse: message version 1.27.
-# * juno: message version 1.29.
-# * kilo: message version 1.34.
-# * liberty: message version 1.37.
-#
-# Services which consume this:
-#
-# * nova-cells
-#
-# Related options:
-#
-# * None
-#  (string value)
-# from .upgrade_levels.nova.conf.cells
-{{ if not .upgrade_levels.nova.conf.cells }}#{{ end }}cells = {{ .upgrade_levels.nova.conf.cells | default "<None>" }}
-
-#
-# Intercell version
-#
-# Intercell RPC API is the client side of the Cell<->Cell RPC API.
-# Use this option to set a version cap for messages sent between
-# cells services.
+# Set this option to "auto" if you want to let the compute RPC module
+# automatically determine what version to use based on the service
+# versions in the deployment.
 #
 # Possible values:
 #
-# * None: This is the default value.
-# * grizzly: message version 1.0.
-#
-# Services which consume this:
-#
-# * nova-cells
-#
-# Related options:
-#
-# * None
+# * By default send the latest version the client knows about
+# * 'auto': Automatically determines what version to use based on
+#   the service versions in the deployment.
+# * A string representing a version number in the format 'N.N';
+#   for example, possible values might be '1.12' or '2.0'.
+# * An OpenStack release name, in lower case, such as 'mitaka' or
+#   'liberty'.
 #  (string value)
-# from .upgrade_levels.nova.conf.intercell
-{{ if not .upgrade_levels.nova.conf.intercell }}#{{ end }}intercell = {{ .upgrade_levels.nova.conf.intercell | default "<None>" }}
-
-#
-#
-# Specifies the maximum version for messages sent from cert services. This
-# should
-# be the minimum value that is supported by all of the deployed cert services.
-#
-# Possible values:
-#
-# Any valid OpenStack release name, in lower case, such as 'mitaka' or
-# 'liberty'.
-# Alternatively, it can be any string representing a version number in the
-# format
-# 'N.N'; for example, possible values might be '1.12' or '2.0'.
-#
-# Services which consume this:
-#
-# * nova-cert
-#
-# Related options:
-#
-# * None
-#  (string value)
-# from .upgrade_levels.nova.conf.cert
-{{ if not .upgrade_levels.nova.conf.cert }}#{{ end }}cert = {{ .upgrade_levels.nova.conf.cert | default "<None>" }}
-
-# Set a version cap for messages sent to compute services. Set this option to
-# "auto" if you want to let the compute RPC module automatically determine what
-# version to use based on the service versions in the deployment. Otherwise, you
-# can set this to a specific version to pin this service to messages at a
-# particular level. All services of a single type (i.e. compute) should be
-# configured to use the same version, and it should be set to the minimum
-# commonly-supported version of all those services in the deployment. (string
-# value)
 # from .upgrade_levels.nova.conf.compute
 {{ if not .upgrade_levels.nova.conf.compute }}#{{ end }}compute = {{ .upgrade_levels.nova.conf.compute | default "<None>" }}
 
-#
-# Sets a version cap (limit) for messages sent to scheduler services. In the
-# situation where there were multiple scheduler services running, and they were
-# not being upgraded together, you would set this to the lowest deployed version
-# to guarantee that other services never send messages that any of your running
-# schedulers cannot understand.
-#
-# This is rarely needed in practice as most deployments run a single scheduler.
-# It exists mainly for design compatibility with the other services, such as
-# compute, which are routinely upgraded in a rolling fashion.
-#
-# Services that use this:
-#
-# * nova-compute, nova-conductor
-#
-# Related options:
-#
-# * None
-#  (string value)
+# Cells RPC API version cap (string value)
+# from .upgrade_levels.nova.conf.cells
+{{ if not .upgrade_levels.nova.conf.cells }}#{{ end }}cells = {{ .upgrade_levels.nova.conf.cells | default "<None>" }}
+
+# Intercell RPC API version cap (string value)
+# from .upgrade_levels.nova.conf.intercell
+{{ if not .upgrade_levels.nova.conf.intercell }}#{{ end }}intercell = {{ .upgrade_levels.nova.conf.intercell | default "<None>" }}
+
+# Cert RPC API version cap (string value)
+# from .upgrade_levels.nova.conf.cert
+{{ if not .upgrade_levels.nova.conf.cert }}#{{ end }}cert = {{ .upgrade_levels.nova.conf.cert | default "<None>" }}
+
+# Scheduler RPC API version cap (string value)
 # from .upgrade_levels.nova.conf.scheduler
 {{ if not .upgrade_levels.nova.conf.scheduler }}#{{ end }}scheduler = {{ .upgrade_levels.nova.conf.scheduler | default "<None>" }}
 
-# Set a version cap for messages sent to conductor services (string value)
+# Conductor RPC API version cap (string value)
 # from .upgrade_levels.nova.conf.conductor
 {{ if not .upgrade_levels.nova.conf.conductor }}#{{ end }}conductor = {{ .upgrade_levels.nova.conf.conductor | default "<None>" }}
 
-# Set a version cap for messages sent to console services (string value)
+# Console RPC API version cap (string value)
 # from .upgrade_levels.nova.conf.console
 {{ if not .upgrade_levels.nova.conf.console }}#{{ end }}console = {{ .upgrade_levels.nova.conf.console | default "<None>" }}
 
-# Set a version cap for messages sent to consoleauth services (string value)
+# Consoleauth RPC API version cap (string value)
 # from .upgrade_levels.nova.conf.consoleauth
 {{ if not .upgrade_levels.nova.conf.consoleauth }}#{{ end }}consoleauth = {{ .upgrade_levels.nova.conf.consoleauth | default "<None>" }}
 
-# Set a version cap for messages sent to network services (string value)
+# Network RPC API version cap (string value)
 # from .upgrade_levels.nova.conf.network
 {{ if not .upgrade_levels.nova.conf.network }}#{{ end }}network = {{ .upgrade_levels.nova.conf.network | default "<None>" }}
 
-# Set a version cap for messages sent to the base api in any service (string
-# value)
+# Base API RPC API version cap (string value)
 # from .upgrade_levels.nova.conf.baseapi
 {{ if not .upgrade_levels.nova.conf.baseapi }}#{{ end }}baseapi = {{ .upgrade_levels.nova.conf.baseapi | default "<None>" }}
+
+
+[vendordata_dynamic_auth]
+#
+# Options within this group control the authentication of the vendordata
+# subsystem of the metadata API server (and config drive) with external systems.
+
+#
+# From nova.conf
+#
+
+# PEM encoded Certificate Authority to use when verifying HTTPs connections.
+# (string value)
+# from .vendordata_dynamic_auth.nova.conf.cafile
+{{ if not .vendordata_dynamic_auth.nova.conf.cafile }}#{{ end }}cafile = {{ .vendordata_dynamic_auth.nova.conf.cafile | default "<None>" }}
+
+# PEM encoded client certificate cert file (string value)
+# from .vendordata_dynamic_auth.nova.conf.certfile
+{{ if not .vendordata_dynamic_auth.nova.conf.certfile }}#{{ end }}certfile = {{ .vendordata_dynamic_auth.nova.conf.certfile | default "<None>" }}
+
+# PEM encoded client certificate key file (string value)
+# from .vendordata_dynamic_auth.nova.conf.keyfile
+{{ if not .vendordata_dynamic_auth.nova.conf.keyfile }}#{{ end }}keyfile = {{ .vendordata_dynamic_auth.nova.conf.keyfile | default "<None>" }}
+
+# Verify HTTPS connections. (boolean value)
+# from .vendordata_dynamic_auth.nova.conf.insecure
+{{ if not .vendordata_dynamic_auth.nova.conf.insecure }}#{{ end }}insecure = {{ .vendordata_dynamic_auth.nova.conf.insecure | default "false" }}
+
+# Timeout value for http requests (integer value)
+# from .vendordata_dynamic_auth.nova.conf.timeout
+{{ if not .vendordata_dynamic_auth.nova.conf.timeout }}#{{ end }}timeout = {{ .vendordata_dynamic_auth.nova.conf.timeout | default "<None>" }}
+
+# Authentication type to load (string value)
+# Deprecated group/name - [vendordata_dynamic_auth]/auth_plugin
+# from .vendordata_dynamic_auth.nova.conf.auth_type
+{{ if not .vendordata_dynamic_auth.nova.conf.auth_type }}#{{ end }}auth_type = {{ .vendordata_dynamic_auth.nova.conf.auth_type | default "<None>" }}
+
+# Config Section from which to load plugin specific options (string value)
+# from .vendordata_dynamic_auth.nova.conf.auth_section
+{{ if not .vendordata_dynamic_auth.nova.conf.auth_section }}#{{ end }}auth_section = {{ .vendordata_dynamic_auth.nova.conf.auth_section | default "<None>" }}
+
+# Authentication URL (string value)
+# from .vendordata_dynamic_auth.nova.conf.auth_url
+{{ if not .vendordata_dynamic_auth.nova.conf.auth_url }}#{{ end }}auth_url = {{ .vendordata_dynamic_auth.nova.conf.auth_url | default "<None>" }}
+
+# Domain ID to scope to (string value)
+# from .vendordata_dynamic_auth.nova.conf.domain_id
+{{ if not .vendordata_dynamic_auth.nova.conf.domain_id }}#{{ end }}domain_id = {{ .vendordata_dynamic_auth.nova.conf.domain_id | default "<None>" }}
+
+# Domain name to scope to (string value)
+# from .vendordata_dynamic_auth.nova.conf.domain_name
+{{ if not .vendordata_dynamic_auth.nova.conf.domain_name }}#{{ end }}domain_name = {{ .vendordata_dynamic_auth.nova.conf.domain_name | default "<None>" }}
+
+# Project ID to scope to (string value)
+# from .vendordata_dynamic_auth.nova.conf.project_id
+{{ if not .vendordata_dynamic_auth.nova.conf.project_id }}#{{ end }}project_id = {{ .vendordata_dynamic_auth.nova.conf.project_id | default "<None>" }}
+
+# Project name to scope to (string value)
+# from .vendordata_dynamic_auth.nova.conf.project_name
+{{ if not .vendordata_dynamic_auth.nova.conf.project_name }}#{{ end }}project_name = {{ .vendordata_dynamic_auth.nova.conf.project_name | default "<None>" }}
+
+# Domain ID containing project (string value)
+# from .vendordata_dynamic_auth.nova.conf.project_domain_id
+{{ if not .vendordata_dynamic_auth.nova.conf.project_domain_id }}#{{ end }}project_domain_id = {{ .vendordata_dynamic_auth.nova.conf.project_domain_id | default "<None>" }}
+
+# Domain name containing project (string value)
+# from .vendordata_dynamic_auth.nova.conf.project_domain_name
+{{ if not .vendordata_dynamic_auth.nova.conf.project_domain_name }}#{{ end }}project_domain_name = {{ .vendordata_dynamic_auth.nova.conf.project_domain_name | default "<None>" }}
+
+# Trust ID (string value)
+# from .vendordata_dynamic_auth.nova.conf.trust_id
+{{ if not .vendordata_dynamic_auth.nova.conf.trust_id }}#{{ end }}trust_id = {{ .vendordata_dynamic_auth.nova.conf.trust_id | default "<None>" }}
+
+# Optional domain ID to use with v3 and v2 parameters. It will be used for both
+# the user and project domain in v3 and ignored in v2 authentication. (string
+# value)
+# from .vendordata_dynamic_auth.nova.conf.default_domain_id
+{{ if not .vendordata_dynamic_auth.nova.conf.default_domain_id }}#{{ end }}default_domain_id = {{ .vendordata_dynamic_auth.nova.conf.default_domain_id | default "<None>" }}
+
+# Optional domain name to use with v3 API and v2 parameters. It will be used for
+# both the user and project domain in v3 and ignored in v2 authentication.
+# (string value)
+# from .vendordata_dynamic_auth.nova.conf.default_domain_name
+{{ if not .vendordata_dynamic_auth.nova.conf.default_domain_name }}#{{ end }}default_domain_name = {{ .vendordata_dynamic_auth.nova.conf.default_domain_name | default "<None>" }}
+
+# User ID (string value)
+# from .vendordata_dynamic_auth.nova.conf.user_id
+{{ if not .vendordata_dynamic_auth.nova.conf.user_id }}#{{ end }}user_id = {{ .vendordata_dynamic_auth.nova.conf.user_id | default "<None>" }}
+
+# Username (string value)
+# Deprecated group/name - [vendordata_dynamic_auth]/user-name
+# from .vendordata_dynamic_auth.nova.conf.username
+{{ if not .vendordata_dynamic_auth.nova.conf.username }}#{{ end }}username = {{ .vendordata_dynamic_auth.nova.conf.username | default "<None>" }}
+
+# User's domain id (string value)
+# from .vendordata_dynamic_auth.nova.conf.user_domain_id
+{{ if not .vendordata_dynamic_auth.nova.conf.user_domain_id }}#{{ end }}user_domain_id = {{ .vendordata_dynamic_auth.nova.conf.user_domain_id | default "<None>" }}
+
+# User's domain name (string value)
+# from .vendordata_dynamic_auth.nova.conf.user_domain_name
+{{ if not .vendordata_dynamic_auth.nova.conf.user_domain_name }}#{{ end }}user_domain_name = {{ .vendordata_dynamic_auth.nova.conf.user_domain_name | default "<None>" }}
+
+# User's password (string value)
+# from .vendordata_dynamic_auth.nova.conf.password
+{{ if not .vendordata_dynamic_auth.nova.conf.password }}#{{ end }}password = {{ .vendordata_dynamic_auth.nova.conf.password | default "<None>" }}
+
+# Tenant ID (string value)
+# from .vendordata_dynamic_auth.nova.conf.tenant_id
+{{ if not .vendordata_dynamic_auth.nova.conf.tenant_id }}#{{ end }}tenant_id = {{ .vendordata_dynamic_auth.nova.conf.tenant_id | default "<None>" }}
+
+# Tenant Name (string value)
+# from .vendordata_dynamic_auth.nova.conf.tenant_name
+{{ if not .vendordata_dynamic_auth.nova.conf.tenant_name }}#{{ end }}tenant_name = {{ .vendordata_dynamic_auth.nova.conf.tenant_name | default "<None>" }}
 
 
 [vmware]
@@ -9345,7 +10715,7 @@
 # from .vmware.nova.conf.use_linked_clone
 {{ if not .vmware.nova.conf.use_linked_clone }}#{{ end }}use_linked_clone = {{ .vmware.nova.conf.use_linked_clone | default "true" }}
 
-#
+# DEPRECATED:
 # This option specifies VIM Service WSDL Location
 #
 # If vSphere API versions 5.1 and later is being used, this section can
@@ -9359,6 +10729,10 @@
 # * http://<server>/vimService.wsdl
 # * file:///opt/stack/vmware/SDK/wsdl/vim25/vimService.wsdl
 #  (string value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason: Only vCenter versions earlier than 5.1 require this option and the
+# current minimum version is 5.1.
 # from .vmware.nova.conf.wsdl_location
 {{ if not .vmware.nova.conf.wsdl_location }}#{{ end }}wsdl_location = {{ .vmware.nova.conf.wsdl_location | default "<None>" }}
 
@@ -9723,7 +11097,8 @@
 # This option represents a file name for the paste.deploy config for nova-api.
 #
 # Possible values:
-#  * A string representing file name for the paste.deploy config.
+#
+# * A string representing file name for the paste.deploy config.
 #  (string value)
 # Deprecated group/name - [DEFAULT]/api_paste_config
 # from .wsgi.nova.conf.api_paste_config
@@ -9738,9 +11113,9 @@
 #
 # Possible values:
 #
-#  * '%(client_ip)s "%(request_line)s" status: %(status_code)s'
-#    'len: %(body_length)s time: %(wall_seconds).7f' (default)
-#  * Any formatted string formed by specific values.
+# * '%(client_ip)s "%(request_line)s" status: %(status_code)s'
+#   'len: %(body_length)s time: %(wall_seconds).7f' (default)
+# * Any formatted string formed by specific values.
 #  (string value)
 # Deprecated group/name - [DEFAULT]/wsgi_log_format
 # from .wsgi.nova.conf.wsgi_log_format
@@ -9752,8 +11127,8 @@
 #
 # Possible values:
 #
-#  * None (default) - the request scheme is not influenced by any HTTP headers.
-#  * Valid HTTP header, like HTTP_X_FORWARDED_PROTO
+# * None (default) - the request scheme is not influenced by any HTTP headers.
+# * Valid HTTP header, like HTTP_X_FORWARDED_PROTO
 #  (string value)
 # Deprecated group/name - [DEFAULT]/secure_proxy_ssl_header
 # from .wsgi.nova.conf.secure_proxy_ssl_header
@@ -9765,11 +11140,11 @@
 #
 # Possible values:
 #
-#  * String representing path to the CA certificate file.
+# * String representing path to the CA certificate file.
 #
 # Related options:
 #
-#  * enabled_ssl_apis
+# * enabled_ssl_apis
 #  (string value)
 # Deprecated group/name - [DEFAULT]/ssl_ca_file
 # from .wsgi.nova.conf.ssl_ca_file
@@ -9780,11 +11155,11 @@
 #
 # Possible values:
 #
-#  * String representing path to the SSL certificate.
+# * String representing path to the SSL certificate.
 #
 # Related options:
 #
-#  * enabled_ssl_apis
+# * enabled_ssl_apis
 #  (string value)
 # Deprecated group/name - [DEFAULT]/ssl_cert_file
 # from .wsgi.nova.conf.ssl_cert_file
@@ -9796,11 +11171,11 @@
 #
 # Possible values:
 #
-#  * String representing path to the SSL private key.
+# * String representing path to the SSL private key.
 #
 # Related options:
 #
-#  * enabled_ssl_apis
+# * enabled_ssl_apis
 #  (string value)
 # Deprecated group/name - [DEFAULT]/ssl_key_file
 # from .wsgi.nova.conf.ssl_key_file
@@ -9814,7 +11189,7 @@
 #
 # Related options:
 #
-#  * keep_alive
+# * keep_alive
 #  (integer value)
 # Minimum value: 0
 # Deprecated group/name - [DEFAULT]/tcp_keepidle
@@ -9853,12 +11228,12 @@
 #
 # Possible values:
 #
-#  * True : reuse HTTP connection.
-#  * False : closes the client socket connection explicitly.
+# * True : reuse HTTP connection.
+# * False : closes the client socket connection explicitly.
 #
 # Related options:
 #
-#  * tcp_keepidle
+# * tcp_keepidle
 #  (boolean value)
 # Deprecated group/name - [DEFAULT]/wsgi_keep_alive
 # from .wsgi.nova.conf.keep_alive
@@ -9881,8 +11256,8 @@
 # XenServer options are used when the compute_driver is set to use
 # XenServer (compute_driver=xenapi.XenAPIDriver).
 #
-# Must specify connection_url, and connection_password to use
-# compute_driver=xenapi.XenAPIDriver.
+# Must specify connection_url, connection_password and ovs_integration_bridge to
+# use compute_driver=xenapi.XenAPIDriver.
 
 #
 # From nova.conf
@@ -9914,8 +11289,10 @@
 # considered to have timed out.
 #
 # Related options:
-#   * ``agent_version_timeout``
-#   * ``agent_resetnetwork_timeout``
+#
+# * ``agent_version_timeout``
+# * ``agent_resetnetwork_timeout``
+#
 #  (integer value)
 # Minimum value: 0
 # from .xenserver.nova.conf.agent_timeout
@@ -9959,9 +11336,11 @@
 # agent is present, network configuration is not injected into the image.
 #
 # Related options:
-#   For this option to have an effect:
-#   * ``flat_injected`` should be set to ``True``
-#   * ``compute_driver`` should be set to ``xenapi.XenAPIDriver``
+#
+# For this option to have an effect:
+# * ``flat_injected`` should be set to ``True``
+# * ``compute_driver`` should be set to ``xenapi.XenAPIDriver``
+#
 #  (string value)
 # from .xenserver.nova.conf.agent_path
 {{ if not .xenserver.nova.conf.agent_path }}#{{ end }}agent_path = {{ .xenserver.nova.conf.agent_path | default "usr/sbin/xe-update-networking" }}
@@ -9975,7 +11354,9 @@
 # ``use_agent_default`` for more information.
 #
 # Related options:
-#   * ``use_agent_default``
+#
+# * ``use_agent_default``
+#
 #  (boolean value)
 # from .xenserver.nova.conf.disable_agent
 {{ if not .xenserver.nova.conf.disable_agent }}#{{ end }}disable_agent = {{ .xenserver.nova.conf.disable_agent | default "false" }}
@@ -9995,66 +11376,128 @@
 # present, the boot times will increase significantly.
 #
 # Related options:
-#   * ``disable_agent``
+#
+# * ``disable_agent``
+#
 #  (boolean value)
 # from .xenserver.nova.conf.use_agent_default
 {{ if not .xenserver.nova.conf.use_agent_default }}#{{ end }}use_agent_default = {{ .xenserver.nova.conf.use_agent_default | default "false" }}
 
 # Timeout in seconds for XenAPI login. (integer value)
+# Minimum value: 0
 # from .xenserver.nova.conf.login_timeout
 {{ if not .xenserver.nova.conf.login_timeout }}#{{ end }}login_timeout = {{ .xenserver.nova.conf.login_timeout | default "10" }}
 
-# Maximum number of concurrent XenAPI connections. Used only if
-# compute_driver=xenapi.XenAPIDriver (integer value)
+#
+# Maximum number of concurrent XenAPI connections.
+#
+# In nova, multiple XenAPI requests can happen at a time.
+# Configuring this option will parallelize access to the XenAPI
+# session, which allows you to make concurrent XenAPI connections.
+#  (integer value)
+# Minimum value: 1
 # from .xenserver.nova.conf.connection_concurrent
 {{ if not .xenserver.nova.conf.connection_concurrent }}#{{ end }}connection_concurrent = {{ .xenserver.nova.conf.connection_concurrent | default "5" }}
 
-# Base URL for torrent files; must contain a slash character (see RFC 1808, step
-# 6) (string value)
+# DEPRECATED:
+# Base URL for torrent files; must contain a slash character (see RFC 1808,
+# step 6).
+#  (string value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# The torrent feature has not been tested nor maintained, and as such is being
+# removed.
 # from .xenserver.nova.conf.torrent_base_url
 {{ if not .xenserver.nova.conf.torrent_base_url }}#{{ end }}torrent_base_url = {{ .xenserver.nova.conf.torrent_base_url | default "<None>" }}
 
-# Probability that peer will become a seeder. (1.0 = 100%) (floating point
-# value)
+# DEPRECATED: Probability that peer will become a seeder (1.0 = 100%) (floating
+# point value)
+# Minimum value: 0
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# The torrent feature has not been tested nor maintained, and as such is being
+# removed.
 # from .xenserver.nova.conf.torrent_seed_chance
 {{ if not .xenserver.nova.conf.torrent_seed_chance }}#{{ end }}torrent_seed_chance = {{ .xenserver.nova.conf.torrent_seed_chance | default "1.0" }}
 
-# Number of seconds after downloading an image via BitTorrent that it should be
-# seeded for other peers. (integer value)
+# DEPRECATED:
+# Number of seconds after downloading an image via BitTorrent that it should
+# be seeded for other peers.'
+#  (integer value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# The torrent feature has not been tested nor maintained, and as such is being
+# removed.
 # from .xenserver.nova.conf.torrent_seed_duration
 {{ if not .xenserver.nova.conf.torrent_seed_duration }}#{{ end }}torrent_seed_duration = {{ .xenserver.nova.conf.torrent_seed_duration | default "3600" }}
 
-# Cached torrent files not accessed within this number of seconds can be reaped
-# (integer value)
+# DEPRECATED:
+# Cached torrent files not accessed within this number of seconds can be reaped.
+#  (integer value)
+# Minimum value: 0
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# The torrent feature has not been tested nor maintained, and as such is being
+# removed.
 # from .xenserver.nova.conf.torrent_max_last_accessed
 {{ if not .xenserver.nova.conf.torrent_max_last_accessed }}#{{ end }}torrent_max_last_accessed = {{ .xenserver.nova.conf.torrent_max_last_accessed | default "86400" }}
 
-# Beginning of port range to listen on (port value)
+# DEPRECATED: Beginning of port range to listen on (port value)
 # Minimum value: 0
 # Maximum value: 65535
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# The torrent feature has not been tested nor maintained, and as such is being
+# removed.
 # from .xenserver.nova.conf.torrent_listen_port_start
 {{ if not .xenserver.nova.conf.torrent_listen_port_start }}#{{ end }}torrent_listen_port_start = {{ .xenserver.nova.conf.torrent_listen_port_start | default "6881" }}
 
-# End of port range to listen on (port value)
+# DEPRECATED: End of port range to listen on (port value)
 # Minimum value: 0
 # Maximum value: 65535
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# The torrent feature has not been tested nor maintained, and as such is being
+# removed.
 # from .xenserver.nova.conf.torrent_listen_port_end
 {{ if not .xenserver.nova.conf.torrent_listen_port_end }}#{{ end }}torrent_listen_port_end = {{ .xenserver.nova.conf.torrent_listen_port_end | default "6891" }}
 
+# DEPRECATED:
 # Number of seconds a download can remain at the same progress percentage w/o
-# being considered a stall (integer value)
+# being considered a stall.
+#  (integer value)
+# Minimum value: 0
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# The torrent feature has not been tested nor maintained, and as such is being
+# removed.
 # from .xenserver.nova.conf.torrent_download_stall_cutoff
 {{ if not .xenserver.nova.conf.torrent_download_stall_cutoff }}#{{ end }}torrent_download_stall_cutoff = {{ .xenserver.nova.conf.torrent_download_stall_cutoff | default "600" }}
 
-# Maximum number of seeder processes to run concurrently within a given dom0.
-# (-1 = no limit) (integer value)
+# DEPRECATED:
+# Maximum number of seeder processes to run concurrently within a given dom0
+# (-1 = no limit).
+#  (integer value)
+# Minimum value: -1
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# The torrent feature has not been tested nor maintained, and as such is being
+# removed.
 # from .xenserver.nova.conf.torrent_max_seeder_processes_per_host
 {{ if not .xenserver.nova.conf.torrent_max_seeder_processes_per_host }}#{{ end }}torrent_max_seeder_processes_per_host = {{ .xenserver.nova.conf.torrent_max_seeder_processes_per_host | default "1" }}
 
 #
 # Cache glance images locally.
 #
-# The value for this option must be choosen from the choices listed
+# The value for this option must be chosen from the choices listed
 # here. Configuring a value other than these will default to 'all'.
 #
 # Note: There is nothing that deletes these images.
@@ -10142,14 +11585,14 @@
 #
 # Whether or not to download images via Bit Torrent.
 #
-# The value for this option must be choosen from the choices listed
+# The value for this option must be chosen from the choices listed
 # here. Configuring a value other than these will default to 'none'.
 #
 # Possible values:
 #
 # * `all`: will download all images.
 # * `some`: will only download images that have the image_property
-#           `bittorrent=true'.
+#           `bittorrent=true`.
 # * `none`: will turnoff downloading images via Bit Torrent.
 #  (string value)
 # Allowed values: all, some, none
@@ -10276,9 +11719,7 @@
 # from .xenserver.nova.conf.vhd_coalesce_max_attempts
 {{ if not .xenserver.nova.conf.vhd_coalesce_max_attempts }}#{{ end }}vhd_coalesce_max_attempts = {{ .xenserver.nova.conf.vhd_coalesce_max_attempts | default "20" }}
 
-#
-# Base path to the storage repository on the XenServer host.
-#  (string value)
+# Base path to the storage repository on the XenServer host. (string value)
 # from .xenserver.nova.conf.sr_base_path
 {{ if not .xenserver.nova.conf.sr_base_path }}#{{ end }}sr_base_path = {{ .xenserver.nova.conf.sr_base_path | default "/var/run/sr-mount" }}
 
@@ -10302,14 +11743,22 @@
 # This option represents the port of the iSCSI Target. If the
 # target port is not present in the connection information from the
 # volume provider then the value from this option is taken.
-#  (string value)
+#  (port value)
+# Minimum value: 0
+# Maximum value: 65535
 # from .xenserver.nova.conf.target_port
 {{ if not .xenserver.nova.conf.target_port }}#{{ end }}target_port = {{ .xenserver.nova.conf.target_port | default "3260" }}
 
-#
+# DEPRECATED:
 # Used to enable the remapping of VBD dev.
 # (Works around an issue in Ubuntu Maverick)
 #  (boolean value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# This option provided a workaround for issues in Ubuntu Maverick, which
+# was released in April 2010 and was dropped from support in April 2012.
+# There's no reason to continue supporting this option.
 # from .xenserver.nova.conf.remap_vbd_dev
 {{ if not .xenserver.nova.conf.remap_vbd_dev }}#{{ end }}remap_vbd_dev = {{ .xenserver.nova.conf.remap_vbd_dev | default "false" }}
 
@@ -10339,15 +11788,73 @@
 # from .xenserver.nova.conf.independent_compute
 {{ if not .xenserver.nova.conf.independent_compute }}#{{ end }}independent_compute = {{ .xenserver.nova.conf.independent_compute | default "false" }}
 
-# Number of seconds to wait for instance to go to running state (integer value)
+#
+# Wait time for instances to go to running state.
+#
+# Provide an integer value representing time in seconds to set the
+# wait time for an instance to go to running state.
+#
+# When a request to create an instance is received by nova-api and
+# communicated to nova-compute, the creation of the instance occurs
+# through interaction with Xen via XenAPI in the compute node. Once
+# the node on which the instance(s) are to be launched is decided by
+# nova-schedule and the launch is triggered, a certain amount of wait
+# time is involved until the instance(s) can become available and
+# 'running'. This wait time is defined by running_timeout. If the
+# instances do not go to running state within this specified wait
+# time, the launch expires and the instance(s) are set to 'error'
+# state.
+#  (integer value)
+# Minimum value: 0
 # from .xenserver.nova.conf.running_timeout
 {{ if not .xenserver.nova.conf.running_timeout }}#{{ end }}running_timeout = {{ .xenserver.nova.conf.running_timeout | default "60" }}
 
-# The XenAPI VIF driver using XenServer Network APIs. (string value)
+# DEPRECATED:
+# The XenAPI VIF driver using XenServer Network APIs.
+#
+# Provide a string value representing the VIF XenAPI vif driver to use for
+# plugging virtual network interfaces.
+#
+# Xen configuration uses bridging within the backend domain to allow
+# all VMs to appear on the network as individual hosts. Bridge
+# interfaces are used to create a XenServer VLAN network in which
+# the VIFs for the VM instances are plugged. If no VIF bridge driver
+# is plugged, the bridge is not made available. This configuration
+# option takes in a value for the VIF driver.
+#
+# Possible values:
+#
+# * nova.virt.xenapi.vif.XenAPIOpenVswitchDriver (default)
+# * nova.virt.xenapi.vif.XenAPIBridgeDriver (deprecated)
+#
+# Related options:
+#
+# * ``vlan_interface``
+# * ``ovs_integration_bridge``
+#  (string value)
+# This option is deprecated for removal since 15.0.0.
+# Its value may be silently ignored in the future.
+# Reason:
+# There are only two in-tree vif drivers for XenServer. XenAPIBridgeDriver is
+# for
+# nova-network which is deprecated and XenAPIOpenVswitchDriver is for Neutron
+# which is the default configuration for Nova since the 15.0.0 Ocata release. In
+# the future the "use_neutron" configuration option will be used to determine
+# which vif driver to use.
 # from .xenserver.nova.conf.vif_driver
-{{ if not .xenserver.nova.conf.vif_driver }}#{{ end }}vif_driver = {{ .xenserver.nova.conf.vif_driver | default "nova.virt.xenapi.vif.XenAPIBridgeDriver" }}
+{{ if not .xenserver.nova.conf.vif_driver }}#{{ end }}vif_driver = {{ .xenserver.nova.conf.vif_driver | default "nova.virt.xenapi.vif.XenAPIOpenVswitchDriver" }}
 
-# Dom0 plugin driver used to handle image uploads. (string value)
+#
+# Dom0 plugin driver used to handle image uploads.
+#
+# Provide a string value representing a plugin driver required to
+# handle the image uploading to GlanceStore.
+#
+# Images, and snapshots from XenServer need to be uploaded to the data
+# store for use. image_upload_handler takes in a value for the Dom0
+# plugin driver. This driver is then called to uplaod images to the
+# GlanceStore.
+#  (string value)
 # from .xenserver.nova.conf.image_upload_handler
 {{ if not .xenserver.nova.conf.image_upload_handler }}#{{ end }}image_upload_handler = {{ .xenserver.nova.conf.image_upload_handler | default "nova.virt.xenapi.image.glance.GlanceStore" }}
 
@@ -10372,12 +11879,12 @@
 # environment, therefore this configuration value must be set
 # accordingly if you are using XenAPI.
 #
-# Possible options:
+# Possible values:
 #
-#    * Any string that represents a bridge name(default is xapi1).
+# * Any string that represents a bridge name.
 #  (string value)
 # from .xenserver.nova.conf.ovs_integration_bridge
-{{ if not .xenserver.nova.conf.ovs_integration_bridge }}#{{ end }}ovs_integration_bridge = {{ .xenserver.nova.conf.ovs_integration_bridge | default "xapi1" }}
+{{ if not .xenserver.nova.conf.ovs_integration_bridge }}#{{ end }}ovs_integration_bridge = {{ .xenserver.nova.conf.ovs_integration_bridge | default "<None>" }}
 
 #
 # When adding new host to a pool, this will append a --force flag to the
@@ -10392,6 +11899,17 @@
 #  (boolean value)
 # from .xenserver.nova.conf.use_join_force
 {{ if not .xenserver.nova.conf.use_join_force }}#{{ end }}use_join_force = {{ .xenserver.nova.conf.use_join_force | default "true" }}
+
+#
+# Publicly visible name for this console host.
+#
+# Possible values:
+#
+# * A string representing a valid hostname
+#  (string value)
+# Deprecated group/name - [DEFAULT]/console_public_hostname
+# from .xenserver.nova.conf.console_public_hostname
+{{ if not .xenserver.nova.conf.console_public_hostname }}#{{ end }}console_public_hostname = {{ .xenserver.nova.conf.console_public_hostname | default "5b6s17" }}
 
 
 [xvp]
@@ -10433,3 +11951,4 @@
 {{ if not .xvp.nova.conf.console_xvp_multiplex_port }}#{{ end }}console_xvp_multiplex_port = {{ .xvp.nova.conf.console_xvp_multiplex_port | default "5900" }}
 
 {{- end -}}
+

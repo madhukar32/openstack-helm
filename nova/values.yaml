@@ -17,6 +17,10 @@
 # Declare name/value pairs to be passed into your templates.
 # name: value
 
+sdn:
+  opencontrail:
+    enabled: true
+
 replicas:
   api_metadata: 1
   osapi: 1
@@ -52,19 +56,19 @@ labels:
     node_selector_value: enabled
 
 images:
-  db_init: docker.io/kolla/ubuntu-source-nova-api:3.0.3
-  db_sync: docker.io/kolla/ubuntu-source-nova-api:3.0.3
-  ks_user: docker.io/kolla/ubuntu-source-kolla-toolbox:3.0.3
-  ks_service: docker.io/kolla/ubuntu-source-kolla-toolbox:3.0.3
-  ks_endpoints: docker.io/kolla/ubuntu-source-kolla-toolbox:3.0.3
-  api: docker.io/kolla/ubuntu-source-nova-api:3.0.3
-  conductor: docker.io/kolla/ubuntu-source-nova-conductor:3.0.3
-  scheduler: docker.io/kolla/ubuntu-source-nova-scheduler:3.0.3
-  novncproxy: docker.io/kolla/ubuntu-source-nova-novncproxy:3.0.3
-  consoleauth: docker.io/kolla/ubuntu-source-nova-consoleauth:3.0.3
-  compute: docker.io/kolla/ubuntu-source-nova-compute:3.0.3
-  libvirt: docker.io/kolla/ubuntu-source-nova-libvirt:3.0.3
-  bootstrap: docker.io/kolla/ubuntu-source-nova-api:3.0.3
+  db_init: docker.io/kolla/ubuntu-source-nova-api:4.0.0
+  db_sync: docker.io/kolla/ubuntu-source-nova-api:4.0.0
+  ks_user: docker.io/kolla/ubuntu-source-kolla-toolbox:4.0.0
+  ks_service: docker.io/kolla/ubuntu-source-kolla-toolbox:4.0.0
+  ks_endpoints: docker.io/kolla/ubuntu-source-kolla-toolbox:4.0.0
+  api: docker.io/kolla/ubuntu-source-nova-api:4.0.0
+  conductor: docker.io/kolla/ubuntu-source-nova-conductor:4.0.0
+  scheduler: docker.io/kolla/ubuntu-source-nova-scheduler:4.0.0
+  novncproxy: docker.io/kolla/ubuntu-source-nova-novncproxy:4.0.0
+  consoleauth: docker.io/kolla/ubuntu-source-nova-consoleauth:4.0.0
+  compute: ubuntu-binary-nova-compute:4.0.2
+  libvirt: docker.io/kolla/ubuntu-source-nova-libvirt:4.0.0
+  bootstrap: docker.io/kolla/ubuntu-source-nova-api:4.0.0
   dep_check: docker.io/kolla/ubuntu-source-kubernetes-entrypoint:4.0.0
   pull_policy: "IfNotPresent"
 
@@ -100,7 +104,7 @@ bootstrap:
 network:
   dns:
     servers:
-      - "10.96.0.10"
+      - "10.87.116.10"
       - "8.8.8.8"
     kubernetes_domain: "cluster.local"
     other_domains: ""
@@ -178,8 +182,6 @@ dependencies:
     service:
     - keystone-api
     - nova-api
-    daemonset:
-    - ovs-agent
   libvirt:
     jobs:
     - nova-db-sync

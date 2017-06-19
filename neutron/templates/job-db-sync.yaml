@@ -60,10 +60,17 @@ spec:
               mountPath: /etc/neutron/neutron.conf
               subPath: neutron.conf
               readOnly: true
+            {{- if .Values.sdn.opencontrail.enabled }}
+            - name: neutron-etc
+              mountPath: /etc/neutron/plugins/opencontrail_plugin.ini
+              subPath: opencontrail_plugin.ini
+              readOnly: true
+            {{- else }}
             - name: neutron-etc
               mountPath: /etc/neutron/plugins/ml2/ml2_conf.ini
               subPath: ml2_conf.ini
               readOnly: true
+            {{- end }}
       volumes:
         - name: etcneutron
           emptyDir: {}
