@@ -37,6 +37,8 @@ data:
 {{ tuple "bin/_bootstrap.sh.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
   nova-api.sh: |
 {{ tuple "bin/_nova-api.sh.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
+  nova-placement.sh: |
+{{ tuple "bin/_nova-placement.sh.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
   nova-api-metadata.sh: |
 {{ tuple "bin/_nova-api-metadata.sh.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
   nova-compute.sh: |

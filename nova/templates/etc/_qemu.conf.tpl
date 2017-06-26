@@ -26,6 +26,7 @@
 #          rollover when a size limit is hit.
 #
 stdio_handler = "file"
+dynamic_ownership = 1
 {{- if .Values.sdn.opencontrail.enabled }}
 cgroup_device_acl = [
     "/dev/null", "/dev/full", "/dev/zero",

@@ -27,6 +27,7 @@ replicas:
   conductor: 1
   consoleauth: 1
   scheduler: 1
+  placement: 1
 
 labels:
   agent:
@@ -48,6 +49,9 @@ labels:
   osapi:
     node_selector_key: openstack-control-plane
     node_selector_value: enabled
+  placement:
+    node_selector_key: openstack-control-plane
+    node_selector_value: enabled
   api_metadata:
     node_selector_key: openstack-control-plane
     node_selector_value: enabled
@@ -67,7 +71,8 @@ images:
   novncproxy: docker.io/kolla/ubuntu-source-nova-novncproxy:4.0.0
   consoleauth: docker.io/kolla/ubuntu-source-nova-consoleauth:4.0.0
   compute: ubuntu-binary-nova-compute:4.0.2
-  libvirt: docker.io/kolla/ubuntu-source-nova-libvirt:4.0.0
+  placement: ubuntu-source-nova-placement-api:4.0.1
+  libvirt: docker.io/kolla/ubuntu-source-nova-libvirt:3.0.3
   bootstrap: docker.io/kolla/ubuntu-source-nova-api:4.0.0
   dep_check: docker.io/kolla/ubuntu-source-kubernetes-entrypoint:4.0.0
   pull_policy: "IfNotPresent"
@@ -89,6 +94,8 @@ termination_grace_period:
   metadata:
     timeout: 30
   osapi:
+    timeout: 30
+  placement:
     timeout: 30
 
 bootstrap:
@@ -120,6 +127,9 @@ network:
     node_port:
       enabled: false
       port: 30775
+  placement:
+    name: "nova-placement-api"
+    port: 8780
   novncproxy:
     name: "nova-novncproxy"
     port: 6080
@@ -132,13 +142,14 @@ keystone:
   admin_project_domain: "default"
   admin_region_name: "RegionOne"
   nova_user_role: "admin"
+  placement_user_role: "admin"
 
 
 ceph:
   enabled: false
   monitors: []
   cinder_user: "cinder"
-  cinder_keyring: null
+  cinder_keyring: foo
   nova_pool: "vms"
   secret_uuid: ""
 
@@ -151,6 +162,13 @@ dependencies:
     - nova-db-sync
     - nova-ks-user
     - nova-ks-endpoints
+    service:
+    - mariadb
+  placement:
+    jobs:
+    - nova-db-sync
+    - nova-placement-ks-user
+    - nova-placement-ks-endpoints
     service:
     - mariadb
   db_init:
@@ -176,12 +194,24 @@ dependencies:
     - nova-ks-service
     service:
     - keystone-api
+  ks_nova_placement_user:
+    service:
+    - keystone-api
+  ks_nova_placement_service:
+    service:
+    - keystone-api
+  ks_nova_placement_endpoints:
+    jobs:
+    - nova-placement-ks-service
+    service:
+    - keystone-api
   compute:
     jobs:
     - nova-db-sync
     service:
     - keystone-api
     - nova-api
+    - nova-placement-api
   libvirt:
     jobs:
     - nova-db-sync
@@ -229,6 +259,9 @@ mounts:
   nova_bootstrap:
     init_container: null
     nova_bootstrap:
+  nova_placement_api:
+    init_container: null
+    nova_placement_api:
 
 conf:
   paste:
@@ -254,8 +287,8 @@ conf:
           osapi_compute_workers: 1
           metadata_workers: 1
           use_neutron: true
-          firewall_driver: nova.virt.firewall.NoopFirewallDriver
-          linuxnet_interface_driver: openvswitch
+          #firewall_driver: nova.virt.firewall.NoopFirewallDriver
+          #linuxnet_interface_driver: openvswitch
           allow_resize_to_same_host: true
           compute_driver: libvirt.LibvirtDriver
           my_ip: 0.0.0.0
@@ -284,6 +317,20 @@ conf:
       nova:
         conf:
           num_retries: 3
+    placement:
+      nova:
+        conf:
+          os_region_name: "RegionOne"
+          auth_type: "password"
+          password: "password"
+          user_domain_name: "default"
+          project_domain_name: "default"
+          project_name: "service"
+          username: "placement"
+    scheduler:
+      nova:
+        conf:
+          discover_hosts_in_cells_interval: 1
     cinder:
       nova:
         conf:
@@ -408,6 +455,14 @@ endpoints:
       api: 8774
       metadata: 8775
       novncproxy: 6080
+  placement:
+    name: placement
+    hosts:
+      default: nova-placement-api
+    path: null
+    scheme: 'http'
+    port:
+      api: 8780
   identity:
     name: keystone
     hosts:

@@ -23,6 +23,10 @@
 {{- tuple "identity" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup"| set .Values.conf.nova.keystone_authtoken.keystonemiddleware.auth_token "auth_url" | quote | trunc 0 -}}
 {{- end -}}
 
+{{- if empty .Values.conf.nova.placement.nova.conf.auth_url -}}
+{{- tuple "identity" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup"| set .Values.conf.nova.placement.nova.conf "auth_url" | quote | trunc 0 -}}
+{{- end -}}
+
 {{- if empty .Values.conf.nova.keystone_authtoken.keystonemiddleware.auth_token.memcached_servers -}}
 {{- tuple "oslo_cache" "internal" "memcache" . | include "helm-toolkit.endpoints.hostname_endpoint_uri_lookup" | set .Values.conf.nova.keystone_authtoken.keystonemiddleware.auth_token "memcached_servers" | quote | trunc 0 -}}
 {{- end -}}
@@ -98,3 +102,5 @@ data:
 {{ tuple "etc/_libvirtd.conf.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
   qemu.conf: |+
 {{ tuple "etc/_qemu.conf.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
+  placement-api-wsgi.conf: |+
+{{ tuple "etc/_placement-api-wsgi.conf.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}

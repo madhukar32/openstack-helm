@@ -638,7 +638,7 @@
 {{ if not .default.oslo.messaging.rpc_poll_timeout }}#{{ end }}rpc_poll_timeout = {{ .default.oslo.messaging.rpc_poll_timeout | default "1" }}
 
 # Expiration timeout in seconds of a name service record about existing target
-# ( < 0 means no timeout). (integer value)
+# ( less than 0 means no timeout). (integer value)
 # Deprecated group/name - [DEFAULT]/zmq_target_expire
 # from .default.oslo.messaging.zmq_target_expire
 {{ if not .default.oslo.messaging.zmq_target_expire }}#{{ end }}zmq_target_expire = {{ .default.oslo.messaging.zmq_target_expire | default "300" }}
@@ -833,7 +833,7 @@
 # from .default.oslo.service.wsgi.wsgi_keep_alive
 {{ if not .default.oslo.service.wsgi.wsgi_keep_alive }}#{{ end }}wsgi_keep_alive = {{ .default.oslo.service.wsgi.wsgi_keep_alive | default "true" }}
 
-# Timeout for client connections' socket operations. If an incoming connection
+# Timeout for client connections socket operations. If an incoming connection
 # is idle for this number of seconds it will be closed. A value of '0' means
 # wait forever. (integer value)
 # from .default.oslo.service.wsgi.client_socket_timeout
@@ -846,8 +846,8 @@
 # From neutron.agent
 #
 
-# Root helper application. Use 'sudo neutron-rootwrap
-# /etc/neutron/rootwrap.conf' to use the real root filter facility. Change to
+# Root helper application. Use sudo neutron-rootwrap
+# /etc/neutron/rootwrap.conf to use the real root filter facility. Change to
 # 'sudo' to skip the filtering and just run the command directly. (string
 # value)
 # from .agent.neutron.agent.root_helper
@@ -877,7 +877,7 @@
 {{ if not .agent.neutron.agent.log_agent_heartbeats }}#{{ end }}log_agent_heartbeats = {{ .agent.neutron.agent.log_agent_heartbeats | default "false" }}
 
 # Add comments to iptables rules. Set to false to disallow the addition of
-# comments to generated iptables rules that describe each rule's purpose.
+# comments to generated iptables rules that describe each rules purpose.
 # System must support the iptables comments module for addition of comments.
 # (boolean value)
 # from .agent.neutron.agent.comment_iptables_rules
@@ -1115,13 +1115,27 @@
 
 #
 # From keystonemiddleware.auth_token
+
+# FIXME(alanmeadows) - added the next several lines because oslo gen config refuses to generate the line items required in keystonemiddleware
+# for authentication - while it does support an "auth_section" parameter to locate these elsewhere, it would be a strange divergence
+# from how neutron keystone authentication is stored today - ocata and later appear to use a "service" user section which can house these details
+# and does successfully generate beyond newton, so likely this whole section will be removed the next time we generate this file
+
+{{ if not .keystone_authtoken.keystonemiddleware.auth_token.auth_url }}#{{ end }}auth_url = {{ .keystone_authtoken.keystonemiddleware.auth_token.auth_url | default "<None>" }}
+{{ if not .keystone_authtoken.keystonemiddleware.auth_token.region_name }}#{{ end }}region_name = {{ .keystone_authtoken.keystonemiddleware.auth_token.region_name | default "<None>" }}
+{{ if not .keystone_authtoken.keystonemiddleware.auth_token.project_name }}#{{ end }}project_name = {{ .keystone_authtoken.keystonemiddleware.auth_token.project_name | default "<None>" }}
+{{ if not .keystone_authtoken.keystonemiddleware.auth_token.project_domain_name }}#{{ end }}project_domain_name = {{ .keystone_authtoken.keystonemiddleware.auth_token.project_domain_name | default "<None>" }}
+{{ if not .keystone_authtoken.keystonemiddleware.auth_token.user_domain_name }}#{{ end }}user_domain_name = {{ .keystone_authtoken.keystonemiddleware.auth_token.user_domain_name | default "<None>" }}
+{{ if not .keystone_authtoken.keystonemiddleware.auth_token.username }}#{{ end }}username = {{ .keystone_authtoken.keystonemiddleware.auth_token.username | default "<None>" }}
+{{ if not .keystone_authtoken.keystonemiddleware.auth_token.password }}#{{ end }}password = {{ .keystone_authtoken.keystonemiddleware.auth_token.password | default "<None>" }}
+
 #
 
 # Complete "public" Identity API endpoint. This endpoint should not be an
 # "admin" endpoint, as it should be accessible by all end users.
 # Unauthenticated clients are redirected to this endpoint to authenticate.
 # Although this endpoint should  ideally be unversioned, client support in the
-# wild varies.  If you're using a versioned v2 endpoint here, then this  should
+# wild varies.  If you are using a versioned v2 endpoint here, then this  should
 # *not* be the same endpoint the service user utilizes  for validating tokens,
 # because normal end users may not be  able to reach that endpoint. (string
 # value)
@@ -1300,7 +1314,7 @@
 {{ if not .keystone_authtoken.keystonemiddleware.auth_token.service_token_roles }}#{{ end }}service_token_roles = {{ .keystone_authtoken.keystonemiddleware.auth_token.service_token_roles | default "service" }}
 
 # For backwards compatibility reasons we must let valid service tokens pass
-# that don't pass the service_token_roles check as valid. Setting this true
+# that dont pass the service_token_roles check as valid. Setting this true
 # will become the default in a future release and should be enabled if
 # possible. (boolean value)
 # from .keystone_authtoken.keystonemiddleware.auth_token.service_token_roles_required
@@ -1438,7 +1452,7 @@
 # from .nova.nova.auth.keyfile
 {{ if not .nova.nova.auth.keyfile }}#{{ end }}keyfile = {{ .nova.nova.auth.keyfile | default "<None>" }}
 
-# User's password (string value)
+# Users password (string value)
 # from .nova.nova.auth.password
 {{ if not .nova.nova.auth.password }}#{{ end }}password = {{ .nova.nova.auth.password | default "<None>" }}
 
@@ -1476,11 +1490,11 @@
 # from .nova.nova.auth.trust_id
 {{ if not .nova.nova.auth.trust_id }}#{{ end }}trust_id = {{ .nova.nova.auth.trust_id | default "<None>" }}
 
-# User's domain id (string value)
+# Users domain id (string value)
 # from .nova.nova.auth.user_domain_id
 {{ if not .nova.nova.auth.user_domain_id }}#{{ end }}user_domain_id = {{ .nova.nova.auth.user_domain_id | default "<None>" }}
 
-# User's domain name (string value)
+# Users domain name (string value)
 # from .nova.nova.auth.user_domain_name
 {{ if not .nova.nova.auth.user_domain_name }}#{{ end }}user_domain_name = {{ .nova.nova.auth.user_domain_name | default "<None>" }}
 
@@ -1536,7 +1550,7 @@
 # from .oslo_messaging_amqp.oslo.messaging.trace
 {{ if not .oslo_messaging_amqp.oslo.messaging.trace }}#{{ end }}trace = {{ .oslo_messaging_amqp.oslo.messaging.trace | default "false" }}
 
-# CA certificate PEM file used to verify the server's certificate (string
+# CA certificate PEM file used to verify the servers certificate (string
 # value)
 # Deprecated group/name - [amqp1]/ssl_ca_file
 # from .oslo_messaging_amqp.oslo.messaging.ssl_ca_file
@@ -1996,7 +2010,7 @@
 {{ if not .oslo_messaging_rabbit.oslo.messaging.rabbit_qos_prefetch_count }}#{{ end }}rabbit_qos_prefetch_count = {{ .oslo_messaging_rabbit.oslo.messaging.rabbit_qos_prefetch_count | default "0" }}
 
 # Number of seconds after which the Rabbit broker is considered down if
-# heartbeat's keep-alive fails (0 disable the heartbeat). EXPERIMENTAL (integer
+# heartbeats keep-alive fails (0 disable the heartbeat). EXPERIMENTAL (integer
 # value)
 # from .oslo_messaging_rabbit.oslo.messaging.heartbeat_timeout_threshold
 {{ if not .oslo_messaging_rabbit.oslo.messaging.heartbeat_timeout_threshold }}#{{ end }}heartbeat_timeout_threshold = {{ .oslo_messaging_rabbit.oslo.messaging.heartbeat_timeout_threshold | default "60" }}
@@ -2019,7 +2033,7 @@
 # from .oslo_messaging_rabbit.oslo.messaging.frame_max
 {{ if not .oslo_messaging_rabbit.oslo.messaging.frame_max }}#{{ end }}frame_max = {{ .oslo_messaging_rabbit.oslo.messaging.frame_max | default "<None>" }}
 
-# How often to send heartbeats for consumer's connections (integer value)
+# How often to send heartbeats for consumers connections (integer value)
 # from .oslo_messaging_rabbit.oslo.messaging.heartbeat_interval
 {{ if not .oslo_messaging_rabbit.oslo.messaging.heartbeat_interval }}#{{ end }}heartbeat_interval = {{ .oslo_messaging_rabbit.oslo.messaging.heartbeat_interval | default "3" }}
 
@@ -2031,11 +2045,11 @@
 # from .oslo_messaging_rabbit.oslo.messaging.ssl_options
 {{ if not .oslo_messaging_rabbit.oslo.messaging.ssl_options }}#{{ end }}ssl_options = {{ .oslo_messaging_rabbit.oslo.messaging.ssl_options | default "<None>" }}
 
-# Set socket timeout in seconds for connection's socket (floating point value)
+# Set socket timeout in seconds for connections socket (floating point value)
 # from .oslo_messaging_rabbit.oslo.messaging.socket_timeout
 {{ if not .oslo_messaging_rabbit.oslo.messaging.socket_timeout }}#{{ end }}socket_timeout = {{ .oslo_messaging_rabbit.oslo.messaging.socket_timeout | default "0.25" }}
 
-# Set TCP_USER_TIMEOUT in seconds for connection's socket (floating point
+# Set TCP_USER_TIMEOUT in seconds for connections socket (floating point
 # value)
 # from .oslo_messaging_rabbit.oslo.messaging.tcp_user_timeout
 {{ if not .oslo_messaging_rabbit.oslo.messaging.tcp_user_timeout }}#{{ end }}tcp_user_timeout = {{ .oslo_messaging_rabbit.oslo.messaging.tcp_user_timeout | default "0.25" }}
@@ -2204,7 +2218,7 @@
 {{ if not .oslo_messaging_zmq.oslo.messaging.rpc_poll_timeout }}#{{ end }}rpc_poll_timeout = {{ .oslo_messaging_zmq.oslo.messaging.rpc_poll_timeout | default "1" }}
 
 # Expiration timeout in seconds of a name service record about existing target
-# ( < 0 means no timeout). (integer value)
+# ( less than 0 means no timeout). (integer value)
 # Deprecated group/name - [DEFAULT]/zmq_target_expire
 # from .oslo_messaging_zmq.oslo.messaging.zmq_target_expire
 {{ if not .oslo_messaging_zmq.oslo.messaging.zmq_target_expire }}#{{ end }}zmq_target_expire = {{ .oslo_messaging_zmq.oslo.messaging.zmq_target_expire | default "300" }}
