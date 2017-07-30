@@ -29,6 +29,14 @@ resources:
       memory: "128Mi"
       cpu: "500m"
 
+pod:
+  affinity:
+      anti:
+        type:
+          default: preferredDuringSchedulingIgnoredDuringExecution
+        topologyKey:
+          default: kubernetes.io/hostname
+
 labels:
   node_selector_key: openstack-control-plane
   node_selector_value: enabled

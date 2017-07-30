@@ -30,6 +30,14 @@ development:
   enabled: false
   storage_path: /var/lib/localkube/openstack-helm/mariadb
 
+pod:
+  affinity:
+    anti:
+      type:
+        default: preferredDuringSchedulingIgnoredDuringExecution
+      topologyKey:
+        default: kubernetes.io/hostname
+
 resources:
   enabled: false
   api:

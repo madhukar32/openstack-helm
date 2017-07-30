@@ -44,6 +44,7 @@ keystone:
   admin_user: admin
   admin_password: password
   admin_project_name: admin
+  admin_role: admin
 
 network:
   api:
