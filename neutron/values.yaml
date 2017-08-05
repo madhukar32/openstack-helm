@@ -30,7 +30,7 @@ images:
   ks_user: docker.io/kolla/ubuntu-source-kolla-toolbox:3.0.3
   ks_service: docker.io/kolla/ubuntu-source-kolla-toolbox:3.0.3
   ks_endpoints: docker.io/kolla/ubuntu-source-kolla-toolbox:3.0.3
-  server: 10.84.5.71:5000/ubuntu-source-neutron-server:4.0.0.0-4
+  server: docker.io/madhukar32/ubuntu-source-neutron-server:4.0.0.0-4
   dhcp: docker.io/kolla/ubuntu-source-neutron-dhcp-agent:3.0.3
   metadata: docker.io/kolla/ubuntu-source-neutron-metadata-agent:3.0.3
   l3: docker.io/kolla/ubuntu-source-neutron-l3-agent:3.0.3
