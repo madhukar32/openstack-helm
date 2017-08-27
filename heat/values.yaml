@@ -17,18 +17,14 @@
 # Declare name/value pairs to be passed into your templates.
 # name: value
 
-
-replicas:
-  api: 1
-  cfn: 1
-  cloudwatch: 1
-  engine: 1
+release_group: null
 
 labels:
   node_selector_key: openstack-control-plane
   node_selector_value: enabled
 
 images:
+  bootstrap: docker.io/kolla/ubuntu-source-heat-api:3.0.3
   db_init: docker.io/kolla/ubuntu-source-heat-api:3.0.3
   db_sync: docker.io/kolla/ubuntu-source-heat-api:3.0.3
   ks_user: docker.io/kolla/ubuntu-source-kolla-toolbox:3.0.3
@@ -40,36 +36,6 @@ images:
   engine: docker.io/kolla/ubuntu-source-heat-engine:3.0.3
   dep_check: docker.io/kolla/ubuntu-source-kubernetes-entrypoint:4.0.0
   pull_policy: "IfNotPresent"
-
-upgrades:
-  revision_history: 3
-  pod_replacement_strategy: RollingUpdate
-  rolling_update:
-    max_unavailable: 1
-    max_surge: 3
-
-keystone_secrets:
-  admin: "heat-env-keystone-admin"
-  user: "heat-env-keystone-user"
-  trustee: "heat-env-keystone-trustee"
-  stack: "heat-env-keystone-stack-user"
-
-keystone:
-  admin_user: "admin"
-  admin_user_domain: "default"
-  admin_password: "password"
-  admin_project_name: "admin"
-  admin_project_domain: "default"
-  admin_region_name: "RegionOne"
-
-  heat_user_role: "admin"
-
-  heat_trustee_role: "admin"
-  heat_trustee_region_name: "RegionOne"
-
-  heat_stack_user_role: "admin"
-  heat_stack_region_name: "RegionOne"
-
 
 conf:
   paste:
@@ -85,31 +51,20 @@ conf:
       heat:
         common:
           config:
-            stack_user_domain_name: heat
-            stack_domain_admin: heat-domain
-            stack_domain_admin_password: password
             num_engine_workers: 4
-            trusts_delegated_roles: Member
+            trusts_delegated_roles: _member_
     keystone_authtoken:
       keystonemiddleware:
         auth_token:
           auth_type: password
           auth_version: v3
-          region_name: RegionOne
-          project_domain_name: default
-          project_name: service
-          user_domain_name: default
-          username: heat
-          password: password
     trustee:
       heat:
         common:
           context:
-            password: password
-            user_domain_name: default
-            username: heat-trust
-            project_domain_name: default
-            project_name: service
+            auth_section: trustee
+            auth_type: password
+            auth_version: v3
     heat_api:
       heat:
         common:
@@ -145,78 +100,105 @@ conf:
 
 network:
   api:
-    name: "heat-api"
-    proto: "http"
+    ingress:
+      public: true
     node_port:
       enabled: false
       port: 30004
   cfn:
-    name: "heat-cfn"
-    proto: "http"
+    ingress:
+      public: true
     node_port:
       enabled: false
       port: 30800
   cloudwatch:
-    name: "heat-cloudwatch"
-    proto: "http"
+    ingress:
+      public: true
     node_port:
       enabled: false
       port: 30003
 
+bootstrap:
+  enabled: false
+  script: |
+    openstack token issue
+
 dependencies:
   db_init:
-    jobs:
-    - mariadb-seed
-    service:
-    - mariadb
+    services:
+    - service: oslo_db
+      endpoint: internal
   db_sync:
     jobs:
     - heat-db-init
-    service:
-    - mariadb
+    services:
+    - service: oslo_db
+      endpoint: internal
   ks_user:
-    service:
-    - keystone-api
+    services:
+    - service: identity
+      endpoint: internal
   ks_service:
-    service:
-    - keystone-api
+    services:
+    - service: identity
+      endpoint: internal
   ks_endpoints:
     jobs:
     - heat-ks-service
-    service:
-    - keystone-api
+    services:
+    - service: identity
+      endpoint: internal
   api:
     jobs:
     - heat-db-sync
     - heat-ks-user
     - heat-ks-endpoints
-    service:
-    - keystone-api
-    - mariadb
+    services:
+    - service: oslo_db
+      endpoint: internal
+    - service: identity
+      endpoint: internal
   cfn:
     jobs:
     - heat-db-sync
     - heat-ks-user
     - heat-ks-endpoints
-    service:
-    - keystone-api
-    - mariadb
+    services:
+    - service: oslo_db
+      endpoint: internal
+    - service: identity
+      endpoint: internal
   cloudwatch:
     jobs:
     - heat-db-sync
     - heat-ks-user
     - heat-ks-endpoints
-    service:
-    - keystone-api
-    - mariadb
+    services:
+    - service: oslo_db
+      endpoint: internal
+    - service: identity
+      endpoint: internal
   engine:
     jobs:
     - heat-db-sync
     - heat-ks-user
     - heat-ks-endpoints
-    service:
-    - keystone-api
-    - mariadb
+    services:
+    - service: oslo_db
+      endpoint: internal
+    - service: identity
+      endpoint: internal
+
+# Names of secrets used by bootstrap and environmental checks
+secrets:
+  identity:
+    admin: heat-keystone-admin
+    user: heat-keystone-user
+    trustee: heat-keystone-trustee
+    stack_user: heat-keystone-stack-user
+  oslo_db:
+    admin: heat-db-admin
+    user: heat-db-user
 
 # typically overriden by environmental
 # values, but should include all endpoints
@@ -224,39 +206,89 @@ dependencies:
 endpoints:
   identity:
     name: keystone
+    auth:
+      admin:
+        region_name: RegionOne
+        username: admin
+        password: password
+        project_name: admin
+        user_domain_name: default
+        project_domain_name: default
+      user:
+        role: admin
+        region_name: RegionOne
+        username: heat
+        password: password
+        project_name: service
+        user_domain_name: default
+        project_domain_name: default
+      trustee:
+        role: admin
+        region_name: RegionOne
+        username: heat-trust
+        password: password
+        project_name: service
+        user_domain_name: default
+        project_domain_name: default
+      stack_user:
+        role: admin
+        region_name: RegionOne
+        username: heat-trust
+        password: password
+        domain_name: heat
     hosts:
       default: keystone-api
-    path: /v3
-    scheme: 'http'
+      public: keystone
+    path:
+      default: /v3
+    scheme:
+      default: 'http'
     port:
-      admin: 35357
-      api: 5000
+      admin:
+        default: 35357
+      api:
+        default: 80
   orchestration:
     name: heat
     hosts:
       default: heat-api
-    path: '/v1/%(project_id)s'
-    scheme: 'http'
+      public: heat
+    path:
+      default: '/v1/%(project_id)s'
+    scheme:
+      default: 'http'
     port:
-      api: 8004
+      api:
+        default: 8004
+        public: 80
   cloudformation:
     name: heat-cfn
     hosts:
       default: heat-cfn
-    path: /v1
-    scheme: 'http'
+      public: cloudformation
+    path:
+      default: /v1
+    scheme:
+      default: 'http'
     port:
-      api: 8000
+      api:
+        default: 8000
+        public: 80
 # Cloudwatch does not get an entry in the keystone service catalog
   cloudwatch:
     name: heat-cloudwatch
     hosts:
       default: heat-cloudwatch
-    path: null
+      public: cloudwatch
+    path:
+      default: null
     type: null
-    scheme: 'http'
+    scheme:
+      default: 'http'
     port:
-      api: 8003
+      api:
+        default: 8003
+        public: 80
   oslo_db:
     auth:
       admin:
@@ -270,12 +302,14 @@ endpoints:
     path: /heat
     scheme: mysql+pymysql
     port:
-      mysql: 3306
+      mysql:
+        default: 3306
   oslo_cache:
     hosts:
-      default: memcache
+      default: memcached
     port:
-      memcache: 11211
+      memcache:
+        default: 11211
   oslo_messaging:
     auth:
       admin:
@@ -289,84 +323,164 @@ endpoints:
     path: /
     scheme: rabbit
     port:
-      amqp: 5672
+      amqp:
+        default: 5672
 
-resources:
-  enabled: false
-  heat_api:
-    requests:
-      memory: "124Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-  heat_cfn:
-    requests:
-      memory: "124Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-  heat_cloudwatch:
-    requests:
-      memory: "124Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-  heat_db_init:
-    requests:
-      memory: "124Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-  heat_db_sync:
-    requests:
-      memory: "124Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-  heat_ks_endpoints:
-    requests:
-      memory: "124Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-  heat_ks_service:
-    requests:
-      memory: "124Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-  heat_ks_user:
-    requests:
-      memory: "124Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-  heat_engine:
-    requests:
-      memory: "124Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-
-mounts:
-  heat_api:
-    init_container: null
+pod:
+  affinity:
+      anti:
+        type:
+          default: preferredDuringSchedulingIgnoredDuringExecution
+        topologyKey:
+          default: kubernetes.io/hostname
+  mounts:
     heat_api:
-  heat_cfn:
-    init_container: null
+      init_container: null
+      heat_api:
     heat_cfn:
-  heat_cloudwatch:
-    init_container: null
+      init_container: null
+      heat_cfn:
     heat_cloudwatch:
-  heat_engine:
-    init_container: null
+      init_container: null
+      heat_cloudwatch:
     heat_engine:
+      init_container: null
+      heat_engine:
+    heat_bootstrap:
+      init_container: null
+      heat_bootstrap:
+  replicas:
+    api: 1
+    cfn: 1
+    cloudwatch: 1
+    engine: 1
+  lifecycle:
+    upgrades:
+      deployments:
+        revision_history: 3
+        pod_replacement_strategy: RollingUpdate
+        rolling_update:
+          max_unavailable: 1
+          max_surge: 3
+    disruption_budget:
+      api:
+        min_available: 0
+      cfn:
+        min_available: 0
+      cloudwatch:
+        min_available: 0
+    termination_grace_period:
+      api:
+        timeout: 30
+      cfn:
+        timeout: 30
+      cloudwatch:
+        timeout: 30
+  resources:
+    enabled: false
+    api:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    cfn:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    cloudwatch:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    engine:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    jobs:
+      bootstrap:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      db_init:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      db_sync:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      ks_endpoints:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      ks_service:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      ks_user:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      tests:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+
+manifests:
+  configmap_bin: true
+  configmap_etc: true
+  deployment_api: true
+  deployment_cfn: true
+  deployment_cloudwatch: true
+  ingress_api: true
+  ingress_cfn: true
+  ingress_cloudwatch: true
+  job_bootstrap: true
+  job_db_init: true
+  job_db_sync: true
+  job_ks_endpoints: true
+  job_ks_service: true
+  job_ks_user: true
+  pdb_api: true
+  pdb_cfn: true
+  pdb_cloudwatch: true
+  secret_db: true
+  secret_keystone: true
+  service_api: true
+  service_cfn: true
+  service_cloudwatch: true
+  service_ingress_api: true
+  service_ingress_cfn: true
+  service_ingress_cloudwatch: true
+  statefulset_engine: true

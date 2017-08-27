@@ -11,12 +11,14 @@ Contents:
 .. toctree::
    :maxdepth: 3
 
-   readme
-   philosophy
-   install/index
-   devref/index
-   operator/index
    contributing
+   devref/index
+   gates
+   install/index
+   readme
+   specs/index
+   testing
+   troubleshooting/index
 
 Indices and tables
 ==================
@@ -24,4 +26,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-

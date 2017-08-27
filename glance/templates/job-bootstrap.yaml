@@ -1,20 +1,23 @@
-# Copyright 2017 The Openstack-Helm Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+{{/*
+Copyright 2017 The Openstack-Helm Authors.
 
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/}}
+
+{{- if .Values.manifests.job_bootstrap }}
 {{- $envAll := . }}
-{{- $ksAdminSecret := $envAll.Values.keystone.admin_secret | default "glance-env-keystone-admin" }}
 {{- $dependencies := .Values.dependencies.bootstrap }}
+---
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -22,49 +25,45 @@ metadata:
 spec:
   template:
     metadata:
-      annotations:
-        pod.beta.kubernetes.io/init-containers: '[
-{{ tuple $envAll $dependencies "[]" | include "helm-toolkit.kubernetes_entrypoint_init_container" | indent 10 }}
-        ]'
+      labels:
+{{ tuple $envAll "glance" "bootstrap" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
     spec:
       restartPolicy: OnFailure
       nodeSelector:
         {{ .Values.labels.node_selector_key }}: {{ .Values.labels.node_selector_value }}
+      initContainers:
+{{ tuple $envAll $dependencies "[]" | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
       containers:
         - name: glance-bootstrap
-          image: {{ .Values.images.db_init }}
+          image: {{ .Values.images.bootstrap }}
           imagePullPolicy: {{ .Values.images.pull_policy }}
-          {{- if .Values.resources.enabled }}
-          resources:
-            limits:
-              cpu: {{ .Values.resources.jobs.bootstrap.limits.cpu | quote }}
-              memory: {{ .Values.resources.jobs.bootstrap.limits.memory | quote }}
-            requests:
-              cpu: {{ .Values.resources.jobs.bootstrap.requests.cpu | quote }}
-              memory: {{ .Values.resources.jobs.bootstrap.requests.memory | quote }}
-          {{- end }}
+{{ tuple $envAll $envAll.Values.pod.resources.jobs.bootstrap | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
           env:
-{{- with $env := dict "ksUserSecret" $ksAdminSecret }}
-{{- include "helm-toolkit.keystone_openrc_env_vars" $env | indent 12 }}
+{{- with $env := dict "ksUserSecret" .Values.secrets.identity.admin }}
+{{- include "helm-toolkit.snippets.keystone_openrc_env_vars" $env | indent 12 }}
 {{- end }}
           command:
-            - bash
             - /tmp/bootstrap.sh
           volumeMounts:
             - name: imagedir
               mountPath: /tmp/images
-            - name: bootstrapsh
+            - name: glance-bin
               mountPath: /tmp/bootstrap.sh
               subPath: bootstrap.sh
-            - name: glanceapiconf
+              readOnly: true
+            - name: glance-etc
               mountPath: /etc/glance/glance-api.conf
               subPath: glance-api.conf
+              readOnly: true
       volumes:
         - name: imagedir
           emptyDir: {}
-        - name: bootstrapsh
+        - name: glance-bin
           configMap:
             name: glance-bin
-        - name: glanceapiconf
+            defaultMode: 0555
+        - name: glance-etc
           configMap:
             name: glance-etc
+            defaultMode: 0444
+{{- end }}

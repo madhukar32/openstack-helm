@@ -1,18 +1,20 @@
-# Copyright 2017 The Openstack-Helm Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+{{/*
+Copyright 2017 The Openstack-Helm Authors.
 
-{{- define "helm-toolkit.keystone_endpoints" }}
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/}}
+
+{{- define "helm-toolkit.scripts.keystone_endpoints" }}
 #!/bin/bash
 
 # Copyright 2017 Pete Birley
@@ -52,7 +54,7 @@ fi
 
 # Determine if Endpoint needs updated
 if [[ ${OS_ENDPOINT_ID} ]]; then
-  OS_ENDPOINT_URL_CURRENT=$(openstack endpoint show ${OS_ENDPOINT_ID} --f value -c url)
+  OS_ENDPOINT_URL_CURRENT=$(openstack endpoint show ${OS_ENDPOINT_ID} -f value -c url)
   if [ "${OS_ENDPOINT_URL_CURRENT}" == "${OS_SERVICE_ENDPOINT}" ]; then
     echo "Endpoints Match: no action required"
     OS_ENDPOINT_UPDATE="False"

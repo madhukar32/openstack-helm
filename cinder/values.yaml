@@ -17,136 +17,315 @@
 # Declare name/value pairs to be passed into your templates.
 # name: value
 
-replicas:
-  api: 1
-  volume: 1
-  scheduler: 1
+storage: ceph
 
 labels:
   node_selector_key: openstack-control-plane
   node_selector_value: enabled
 
+release_group: null
+
 images:
+  test: docker.io/kolla/ubuntu-binary-rally:4.0.0
   db_init: docker.io/kolla/ubuntu-source-cinder-api:3.0.3
   db_sync: docker.io/kolla/ubuntu-source-cinder-api:3.0.3
   ks_user: docker.io/kolla/ubuntu-source-kolla-toolbox:3.0.3
   ks_service: docker.io/kolla/ubuntu-source-kolla-toolbox:3.0.3
   ks_endpoints: docker.io/kolla/ubuntu-source-kolla-toolbox:3.0.3
   api: docker.io/kolla/ubuntu-source-cinder-api:3.0.3
+  bootstrap: docker.io/kolla/ubuntu-source-cinder-api:3.0.3
   scheduler: docker.io/kolla/ubuntu-source-cinder-scheduler:3.0.3
   volume: docker.io/kolla/ubuntu-source-cinder-volume:3.0.3
+  backup: docker.io/kolla/ubuntu-source-cinder-backup:3.0.3
   dep_check: docker.io/kolla/ubuntu-source-kubernetes-entrypoint:4.0.0
   pull_policy: "IfNotPresent"
 
-upgrades:
-  revision_history: 3
-  pod_replacement_strategy: RollingUpdate
-  rolling_update:
-    max_unavailable: 1
-    max_surge: 3
+pod:
+  affinity:
+      anti:
+        type:
+          default: preferredDuringSchedulingIgnoredDuringExecution
+        topologyKey:
+          default: kubernetes.io/hostname
+  mounts:
+    cinder_api:
+      init_container: null
+      cinder_api:
+    cinder_scheduler:
+      init_container: null
+      cinder_scheduler:
+    cinder_volume:
+      init_container: null
+      cinder_volume:
+    cinder_backup:
+      init_container: null
+      cinder_backup:
+    cinder_tests:
+      init_container: null
+      cinder_tests:
+  replicas:
+    api: 1
+    volume: 1
+    scheduler: 1
+    backup: 1
+  lifecycle:
+    upgrades:
+      deployments:
+        revision_history: 3
+        pod_replacement_strategy: RollingUpdate
+        rolling_update:
+          max_unavailable: 1
+          max_surge: 3
+    disruption_budget:
+      api:
+        min_available: 0
+    termination_grace_period:
+      api:
+        timeout: 30
+  resources:
+    enabled: false
+    api:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    scheduler:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    volume:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    jobs:
+      bootstrap:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      db_init:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      db_sync:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      ks_endpoints:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      ks_service:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      ks_user:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      tests:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
 
-keystone:
-  admin_user: "admin"
-  admin_user_domain: "default"
-  admin_password: "password"
-  admin_project_name: "admin"
-  admin_project_domain: "default"
-  admin_region_name: "RegionOne"
-
-  cinder_user: "cinder"
-  cinder_user_domain: "default"
-  cinder_user_role: "admin"
-  cinder_password: "password"
-  cinder_project_name: "service"
-  cinder_project_domain: "default"
-  cinder_region_name: "RegionOne"
+bootstrap:
+  enabled: true
+  bootstrap_conf_backends: true
+  volume_types:
+    name:
+      group:
+      volume_backend_name:
 
 network:
   api:
-    name: "cinder-api"
-    port: 8776
+    ingress:
+      public: true
     node_port:
       enabled: false
       port: 30877
 
-ceph:
-  enabled: false
-  monitors: []
-  cinder_user: "admin"
-  # a null value for the keyring will
-  # attempt to use the key from
-  # common/secrets/ceph-client-key
-  cinder_keyring: foo
-
-backends:
-  enabled:
-  - rbd1
-  rbd1:
-    secret: "foo"
-    user: "admin"
-    pool: "volumes"
-
-glance:
-  version: 2
-
-messaging:
-  hosts: rabbitmq
-  user: rabbitmq
-  password: password
-
-
-api:
-  workers: 8
-
-misc:
-  debug: false
+conf:
+  paste:
+    override:
+    append:
+  policy:
+    override:
+    append:
+  rootwrap:
+    override:
+    append:
+  ceph:
+    override:
+    append:
+    monitors: []
+    cinder_keyring: null
+  cinder:
+    override:
+    append:
+    database:
+      oslo:
+        db:
+          max_retries: -1
+    default:
+      oslo:
+        log:
+          use_syslog: false
+          use_stderr: true
+      cinder:
+        enable_v1_api: false
+        volume_name_template: "%s"
+        osapi_volume_workers: 8
+        glance_api_version: 2
+        os_region_name: RegionOne
+        host: cinder-volume-worker
+        osapi_volume_listen_port: 8776
+        enabled_backends: "rbd1"
+        backup_driver: "cinder.backup.drivers.ceph"
+        backup_ceph_conf: "/etc/ceph/ceph.conf"
+        backup_ceph_user: admin
+        backup_ceph_pool: backups
+    keystone_authtoken:
+      keystonemiddleware:
+        auth_token:
+          auth_version: v3
+          auth_type: password
+    oslo_concurrency:
+      oslo:
+        concurrency:
+          lock_path: "/var/lib/cinder/tmp"
+  backends:
+    override:
+    append:
+    # Those options will be written to backends.conf as-is.
+    rbd1:
+      volume_driver: cinder.volume.drivers.rbd.RBDDriver
+      volume_backend_name: rbd1
+      rbd_pool: volumes
+      rbd_ceph_conf: "/etc/ceph/ceph.conf"
+      rbd_flatten_volume_from_snapshot: false
+      rbd_max_clone_depth: 5
+      rbd_store_chunk_size: 4
+      rados_connect_timeout: -1
+      rbd_user: "admin"
+  rally_tests:
+    override:
+    append:
+>>>>>>> origin/upstream/master
 
 dependencies:
   db_init:
-    jobs:
-    - mariadb-seed
-    service:
-    - mariadb
+    services:
+    - service: oslo_db
+      endpoint: internal
   db_sync:
     jobs:
     - cinder-db-init
-    service:
-    - mariadb
+    services:
+    - service: oslo_db
+      endpoint: internal
   ks_user:
-    service:
-    - keystone-api
+    services:
+    - service: identity
+      endpoint: internal
   ks_service:
-    service:
-    - keystone-api
+    services:
+    - service: identity
+      endpoint: internal
   ks_endpoints:
     jobs:
     - cinder-ks-service
-    service:
-    - keystone-api
+    services:
+    - service: identity
+      endpoint: internal
   api:
     jobs:
     - cinder-db-sync
     - cinder-ks-user
     - cinder-ks-endpoints
-    service:
-    - mariadb
-    - keystone-api
+    services:
+    - service: oslo_db
+      endpoint: internal
+    - service: identity
+      endpoint: internal
+  bootstrap:
+    services:
+    - service: identity
+      endpoint: internal
+    - service: volume
+      endpoint: internal
   volume:
     jobs:
     - cinder-db-sync
     - cinder-ks-user
     - cinder-ks-endpoints
-    service:
-    - keystone-api
-    - cinder-api
+    services:
+    - service: identity
+      endpoint: internal
+    - service: volume
+      endpoint: internal
   scheduler:
     jobs:
     - cinder-db-sync
     - cinder-ks-user
     - cinder-ks-endpoints
-    service:
-    - keystone-api
-    - cinder-api
+    services:
+    - service: identity
+      endpoint: internal
+    - service: volume
+      endpoint: internal
+  backup:
+    jobs:
+    - cinder-db-sync
+    - cinder-ks-user
+    - cinder-ks-endpoints
+    services:
+    - service: identity
+      endpoint: internal
+    - service: volume
+      endpoint: internal
+  tests:
+    services:
+    - service: identity
+      endpoint: internal
+    - service: volume
+      endpoint: internal
+
+# Names of secrets used by bootstrap and environmental checks
+secrets:
+  identity:
+    admin: cinder-keystone-admin
+    user: cinder-keystone-user
+  oslo_db:
+    admin: cinder-db-admin
+    user: cinder-db-user
 
 # We use a different layout of the endpoints here to account for versioning
 # this swaps the service name and type, and should be rolled out to other
@@ -154,46 +333,99 @@ dependencies:
 endpoints:
   identity:
     name: keystone
+    auth:
+      admin:
+        region_name: RegionOne
+        username: admin
+        password: password
+        project_name: admin
+        user_domain_name: default
+        project_domain_name: default
+      user:
+        role: admin
+        region_name: RegionOne
+        username: cinder
+        password: password
+        project_name: service
+        user_domain_name: default
+        project_domain_name: default
     hosts:
       default: keystone-api
-    path: /v3
-    scheme: 'http'
+      public: keystone
+    path:
+      default: /v3
+    scheme:
+      default: http
     port:
-      admin: 35357
-      api: 5000
+      admin:
+        default: 35357
+      api:
+        default: 80
   image:
     name: glance
     hosts:
       default: glance-api
-    path: null
-    scheme: 'http'
+      public: glance
+    path:
+      default: null
+    scheme:
+      default: http
     port:
-      api: 9292
-      registry: 9191
+      api:
+        default: 9292
+        public: 80
+  image_registry:
+    name: glance-registry
+    hosts:
+      default: glance-registry
+      public: glance-reg
+    path:
+      default: null
+    scheme:
+      default: 'http'
+    port:
+      api:
+        default: 9191
+        public: 80
   volume:
     name: cinder
     hosts:
       default: cinder-api
-    path: '/v1/%(tenant_id)s'
-    scheme: 'http'
+      public: cinder
+    path:
+      default: '/v1/%(tenant_id)s'
+    scheme:
+      default:  'http'
     port:
-      api: 8776
+      api:
+        default: 8776
+        public: 80
   volumev2:
     name: cinder
     hosts:
       default: cinder-api
-    path: '/v2/%(tenant_id)s'
-    scheme: 'http'
+      public: cinder
+    path:
+      default: '/v2/%(tenant_id)s'
+    scheme:
+      default:  'http'
     port:
-      api: 8776
+      api:
+        default: 8776
+        public: 80
   volumev3:
     name: cinder
     hosts:
       default: cinder-api
-    path: '/v3/%(tenant_id)s'
-    scheme: 'http'
+      public: cinder
+    path:
+      default: '/v3/%(tenant_id)s'
+    scheme:
+      default: 'http'
     port:
-      api: 8776
+      api:
+        default: 8776
+        public: 80
   oslo_db:
     auth:
       admin:
@@ -207,63 +439,47 @@ endpoints:
     path: /cinder
     scheme: mysql+pymysql
     port:
-      mysql: 3306
+      mysql:
+        default: 3306
+  oslo_messaging:
+    auth:
+      admin:
+        username: admin
+        password: password
+      user:
+        username: rabbitmq
+        password: password
+    hosts:
+      default: rabbitmq
+    path: /
+    scheme: rabbit
+    port:
+      amqp:
+        default: 5672
+  oslo_cache:
+    hosts:
+      default: memcached
+    port:
+      memcache:
+        default: 11211
 
-resources:
-  enabled: false
-  cinder_api:
-    requests:
-      memory: "124Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-  cinder_scheduler:
-    requests:
-      memory: "124Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-  cinder_volume:
-    requests:
-      memory: "124Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-  cinder_db_init:
-    requests:
-      memory: "124Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-  cinder_db_sync:
-    requests:
-      memory: "124Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-  cinder_ks_endpoints:
-    requests:
-      memory: "124Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-  cinder_ks_service:
-    requests:
-      memory: "124Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-  cinder_ks_user:
-    requests:
-      memory: "124Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
+manifests:
+  configmap_bin: true
+  configmap_etc: true
+  deployment_api: true
+  deployment_backup: true
+  deployment_scheduler: true
+  deployment_volume: true
+  ingress_api: true
+  job_bootstrap: true
+  job_db_init: true
+  job_db_sync: true
+  job_ks_endpoints: true
+  job_ks_service: true
+  job_ks_user: true
+  pdb_api: true
+  pod_rally_test: true
+  secret_db: true
+  secret_keystone: true
+  service_api: true
+  service_ingress_api: true

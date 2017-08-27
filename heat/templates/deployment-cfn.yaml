@@ -1,63 +1,61 @@
-# Copyright 2017 The Openstack-Helm Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+{{/*
+Copyright 2017 The Openstack-Helm Authors.
 
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/}}
+
+{{- if .Values.manifests.deployment_cfn }}
 {{- $envAll := . }}
 {{- $dependencies := .Values.dependencies.cfn }}
-{{- $mounts_heat_cfn := .Values.mounts.heat_cfn.heat_cfn }}
-{{- $mounts_heat_cfn_init := .Values.mounts.heat_cfn.init_container }}
-apiVersion: extensions/v1beta1
+{{- $mounts_heat_cfn := .Values.pod.mounts.heat_cfn.heat_cfn }}
+{{- $mounts_heat_cfn_init := .Values.pod.mounts.heat_cfn.init_container }}
+---
+apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
   name: heat-cfn
 spec:
-  replicas: {{ .Values.replicas.cfn }}
-  revisionHistoryLimit: {{ .Values.upgrades.revision_history }}
-  strategy:
-    type: {{ .Values.upgrades.pod_replacement_strategy }}
-    {{ if eq .Values.upgrades.pod_replacement_strategy "RollingUpdate" }}
-    rollingUpdate:
-      maxUnavailable: {{ .Values.upgrades.rolling_update.max_unavailable }}
-      maxSurge: {{ .Values.upgrades.rolling_update.max_surge }}
-    {{ end }}
+  replicas: {{ .Values.pod.replicas.cfn }}
+{{ tuple $envAll | include "helm-toolkit.snippets.kubernetes_upgrades_deployment" | indent 2 }}
   template:
     metadata:
       labels:
-        app: heat-cfn
+{{ tuple $envAll "heat" "cfn" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
       annotations:
-        pod.beta.kubernetes.io/init-containers: '[
-{{ tuple $envAll $dependencies $mounts_heat_cfn_init | include "helm-toolkit.kubernetes_entrypoint_init_container" | indent 10 }}
-        ]'
+        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.utils.hash" }}
+        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.utils.hash" }}
     spec:
+      affinity:
+{{ tuple $envAll "heat" "cfn" | include "helm-toolkit.snippets.kubernetes_pod_anti_affinity" | indent 8 }}
       nodeSelector:
         {{ .Values.labels.node_selector_key }}: {{ .Values.labels.node_selector_value }}
+      terminationGracePeriodSeconds: {{ .Values.pod.lifecycle.termination_grace_period.cfn.timeout | default "30" }}
+      initContainers:
+{{ tuple $envAll $dependencies $mounts_heat_cfn_init | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
       containers:
         - name: heat-cfn
           image: {{ .Values.images.cfn }}
           imagePullPolicy: {{ .Values.images.pull_policy }}
-          {{- if .Values.resources.enabled }}
-          resources:
-            requests:
-              memory: {{ .Values.resources.heat_cfn.requests.memory | quote }}
-              cpu: {{ .Values.resources.heat_cfn.requests.cpu | quote }}
-            limits:
-              memory: {{ .Values.resources.heat_cfn.limits.memory | quote }}
-              cpu: {{ .Values.resources.heat_cfn.limits.cpu | quote }}
-          {{- end }}
+{{ tuple $envAll $envAll.Values.pod.resources.cfn | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
           command:
-            - heat-api-cfn
-            - --config-dir
-            - /etc/heat/conf
+            - /tmp/heat-cfn.sh
+            - start
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - /tmp/heat-cfn.sh
+                  - stop
           ports:
             - containerPort: {{ .Values.conf.heat.heat_api_cfn.heat.common.wsgi.bind_port }}
           readinessProbe:
@@ -68,31 +66,35 @@ spec:
               mountPath: /etc/heat
             - name: pod-var-cache-heat
               mountPath: /var/cache/heat
-            - name: heatconf
-              mountPath: /etc/heat/conf/heat.conf
+            - name: heat-bin
+              mountPath: /tmp/heat-cfn.sh
+              subPath: heat-cfn.sh
+              readOnly: true
+            - name: heat-etc
+              mountPath: /etc/heat/heat.conf
               subPath: heat.conf
               readOnly: true
-            - name: heatpaste
+            - name: heat-etc
               mountPath: /etc/heat/api-paste.ini
               subPath: api-paste.ini
               readOnly: true
-            - name: heatpolicy
+            - name: heat-etc
               mountPath: /etc/heat/policy.json
               subPath: policy.json
               readOnly: true
-{{ if $mounts_heat_cfn.volumeMounts }}{{ toYaml $mounts_heat_cfn.volumeMounts | indent 12 }}{{ end }}
+{{- if $mounts_heat_cfn.volumeMounts }}{{ toYaml $mounts_heat_cfn.volumeMounts | indent 12 }}{{ end }}
       volumes:
         - name: pod-etc-heat
           emptyDir: {}
         - name: pod-var-cache-heat
           emptyDir: {}
-        - name: heatconf
+        - name: heat-bin
+          configMap:
+            name: heat-bin
+            defaultMode: 0555
+        - name: heat-etc
           configMap:
             name: heat-etc
-        - name: heatpaste
-          configMap:
-            name: heat-etc
-        - name: heatpolicy
-          configMap:
-            name: heat-etc
-{{ if $mounts_heat_cfn.volumes }}{{ toYaml $mounts_heat_cfn.volumes | indent 8 }}{{ end }}
+            defaultMode: 0444
+{{- if $mounts_heat_cfn.volumes }}{{ toYaml $mounts_heat_cfn.volumes | indent 8 }}{{ end }}
+{{- end }}

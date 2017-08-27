@@ -9,14 +9,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-replicas:
-  api: 1
 
 labels:
   node_selector_key: openstack-control-plane
   node_selector_value: enabled
 
+release_group: null
+
 images:
+  bootstrap: docker.io/kolla/ubuntu-source-barbican-api:3.0.3
   dep_check: docker.io/kolla/ubuntu-source-kubernetes-entrypoint:4.0.0
   db_init: docker.io/kolla/ubuntu-source-barbican-api:3.0.3
   db_sync: docker.io/kolla/ubuntu-source-barbican-api:3.0.3
@@ -26,67 +27,141 @@ images:
   api: docker.io/kolla/ubuntu-source-barbican-api:3.0.3
   pull_policy: "IfNotPresent"
 
-upgrades:
-  revision_history: 3
-  pod_replacement_strategy: RollingUpdate
-  rolling_update:
-    max_unavailable: 1
-    max_surge: 3
+pod:
+  affinity:
+      anti:
+        type:
+          default: preferredDuringSchedulingIgnoredDuringExecution
+        topologyKey:
+          default: kubernetes.io/hostname
+  mounts:
+    barbican_api:
+      init_container: null
+      barbican_api:
+    barbican_bootstrap:
+      init_container: null
+      barbican_bootstrap:
+  replicas:
+    api: 1
+  lifecycle:
+    upgrades:
+      deployments:
+        revision_history: 3
+        pod_replacement_strategy: RollingUpdate
+        rolling_update:
+          max_unavailable: 1
+          max_surge: 3
+    disruption_budget:
+      api:
+        min_available: 0
+  resources:
+    enabled: false
+    api:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    jobs:
+      bootstrap:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      db_init:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      db_sync:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      ks_endpoints:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      ks_service:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      ks_user:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      tests:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
 
 network:
   api:
-    name: "barbican-api"
-    proto: "http"
+    ingress:
+      public: true
     node_port:
       enabled: false
       port: 39486
 
-keystone:
-  admin_user: "admin"
-  admin_user_domain: "default"
-  admin_password: "password"
-  admin_project_name: "admin"
-  admin_project_domain: "default"
-  admin_region_name: "RegionOne"
-
-  barbican_user: "barbican"
-  barbican_user_domain: "default"
-  barbican_user_role: "admin"
-  barbican_password: "password"
-  barbican_project_name: "service"
-  barbican_project_domain: "default"
-  barbican_region_name: "RegionOne"
+bootstrap:
+  enabled: false
+  script: |
+    openstack token issue
 
 dependencies:
   db_init:
-    jobs:
-    - mariadb-seed
-    service:
-    - mariadb
+    services:
+    - service: oslo_db
+      endpoint: internal
   db_sync:
     jobs:
     - barbican-db-init
-    service:
-    - mariadb
+    services:
+    - service: oslo_db
+      endpoint: internal
   ks_user:
-    service:
-    - keystone-api
+    services:
+    - service: identity
+      endpoint: internal
   ks_service:
-    service:
-    - keystone-api
+    services:
+    - service: identity
+      endpoint: internal
   ks_endpoints:
     jobs:
     - barbican-ks-service
-    service:
-    - keystone-api
+    services:
+    - service: identity
+      endpoint: internal
   api:
     jobs:
     - barbican-db-sync
     - barbican-ks-user
     - barbican-ks-endpoints
-    service:
-    - keystone-api
-    - mariadb
+    services:
+    - service: oslo_db
+      endpoint: internal
+    - service: identity
+      endpoint: internal
 
 conf:
   paste:
@@ -106,12 +181,6 @@ conf:
         auth_token:
           auth_type: password
           auth_version: v3
-          region_name: RegionOne
-          project_domain_name: default
-          project_name: service
-          user_domain_name: default
-          username: barbican
-          password: password
     database:
       oslo:
         db:
@@ -121,24 +190,59 @@ conf:
         config:
           bind_port: 9311
 
+# Names of secrets used by bootstrap and environmental checks
+secrets:
+  identity:
+    admin: barbican-keystone-admin
+    user: barbican-keystone-user
+  oslo_db:
+    admin: barbican-db-admin
+    user: barbican-db-user
+
 endpoints:
   identity:
     name: keystone
+    auth:
+      admin:
+        region_name: RegionOne
+        username: admin
+        password: password
+        project_name: admin
+        user_domain_name: default
+        project_domain_name: default
+      user:
+        role: admin
+        region_name: RegionOne
+        username: barbican
+        password: password
+        project_name: service
+        user_domain_name: default
+        project_domain_name: default
     hosts:
       default: keystone-api
-    path: /v3
-    scheme: http
+      public: keystone
+    path:
+      default: /v3
+    scheme:
+      default: http
     port:
-      admin: 35357
-      api: 5000
+      admin:
+        default: 35357
+      api:
+        default: 80
   key-manager:
     name: barbican
     hosts:
       default: barbican-api
-    path: /v1
-    scheme: http
+      public: barbican
+    path:
+      default: /v1
+    scheme:
+      default: http
     port:
-      api: 9311
+      api:
+        default: 9311
+        public: 80
   oslo_db:
     auth:
       admin:
@@ -152,7 +256,8 @@ endpoints:
     path: /barbican
     scheme: mysql+pymysql
     port:
-      mysql: 3306
+      mysql:
+        default: 3306
   oslo_messaging:
     auth:
       admin:
@@ -166,59 +271,28 @@ endpoints:
     path: /
     scheme: rabbit
     port:
-      amqp: 5672
+      amqp:
+        default: 5672
   oslo_cache:
     hosts:
-      default: memcache
+      default: memcached
     port:
-      memcache: 11211
+      memcache:
+        default: 11211
 
-resources:
-  enabled: false
-  db_init:
-    requests:
-      memory: "128Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-  db_sync:
-    requests:
-      memory: "128Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-  ks_endpoints:
-    requests:
-      memory: "128Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-  ks_service:
-    requests:
-      memory: "128Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-  ks_user:
-    requests:
-      memory: "128Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-  api:
-    requests:
-      memory: "128Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-
-mounts:
-  barbican_api:
-    init_container: null
-    barbican_api:
+manifests:
+  configmap_bin: true
+  configmap_etc: true
+  deployment_api: true
+  ingress_api: true
+  job_bootstrap: true
+  job_db_init: true
+  job_db_sync: true
+  job_ks_endpoints: true
+  job_ks_service: true
+  job_ks_user: true
+  pdb_api: true
+  secret_db: true
+  secret_keystone: true
+  service_ingress_api: true
+  service_api: true

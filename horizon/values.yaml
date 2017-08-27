@@ -17,32 +17,25 @@
 # Declare name/value pairs to be passed into your templates.
 # name: value
 
-replicas: 1
-
 images:
-  horizon: docker.io/kolla/ubuntu-source-horizon:3.0.3
+  db_init: docker.io/kolla/ubuntu-source-horizon:4.0.0
+  db_sync: docker.io/kolla/ubuntu-source-horizon:4.0.0
+  horizon: docker.io/kolla/ubuntu-source-horizon:4.0.0
   dep_check: docker.io/kolla/ubuntu-source-kubernetes-entrypoint:4.0.0
   pull_policy: "IfNotPresent"
 
-upgrades:
-  revision_history: 3
-  pod_replacement_strategy: RollingUpdate
-  rolling_update:
-    max_unavailable: 1
-    max_surge: 3
+release_group: null
 
 labels:
   node_selector_key: openstack-control-plane
   node_selector_value: enabled
 
 network:
+  ingress:
+    public: true
   port: 80
   node_port: 31000
   enable_node_port: false
-
-memcached:
-  host: memcached
-  port: 11211
 
 local_settings:
   horizon_secret_key: 9aee62c0-5253-4a86-b189-e0fb71fa503c
@@ -50,19 +43,87 @@ local_settings:
 
 dependencies:
   dashboard:
-    service:
-    - memcached
-    - keystone-api
+    jobs:
+    - horizon-db-sync
+    services:
+    - service: oslo_cache
+      endpoint: internal
+    - service: oslo_db
+      endpoint: internal
+  db_init:
+    services:
+    - service: oslo_db
+      endpoint: internal
+  db_sync:
+    jobs:
+    - horizon-db-init
+    services:
+    - service: oslo_db
+      endpoint: internal
 
-resources:
-  enabled: false
-  dashboard:
-    limits:
-      memory: "128Mi"
-      cpu: "500m"
-    requests:
-      memory: "128Mi"
-      cpu: "500m"
+pod:
+  affinity:
+      anti:
+        type:
+          default: preferredDuringSchedulingIgnoredDuringExecution
+        topologyKey:
+          default: kubernetes.io/hostname
+  mounts:
+    horizon_db_init:
+      init_container: null
+      horizon_db_init:
+    horizon_db_sync:
+      init_container: null
+      horizon_db_sync:
+    horizon:
+      init_container: null
+      horizon:
+  replicas:
+    server: 1
+  lifecycle:
+    upgrades:
+      deployments:
+        revision_history: 3
+        pod_replacement_strategy: RollingUpdate
+        rolling_update:
+          max_unavailable: 1
+          max_surge: 3
+    disruption_budget:
+      horizon:
+        min_available: 0
+    termination_grace_period:
+      horizon:
+        timeout: 30
+  resources:
+    enabled: false
+    server:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1204Mi"
+        cpu: "2000m"
+    jobs:
+      db_init:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      db_sync:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+
+# Names of secrets used by bootstrap and environmental checks
+secrets:
+  oslo_db:
+    admin: horizon-db-admin
+    user: horizon-db-user
 
 # typically overriden by environmental
 # values, but should include all endpoints
@@ -72,8 +133,58 @@ endpoints:
     name: keystone
     hosts:
       default: keystone-api
-    path: /v3
-    scheme: 'http'
+      public: keystone
+    path:
+      default: /v3
+    scheme:
+      default: http
     port:
-      admin: 35357
-      api: 5000
+      admin:
+        default: 35357
+      api:
+        default: 80
+  oslo_cache:
+    hosts:
+      default: memcached
+    port:
+      memcache:
+        default: 11211
+  dashboard:
+    name: horizon
+    hosts:
+      default: horizon-int
+      public: horizon
+    path:
+      default: null
+    scheme:
+      default: http
+    port:
+      web:
+        default: 80
+  oslo_db:
+    auth:
+      admin:
+        username: root
+        password: password
+      user:
+        username: horizon
+        password: password
+    hosts:
+      default: mariadb
+    path: /horizon
+    scheme: mysql+pymysql
+    port:
+      mysql:
+        default: 3306
+
+manifests:
+  configmap_bin: true
+  configmap_etc: true
+  deployment: true
+  ingress_api: true
+  job_db_init: true
+  job_db_sync: true
+  pdb: true
+  secret_db: true
+  service_ingress: true
+  service: true

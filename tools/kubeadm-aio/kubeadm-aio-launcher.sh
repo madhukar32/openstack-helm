@@ -23,7 +23,7 @@ sudo mount --make-shared /var/lib/kubelet
 # Cleanup any old deployment
 sudo docker rm -f kubeadm-aio || true
 sudo docker rm -f kubelet || true
-sudo docker ps -aq | xargs -l1 sudo docker rm -f || true
+sudo docker ps -aq | xargs -r -l1 -P16 sudo docker rm -f
 sudo rm -rfv \
     /etc/cni/net.d \
     /etc/kubernetes \
@@ -31,7 +31,9 @@ sudo rm -rfv \
     /var/etcd \
     /var/lib/kubelet/* \
     /run/openvswitch \
+    /var/lib/nova \
     ${HOME}/.kubeadm-aio/admin.conf \
+    /var/lib/openstack-helm \
     /var/lib/nfs-provisioner || true
 
 # Launch Container
@@ -55,7 +57,7 @@ sudo docker run \
 
 echo "Waiting for kubeconfig"
 set +x
-end=$(($(date +%s) + 120))
+end=$(($(date +%s) + 240))
 READY="False"
 while true; do
   if [ -f ${HOME}/.kubeadm-aio/admin.conf ]; then
@@ -66,7 +68,7 @@ while true; do
   now=$(date +%s)
   [ $now -gt $end ] && \
     echo "KubeADM did not generate kubectl config in time" && \
-    docker logs kubeadm-aio && exit -1
+    sudo docker logs kubeadm-aio && exit -1
 done
 set -x
 
@@ -85,9 +87,12 @@ while true; do
   now=$(date +%s)
   [ $now -gt $end ] && \
     echo "Kube node did not register as ready in time" && \
-    docker logs kubeadm-aio && exit -1
+    sudo docker logs kubeadm-aio && exit -1
 done
 set -x
+
+# Waiting for kube-system pods to be ready before continuing
+sudo docker exec kubeadm-aio wait-for-kube-pods kube-system
 
 # Initialize Helm
 helm init
@@ -95,5 +100,8 @@ helm init
 # Initialize Environment for Development
 sudo docker exec kubeadm-aio openstack-helm-dev-prep
 
-# Deploy NFS provisioner into enviromment
-sudo docker exec kubeadm-aio openstack-helm-nfs-prep
+: ${PVC_BACKEND:="nfs"}
+if [ "$PVC_BACKEND" == "nfs" ]; then
+  # Deploy NFS provisioner into enviromment
+  sudo docker exec kubeadm-aio openstack-helm-nfs-prep
+fi

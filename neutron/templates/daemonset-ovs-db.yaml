@@ -1,30 +1,35 @@
-# Copyright 2017 The Openstack-Helm Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+{{/*
+Copyright 2017 The Openstack-Helm Authors.
 
-{{- if not .Values.sdn.opencontrail.enabled }}
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/}}
+
+{{- if .Values.manifests.daemonset_ovs_db }}
+{{- $envAll := . }}
+---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
   name: ovs-db
 spec:
+{{ tuple $envAll "ovs_db" | include "helm-toolkit.snippets.kubernetes_upgrades_daemonset" | indent 2 }}
   template:
     metadata:
       labels:
-        app: ovs-db
+{{ tuple $envAll "neutron" "ovs-db" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
       annotations:
-        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.hash" }}
-        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.hash" }}
+        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.utils.hash" }}
+        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.utils.hash" }}
     spec:
       nodeSelector:
         {{ .Values.labels.ovs.node_selector_key }}: {{ .Values.labels.ovs.node_selector_value }}
@@ -36,27 +41,18 @@ spec:
         - name: ovs-db
           image: {{ .Values.images.openvswitch_db_server }}
           imagePullPolicy: {{ .Values.images.pull_policy }}
-          {{- if .Values.resources.enabled }}
-          resources:
-            limits:
-              cpu: {{ .Values.resources.ovs.db.limits.cpu | quote }}
-              memory: {{ .Values.resources.ovs.db.limits.memory | quote }}
-            requests:
-              cpu: {{ .Values.resources.ovs.db.requests.cpu | quote }}
-              memory: {{ .Values.resources.ovs.db.requests.memory | quote }}
-          {{- end }}
+{{ tuple $envAll $envAll.Values.pod.resources.ovs.db | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
           securityContext:
             privileged: true
           command:
-            - bash
             - /tmp/openvswitch-db-server.sh
           volumeMounts:
-            - name: openvswitchdbserversh
+            - name: neutron-bin
               mountPath: /tmp/openvswitch-db-server.sh
               subPath: openvswitch-db-server.sh
               readOnly: true
-            - mountPath: /etc/resolv.conf
-              name: resolvconf
+            - name: neutron-etc
+              mountPath: /etc/resolv.conf
               subPath: resolv.conf
               readOnly: true
             - name: varlibopenvswitch
@@ -64,14 +60,16 @@ spec:
             - name: run
               mountPath: /run
       volumes:
-        - name: openvswitchdbserversh
+        - name: neutron-bin
           configMap:
             name: neutron-bin
+            defaultMode: 0555
         - name: varlibopenvswitch
           emptyDir: {}
-        - name: resolvconf
+        - name: neutron-etc
           configMap:
             name: neutron-etc
+            defaultMode: 0444
         - name: libmodules
           hostPath:
             path: /lib/modules

@@ -12,15 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-images:
-  libvirt: quay.io/stackanetes/stackanetes-nova-libvirt:newton
+ceph:
+  enabled: false
 
 conf:
   nova:
     default:
       oslo:
         log:
-          debug: true
+          debug: false
     libvirt:
       nova:
         conf:

@@ -12,43 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# note that you need to update the gcomm member list
-# below when changing this value
-replicas: 3
-
-# this flag allows a "leaner" version of this chart to be installed
-# likely lacking any resiliency or persistence, but will help
-# both laptop developers and cicd systems
-#
-# it will deploy a single instance of mariadb, use nodeDir
-# for persistence and satisfy the mariadb-seed job with
-# a busybox mock
-#
-# note enabling this flag takes precedence when enabled and
-# will override certain things, like the replicas requested
-development:
-  enabled: false
-  storage_path: /var/lib/localkube/openstack-helm/mariadb
+force_bootstrap: false
 
 pod:
   affinity:
-    anti:
-      type:
-        default: preferredDuringSchedulingIgnoredDuringExecution
-      topologyKey:
-        default: kubernetes.io/hostname
-
-resources:
-  enabled: false
-  api:
-    limits:
-      memory: "128Mi"
-      cpu: "500m"
-    requests:
-      memory: "128Mi"
-      cpu: "500m"
-  job:
-    seed:
+      anti:
+        type:
+          default: preferredDuringSchedulingIgnoredDuringExecution
+        topologyKey:
+          default: kubernetes.io/hostname
+  replicas:
+    server: 3
+  lifecycle:
+    disruption_budget:
+      mariadb:
+        min_available: 0
+  resources:
+    enabled: false
+    server:
       limits:
         memory: "128Mi"
         cpu: "500m"
@@ -56,32 +37,52 @@ resources:
         memory: "128Mi"
         cpu: "500m"
 
-# this drives the service name, and statefulset name
-service_name: mariadb
-
 images:
-  mariadb: quay.io/stackanetes/stackanetes-mariadb:newton
+  mariadb: docker.io/mariadb:10.1.23
   pull_policy: IfNotPresent
 
 volume:
-  class_path: volume.beta.kubernetes.io/storage-class
+  enabled: true
   class_name: general
-  size: 2Gi
+  size: 5Gi
 
 labels:
   node_selector_key: openstack-control-plane
   node_selector_value: enabled
 
-network:
-  port:
-    wsrep: 4567
-    mariadb: 3306
-    ist: 4444
-  dns:
-    kubernetes_domain: cluster.local
-
 database:
-  root_password: password
-  cluster_name: mariadb
-  node_name: master
-  wsrep_sst_method: rsync
+  config_override: null
+  # Any configuration here will override the base config.
+  # config_override: |-
+  #   [mysqld]
+  #   wsrep_slave_threads=1
+
+resources:
+  enabled: false
+  server:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "1024Mi"
+      cpu: "2000m"
+
+# typically overriden by environmental
+# values, but should include all endpoints
+# required by this chart
+endpoints:
+  oslo_db:
+    auth:
+      admin:
+        username: root
+        password: password
+    hosts:
+      default: mariadb
+      discovery: mariadb-discovery
+    path: null
+    scheme: mysql+pymysql
+    port:
+      mysql:
+        default: 3306
+      wsrep:
+        default: 4567

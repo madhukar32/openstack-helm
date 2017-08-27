@@ -1,35 +1,38 @@
-# Copyright 2017 The Openstack-Helm Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+{{/*
+Copyright 2017 The Openstack-Helm Authors.
 
-{{- if not .Values.sdn.opencontrail.enabled }}
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/}}
+
+{{- if .Values.manifests.daemonset_l3_agent }}
 {{- $envAll := . }}
 {{- $dependencies := .Values.dependencies.l3 }}
+{{- $mounts_neutron_l3_agent := .Values.pod.mounts.neutron_l3_agent.neutron_l3_agent }}
+{{- $mounts_neutron_l3_agent_init := .Values.pod.mounts.neutron_l3_agent.init_container }}
+---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
   name: neutron-l3-agent
 spec:
+{{ tuple $envAll "l3_agent" | include "helm-toolkit.snippets.kubernetes_upgrades_daemonset" | indent 2 }}
   template:
     metadata:
       labels:
-        app: neutron-l3-agent
+{{ tuple $envAll "neutron" "l3-agent" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
       annotations:
-        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.hash" }}
-        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.hash" }}
-        pod.beta.kubernetes.io/init-containers: '[
-{{ tuple $envAll $dependencies "[]" | include "helm-toolkit.kubernetes_entrypoint_init_container" | indent 10 }}
-        ]'
+        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.utils.hash" }}
+        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.utils.hash" }}
     spec:
       nodeSelector:
         {{ .Values.labels.agent.l3.node_selector_key }}: {{ .Values.labels.agent.l3.node_selector_value }}
@@ -37,23 +40,16 @@ spec:
         runAsUser: 0
       dnsPolicy: ClusterFirst
       hostNetwork: true
+      initContainers:
+{{ tuple $envAll $dependencies $mounts_neutron_l3_agent_init | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
       containers:
         - name: neutron-l3-agent
           image: {{ .Values.images.l3 }}
           imagePullPolicy: {{ .Values.images.pull_policy }}
-          {{- if .Values.resources.enabled }}
-          resources:
-            limits:
-              cpu: {{ .Values.resources.agent.l3.limits.cpu | quote }}
-              memory: {{ .Values.resources.agent.l3.limits.memory | quote }}
-            requests:
-              cpu: {{ .Values.resources.agent.l3.requests.cpu | quote }}
-              memory: {{ .Values.resources.agent.l3.requests.memory | quote }}
-          {{- end }}
+{{ tuple $envAll $envAll.Values.pod.resources.agent.l3 | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
           securityContext:
             privileged: true
           command:
-            - bash
             - /tmp/neutron-l3-agent.sh
           volumeMounts:
             - name: neutron-bin
@@ -82,19 +78,29 @@ spec:
               readOnly: true
             - name: runopenvswitch
               mountPath: /run/openvswitch
+            - name: libmodules
+              mountPath: /lib/modules
+              readOnly: true
             - name: socket
               mountPath: /var/lib/neutron/stackanetes
+{{- if $mounts_neutron_l3_agent.volumeMounts }}{{ toYaml $mounts_neutron_l3_agent.volumeMounts | indent 12 }}{{ end }}
       volumes:
         - name: neutron-bin
           configMap:
             name: neutron-bin
+            defaultMode: 0555
         - name: neutron-etc
           configMap:
             name: neutron-etc
+            defaultMode: 0444
         - name: runopenvswitch
           hostPath:
             path: /run/openvswitch
+        - name: libmodules
+          hostPath:
+            path: /lib/modules
         - name: socket
           hostPath:
             path: /var/lib/neutron/stackanetes
+{{- if $mounts_neutron_l3_agent.volumes }}{{ toYaml $mounts_neutron_l3_agent.volumes | indent 8 }}{{ end }}
 {{- end }}

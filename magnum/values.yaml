@@ -17,16 +17,14 @@
 # Declare name/value pairs to be passed into your templates.
 # name: value
 
-
-replicas:
-  api: 1
-  conductor: 1
+release_group: null
 
 labels:
   node_selector_key: openstack-control-plane
   node_selector_value: enabled
 
 images:
+  bootstrap: docker.io/kolla/ubuntu-source-magnum-api:3.0.3
   db_init: docker.io/kolla/ubuntu-source-magnum-api:3.0.3
   db_sync: docker.io/kolla/ubuntu-source-magnum-api:3.0.3
   ks_user: docker.io/kolla/ubuntu-source-kolla-toolbox:3.0.3
@@ -36,27 +34,6 @@ images:
   conductor: docker.io/kolla/ubuntu-source-magnum-conductor:3.0.3
   dep_check: docker.io/kolla/ubuntu-source-kubernetes-entrypoint:4.0.0
   pull_policy: "IfNotPresent"
-
-upgrades:
-  revision_history: 3
-  pod_replacement_strategy: RollingUpdate
-  rolling_update:
-    max_unavailable: 1
-    max_surge: 3
-
-keystone_secrets:
-  admin: "magnum-env-keystone-admin"
-  user: "magnum-env-keystone-user"
-
-keystone:
-  admin_user: "admin"
-  admin_user_domain: "default"
-  admin_password: "password"
-  admin_project_name: "admin"
-  admin_project_domain: "default"
-  admin_region_name: "RegionOne"
-
-  magnum_user_role: "admin"
 
 conf:
   paste:
@@ -73,12 +50,6 @@ conf:
         auth_token:
           auth_type: password
           auth_version: v3
-          region_name: RegionOne
-          project_domain_name: default
-          project_name: service
-          user_domain_name: default
-          username: magnum
-          password: password
     api:
       magnum:
         port: 9511
@@ -86,50 +57,71 @@ conf:
 
 network:
   api:
-    name: "magnum-api"
-    proto: "http"
+    ingress:
+      public: true
     node_port:
       enabled: false
       port: 30511
 
+bootstrap:
+  enabled: false
+  script: |
+    openstack token issue
+
 dependencies:
   db_init:
-    jobs:
-    - mariadb-seed
-    service:
-    - mariadb
+    services:
+    - service: oslo_db
+      endpoint: internal
   db_sync:
     jobs:
     - magnum-db-init
-    service:
-    - mariadb
+    services:
+    - service: oslo_db
+      endpoint: internal
   ks_user:
-    service:
-    - keystone-api
+    services:
+    - service: identity
+      endpoint: internal
   ks_service:
-    service:
-    - keystone-api
+    services:
+    - service: identity
+      endpoint: internal
   ks_endpoints:
     jobs:
     - magnum-ks-service
-    service:
-    - keystone-api
+    services:
+    - service: identity
+      endpoint: internal
   api:
     jobs:
     - magnum-db-sync
     - magnum-ks-user
     - magnum-ks-endpoints
-    service:
-    - keystone-api
-    - mariadb
+    services:
+    - service: oslo_db
+      endpoint: internal
+    - service: identity
+      endpoint: internal
   conductor:
     jobs:
     - magnum-db-sync
     - magnum-ks-user
     - magnum-ks-endpoints
-    service:
-    - keystone-api
-    - mariadb
+    services:
+    - service: oslo_db
+      endpoint: internal
+    - service: identity
+      endpoint: internal
+
+# Names of secrets used by bootstrap and environmental checks
+secrets:
+  identity:
+    admin: magnum-keystone-admin
+    user: magnum-keystone-user
+  oslo_db:
+    admin: magnum-db-admin
+    user: magnum-db-user
 
 # typically overriden by environmental
 # values, but should include all endpoints
@@ -137,21 +129,47 @@ dependencies:
 endpoints:
   identity:
     name: keystone
+    auth:
+      admin:
+        region_name: RegionOne
+        username: admin
+        password: password
+        project_name: admin
+        user_domain_name: default
+        project_domain_name: default
+      user:
+        role: admin
+        region_name: RegionOne
+        username: magnum
+        password: password
+        project_name: service
+        user_domain_name: default
+        project_domain_name: default
     hosts:
       default: keystone-api
-    path: /v3
-    scheme: 'http'
+      public: keystone
+    path:
+      default: /v3
+    scheme:
+      default: http
     port:
-      admin: 35357
-      api: 5000
+      admin:
+        default: 35357
+      api:
+        default: 80
   container-infra:
     name: magnum
     hosts:
       default: magnum-api
-    path: /v1
-    scheme: 'http'
+      public: magnum
+    path:
+      default: /v1
+    scheme:
+      default: http
     port:
-      api: 9511
+      api:
+        default: 9511
+        public: 80
   oslo_db:
     auth:
       admin:
@@ -165,12 +183,14 @@ endpoints:
     path: /magnum
     scheme: mysql+pymysql
     port:
-      mysql: 3306
+      mysql:
+        default: 3306
   oslo_cache:
     hosts:
-      default: memcache
+      default: memcached
     port:
-      memcache: 11211
+      memcache:
+        default: 11211
   oslo_messaging:
     auth:
       admin:
@@ -184,64 +204,125 @@ endpoints:
     path: /
     scheme: rabbit
     port:
-      amqp: 5672
+      amqp:
+        default: 5672
 
-resources:
-  enabled: false
-  magnum_api:
-    requests:
-      memory: "124Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-  magnum_db_init:
-    requests:
-      memory: "124Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-  magnum_db_sync:
-    requests:
-      memory: "124Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-  magnum_ks_endpoints:
-    requests:
-      memory: "124Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-  magnum_ks_service:
-    requests:
-      memory: "124Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-  magnum_ks_user:
-    requests:
-      memory: "124Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-  magnum_conductor:
-    requests:
-      memory: "124Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-
-mounts:
-  magnum_api:
-    init_container: null
+pod:
+  affinity:
+      anti:
+        type:
+          default: preferredDuringSchedulingIgnoredDuringExecution
+        topologyKey:
+          default: kubernetes.io/hostname
+  mounts:
     magnum_api:
-  magnum_conductor:
-    init_container: null
+      init_container: null
+      magnum_api:
     magnum_conductor:
+      init_container: null
+      magnum_conductor:
+    magnum_bootstrap:
+      init_container: null
+      magnum_bootstrap:
+  replicas:
+    api: 1
+    conductor: 1
+  lifecycle:
+    upgrades:
+      deployments:
+        revision_history: 3
+        pod_replacement_strategy: RollingUpdate
+        rolling_update:
+          max_unavailable: 1
+          max_surge: 3
+    disruption_budget:
+      api:
+        min_available: 0
+    termination_grace_period:
+      api:
+        timeout: 30
+  resources:
+    enabled: false
+    api:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    conductor:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    jobs:
+      bootstrap:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      db_init:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      db_sync:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      ks_endpoints:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      ks_service:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      ks_user:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      tests:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+
+manifests:
+  configmap_bin: true
+  configmap_etc: true
+  deployment_api: true
+  ingress_api: true
+  job_bootstrap: true
+  job_db_init: true
+  job_db_sync: true
+  job_ks_endpoints: true
+  job_ks_service: true
+  job_ks_user: true
+  pdb_api: true
+  secret_db: true
+  secret_keystone: true
+  service_api: true
+  service_cfn: true
+  service_ingress_api: true
+  statefulset_conductor: true

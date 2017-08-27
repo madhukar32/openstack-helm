@@ -1,24 +1,26 @@
-# Copyright 2017 The Openstack-Helm Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+{{/*
+Copyright 2017 The Openstack-Helm Authors.
 
----
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/}}
+
+{{- if .Values.manifests_enabled.deployment }}
+{{- if .Values.ceph.enabled.mds }}
+{{- $envAll := . }}
+{{- $dependencies := .Values.dependencies.mds }}
 kind: Deployment
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1beta1
 metadata:
-  labels:
-    app: ceph
-    daemon: mds
   name: ceph-mds
 spec:
   replicas: 1
@@ -26,32 +28,25 @@ spec:
     metadata:
       name: ceph-mds
       labels:
-        app: ceph
-        daemon: mds
+{{ tuple $envAll "ceph" "mds" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
     spec:
+      affinity:
+{{ tuple $envAll "ceph" "mds" | include "helm-toolkit.snippets.kubernetes_pod_anti_affinity" | indent 8 }}
       nodeSelector:
-        {{ .Values.labels.node_selector_key }}: {{ .Values.labels.node_selector_value }}
+        {{ .Values.labels.mds.node_selector_key }}: {{ .Values.labels.mds.node_selector_value }}
+      initContainers:
+{{ tuple $envAll $dependencies "" | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
       serviceAccount: default
-      volumes:
-        - name: ceph-conf
-          secret:
-            secretName: ceph-conf-combined
-        - name: ceph-bootstrap-osd-keyring
-          secret:
-            secretName: ceph-bootstrap-osd-keyring
-        - name: ceph-bootstrap-mds-keyring
-          secret:
-            secretName: ceph-bootstrap-mds-keyring
-        - name: ceph-bootstrap-rgw-keyring
-          secret:
-            secretName: ceph-bootstrap-rgw-keyring
       containers:
         - name: ceph-mds
           image: {{ .Values.images.daemon }}
           imagePullPolicy: {{ .Values.images.pull_policy }}
+{{ tuple $envAll $envAll.Values.pod.resources.mds | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
           ports:
             - containerPort: 6800
           env:
+            - name: K8S_HOST_NETWORK
+              value: "1"
             - name: CEPH_DAEMON
               value: MDS
             - name: CEPHFS_CREATE
@@ -60,15 +55,45 @@ spec:
               value: k8s
             - name: CLUSTER
               value: ceph
+          command:
+            - /entrypoint.sh
           volumeMounts:
-            - name: ceph-conf
-              mountPath: /etc/ceph
+            - name: ceph-bin
+              mountPath: /entrypoint.sh
+              subPath: entrypoint.sh
+              readOnly: true
+            - name: ceph-bin
+              mountPath: /start_mds.sh
+              subPath: start_mds.sh
+              readOnly: true
+            - name: ceph-bin
+              mountPath: /common_functions.sh
+              subPath: common_functions.sh
+              readOnly: true
+            - name: ceph-etc
+              mountPath: /etc/ceph/ceph.conf
+              subPath: ceph.conf
+              readOnly: true
+            - name: ceph-client-admin-keyring
+              mountPath: /etc/ceph/ceph.client.admin.keyring
+              subPath: ceph.client.admin.keyring
+              readOnly: true
+            - name: ceph-mon-keyring
+              mountPath: /etc/ceph/ceph.mon.keyring
+              subPath: ceph.mon.keyring
+              readOnly: true
             - name: ceph-bootstrap-osd-keyring
-              mountPath: /var/lib/ceph/bootstrap-osd
+              mountPath: /var/lib/ceph/bootstrap-osd/ceph.keyring
+              subPath: ceph.keyring
+              readOnly: false
             - name: ceph-bootstrap-mds-keyring
-              mountPath: /var/lib/ceph/bootstrap-mds
+              mountPath: /var/lib/ceph/bootstrap-mds/ceph.keyring
+              subPath: ceph.keyring
+              readOnly: false
             - name: ceph-bootstrap-rgw-keyring
-              mountPath: /var/lib/ceph/bootstrap-rgw
+              mountPath: /var/lib/ceph/bootstrap-rgw/ceph.keyring
+              subPath: ceph.keyring
+              readOnly: false
           livenessProbe:
               tcpSocket:
                 port: 6800
@@ -78,10 +103,29 @@ spec:
               tcpSocket:
                 port: 6800
               timeoutSeconds: 5
-          resources:
-            requests:
-              memory: {{ .Values.resources.mds.requests.memory | quote }}
-              cpu: {{ .Values.resources.mds.requests.cpu | quote }}
-            limits:
-              memory: {{ .Values.resources.mds.limits.memory | quote }}
-              cpu: {{ .Values.resources.mds.limits.cpu | quote }}
+      volumes:
+        - name: ceph-etc
+          configMap:
+            name: ceph-etc
+            defaultMode: 0444
+        - name: ceph-bin
+          configMap:
+            name: ceph-bin
+            defaultMode: 0555
+        - name: ceph-client-admin-keyring
+          secret:
+            secretName: {{ .Values.secrets.keyrings.admin }}
+        - name: ceph-mon-keyring
+          secret:
+            secretName: {{ .Values.secrets.keyrings.mon }}
+        - name: ceph-bootstrap-osd-keyring
+          secret:
+            secretName: {{ .Values.secrets.keyrings.osd }}
+        - name: ceph-bootstrap-mds-keyring
+          secret:
+            secretName: {{ .Values.secrets.keyrings.mds }}
+        - name: ceph-bootstrap-rgw-keyring
+          secret:
+            secretName: {{ .Values.secrets.keyrings.rgw }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,98 @@
+{{/*
+Copyright 2017 The Openstack-Helm Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/}}
+
+{{- $envAll := . }}
+---
+{{- if eq .Values.deployment_type "Deployment" }}
+apiVersion: apps/v1beta1
+kind: Deployment
+{{- else if eq .Values.deployment_type "DaemonSet" }}
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+{{- end }}
+metadata:
+  name: ingress-api
+spec:
+{{- if eq .Values.deployment_type "Deployment" }}
+  replicas: {{ .Values.pod.replicas.ingress }}
+{{ tuple $envAll | include "helm-toolkit.snippets.kubernetes_upgrades_deployment" | indent 2 }}
+{{- end }}
+  template:
+    metadata:
+      labels:
+{{ tuple $envAll "ingress" "api" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
+      annotations:
+        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.utils.hash" }}
+      labels:
+        app: ingress-api
+    spec:
+{{- if eq .Values.deployment_type "Deployment" }}
+      affinity:
+{{ tuple $envAll "ingress" "server" | include "helm-toolkit.snippets.kubernetes_pod_anti_affinity" | indent 8 }}
+{{- end }}
+      nodeSelector:
+        {{ .Values.labels.node_selector_key }}: {{ .Values.labels.node_selector_value }}
+{{- if .Values.network.host_namespace }}
+      hostNetwork: true
+{{- end }}
+      terminationGracePeriodSeconds: 60
+      containers:
+        - name: ingress-api
+          image: {{ .Values.images.ingress }}
+          imagePullPolicy: {{ .Values.images.pull_policy }}
+{{ tuple $envAll $envAll.Values.pod.resources.error_pages | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 10254
+              scheme: HTTP
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 10254
+              scheme: HTTP
+            initialDelaySeconds: 10
+            timeoutSeconds: 1
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          ports:
+            - containerPort: 80
+              hostPort: 80
+            - containerPort: 443
+              hostPort: 443
+          args:
+            - /nginx-ingress-controller
+            - '--default-backend-service=$(POD_NAMESPACE)/ingress-error-pages'
+            - --configmap=$(POD_NAMESPACE)/nginx-custom-configuration
+{{- if .Values.network.host_namespace }}
+          volumeMounts:
+            - name: ingress-etc
+              mountPath: /etc/resolv.conf
+              subPath: resolv.conf
+              readOnly: true
+      volumes:
+        - name: ingress-etc
+          configMap:
+            name: ingress-etc
+            defaultMode: 0444
+{{- end }}

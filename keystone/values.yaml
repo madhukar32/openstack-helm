@@ -17,44 +17,44 @@
 # Declare name/value pairs to be passed into your templates.
 # name: value
 
-replicas: 1
-
 labels:
   node_selector_key: openstack-control-plane
   node_selector_value: enabled
 
+release_group: null
+
 images:
+  bootstrap: docker.io/kolla/ubuntu-source-keystone:3.0.3
+  test: docker.io/kolla/ubuntu-binary-rally:4.0.0
   db_init: docker.io/kolla/ubuntu-source-keystone:3.0.3
   db_sync: docker.io/kolla/ubuntu-source-keystone:3.0.3
+  fernet_setup: docker.io/kolla/ubuntu-source-keystone:3.0.3
+  fernet_rotate: docker.io/kolla/ubuntu-source-keystone:3.0.3
+  credential_setup: docker.io/kolla/ubuntu-source-keystone:3.0.3
+  credential_rotate: docker.io/kolla/ubuntu-source-keystone:3.0.3
   api: docker.io/kolla/ubuntu-source-keystone:3.0.3
   dep_check: docker.io/kolla/ubuntu-source-kubernetes-entrypoint:4.0.0
   pull_policy: "IfNotPresent"
 
-upgrades:
-  revision_history: 3
-  pod_replacement_strategy: RollingUpdate
-  rolling_update:
-    max_unavailable: 1
-    max_surge: 3
-
-keystone:
-  version: v3
-  scheme: http
-  admin_region_name: RegionOne
-  admin_user: admin
-  admin_password: password
-  admin_project_name: admin
-  admin_role: admin
+bootstrap:
+  enabled: true
+  script: |
+    openstack role add \
+          --user="${OS_USERNAME}" \
+          --user-domain="${OS_USER_DOMAIN_NAME}" \
+          --project-domain="${OS_PROJECT_DOMAIN_NAME}" \
+          --project="${OS_PROJECT_NAME}" \
+          "_member_"
 
 network:
   api:
-    name: "keystone-api"
-    port: 5000
+    port: 80
+    ingress:
+      public: true
     node_port:
       enabled: false
       port: 30500
   admin:
-    name: "keystone-admin"
     port: 35357
     node_port:
       enabled: false
@@ -63,59 +63,186 @@ network:
 dependencies:
   api:
     jobs:
-    - mariadb-seed
     - keystone-db-sync
-    service:
-    - mariadb
+    - keystone-credential-setup
+    # Comment line below when not running fernet tokens.
+    - keystone-fernet-setup
+    services:
+    - service: oslo_cache
+      endpoint: internal
+    - service: oslo_db
+      endpoint: internal
+  db_init:
+    services:
+    - service: oslo_db
+      endpoint: internal
   db_sync:
     jobs:
     - keystone-db-init
-    - mariadb-seed
-    service:
-    - mariadb
-  init:
+    - keystone-credential-setup
+    # Comment line below when not running fernet tokens.
+    - keystone-fernet-setup
+    services:
+    - service: oslo_db
+      endpoint: internal
+  fernet_setup:
+  fernet_rotate:
     jobs:
-    - mariadb-seed
-    service:
-    - mariadb
+    - keystone-fernet-setup
+  credential_setup:
+  credential_rotate:
+    jobs:
+    - keystone-credential-setup
+  tests:
+    services:
+    - service: identity
+      endpoint: internal
+  bootstrap:
+    services:
+    - service: identity
+      endpoint: internal
 
-resources:
-  enabled: false
-  api:
-    limits:
-      memory: "128Mi"
-      cpu: "500m"
-    requests:
-      memory: "128Mi"
-      cpu: "500m"
-  jobs:
-    db_sync:
-      limits:
-        memory: "128Mi"
-        cpu: "500m"
-      requests:
-        memory: "128Mi"
-        cpu: "500m"
-    init:
-      limits:
-        memory: "128Mi"
-        cpu: "500m"
-      requests:
-        memory: "128Mi"
-        cpu: "500m"
-
-mounts:
-  keystone_db_init:
-    init_container: null
+pod:
+  affinity:
+      anti:
+        type:
+          default: preferredDuringSchedulingIgnoredDuringExecution
+        topologyKey:
+          default: kubernetes.io/hostname
+  mounts:
     keystone_db_init:
-  keystone_db_sync:
-    init_container: null
+      init_container: null
+      keystone_db_init:
     keystone_db_sync:
-  keystone_api:
-    init_container: null
+      init_container: null
+      keystone_db_sync:
     keystone_api:
+      init_container: null
+      keystone_api:
+    keystone_tests:
+      init_container: null
+      keystone_tests:
+    keystone_bootstrap:
+      init_container: null
+      keystone_bootstrap:
+    keystone_fernet_setup:
+      init_container: null
+      keystone_fernet_setup:
+    keystone_fernet_rotate:
+      init_container: null
+      keystone_fernet_rotate:
+    keystone_credential_setup:
+      init_container: null
+      keystone_credential_setup:
+    keystone_credential_rotate:
+      init_container: null
+      keystone_credential_rotate:
+  replicas:
+    api: 1
+  lifecycle:
+    upgrades:
+      deployments:
+        revision_history: 3
+        pod_replacement_strategy: RollingUpdate
+        rolling_update:
+          max_unavailable: 1
+          max_surge: 3
+    disruption_budget:
+      api:
+        min_available: 0
+    termination_grace_period:
+      api:
+        timeout: 30
+  resources:
+    enabled: false
+    api:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    jobs:
+      bootstrap:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      db_init:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      db_sync:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      tests:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      fernet_setup:
+        limits:
+          memory: "128Mi"
+          cpu: "100m"
+        requests:
+          memory: "10024Mi"
+          cpu: "2000m"
+      fernet_rotate:
+        limits:
+          memory: "128Mi"
+          cpu: "100m"
+        requests:
+          memory: "1024Mi"
+          cpu: "2000m"
+      credential_setup:
+        limits:
+          memory: "128Mi"
+          cpu: "100m"
+        requests:
+          memory: "1024Mi"
+          cpu: "2000m"
+      credential_rotate:
+        limits:
+          memory: "128Mi"
+          cpu: "100m"
+        requests:
+          memory: "1024Mi"
+          cpu: "2000m"
+
+jobs:
+  fernet_setup:
+    user: keystone
+    group: keystone
+  fernet_rotate:
+    # weekly
+    cron: "0 0 * * 0"
+    user: keystone
+    group: keystone
+  credential_setup:
+    user: keystone
+    group: keystone
+  credential_rotate:
+    # monthly
+    cron: "0 0 1 * *"
+    migrate_wait: 120
+    user: keystone
+    group: keystone
 
 conf:
+  rally_tests:
+    override:
+    append:
   paste:
     override:
     append:
@@ -125,13 +252,35 @@ conf:
   keystone:
     override:
     append:
+    default:
+      keystone:
+        max_token_size: 255
     token:
       keystone:
-        provider: uuid
+        provider: fernet
+    fernet_tokens:
+      keystone:
+        key_repository: /etc/keystone/fernet-keys/
+    credential:
+      keystone:
+        key_repository: /etc/keystone/credential-keys/
     database:
       oslo:
         db:
           max_retries: -1
+    cache:
+      oslo:
+        cache:
+          enabled: true
+          backend: dogpile.cache.memcached
+
+# Names of secrets used by bootstrap and environmental checks
+secrets:
+  identity:
+    admin: keystone-keystone-admin
+  oslo_db:
+    admin: keystone-db-admin
+    user: keystone-db-user
 
 # typically overriden by environmental
 # values, but should include all endpoints
@@ -139,13 +288,26 @@ conf:
 endpoints:
   identity:
     name: keystone
+    auth:
+      admin:
+        region_name: RegionOne
+        username: admin
+        password: password
+        project_name: admin
+        user_domain_name: default
+        project_domain_name: default
     hosts:
       default: keystone-api
-    path: /v3
-    scheme: 'http'
+      public: keystone
+    path:
+      default: /v3
+    scheme:
+      default: http
     port:
-      admin: 35357
-      api: 5000
+      admin:
+        default: 35357
+      api:
+        default: 80
   oslo_db:
     auth:
       admin:
@@ -159,7 +321,8 @@ endpoints:
     path: /keystone
     scheme: mysql+pymysql
     port:
-      mysql: 3306
+      mysql:
+        default: 3306
   oslo_messaging:
     auth:
       admin:
@@ -173,9 +336,32 @@ endpoints:
     path: /openstack
     scheme: rabbit
     port:
-      amqp: 5672
+      amqp:
+        default: 5672
   oslo_cache:
     hosts:
-      default: memcache
+      default: memcached
     port:
-      memcache: 11211
+      memcache:
+        default: 11211
+
+manifests:
+  configmap_bin: true
+  configmap_etc: true
+  cron_credential_rotate: true
+  cron_fernet_rotate: true
+  deployment_api: true
+  ingress_api: true
+  job_bootstrap: true
+  job_credential_setup: true
+  job_db_init: true
+  job_db_sync: true
+  job_fernet_setup: true
+  pdb_api: true
+  pod_rally_test: true
+  secret_credential_keys: true
+  secret_db: true
+  secret_fernet_keys: true
+  secret_keystone: true
+  service_ingress_api: true
+  service_api: true

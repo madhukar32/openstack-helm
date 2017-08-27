@@ -17,18 +17,14 @@
 # Declare name/value pairs to be passed into your templates.
 # name: value
 
-
-replicas:
-  api: 1
-  engine: 1
-  event_engine: 1
-  executor: 1
-
 labels:
   node_selector_key: openstack-control-plane
   node_selector_value: enabled
 
+release_group: null
+
 images:
+  bootstrap: docker.io/kolla/ubuntu-source-mistral-api:3.0.3
   dep_check: docker.io/kolla/ubuntu-source-kubernetes-entrypoint:4.0.0
   db_init: docker.io/kolla/ubuntu-source-mistral-api:3.0.3
   db_sync: docker.io/kolla/ubuntu-source-mistral-api:3.0.3
@@ -41,95 +37,93 @@ images:
   executor: docker.io/kolla/ubuntu-source-mistral-executor:3.0.3
   pull_policy: "IfNotPresent"
 
-upgrades:
-  revision_history: 3
-  pod_replacement_strategy: RollingUpdate
-  rolling_update:
-    max_unavailable: 1
-    max_surge: 3
-
-keystone_secrets:
-  admin: "mistral-env-keystone-admin"
-  user: "mistral-env-keystone-user"
-
-keystone:
-  admin_user: "admin"
-  admin_user_domain: "default"
-  admin_password: "password"
-  admin_project_name: "admin"
-  admin_project_domain: "default"
-  admin_region_name: "RegionOne"
-
-  mistral_user: "mistral"
-  mistral_user_domain: "default"
-  mistral_user_role: "admin"
-  mistral_password: "password"
-  mistral_project_name: "service"
-  mistral_project_domain: "default"
-  mistral_region_name: "RegionOne"
-
 network:
   api:
-    name: "mistral-api"
-    proto: "http"
+    ingress:
+      public: true
     node_port:
       enabled: false
       port: 28989
 
+bootstrap:
+  enabled: false
+  script: |
+    openstack token issue
+
 dependencies:
   db_init:
-    jobs:
-    - mariadb-seed
-    service:
-    - mariadb
+    services:
+    - service: oslo_db
+      endpoint: internal
   db_sync:
     jobs:
     - mistral-db-init
-    service:
-    - mariadb
+    services:
+    - service: oslo_db
+      endpoint: internal
   ks_user:
-    service:
-    - keystone-api
+    services:
+    - service: identity
+      endpoint: internal
   ks_service:
-    service:
-    - keystone-api
+    services:
+    - service: identity
+      endpoint: internal
   ks_endpoints:
     jobs:
     - mistral-ks-service
-    service:
-    - keystone-api
+    services:
+    - service: identity
+      endpoint: internal
   api:
     jobs:
     - mistral-db-sync
     - mistral-ks-user
     - mistral-ks-endpoints
-    service:
-    - keystone-api
-    - mariadb
+    services:
+    - service: oslo_db
+      endpoint: internal
+    - service: identity
+      endpoint: internal
   engine:
     jobs:
     - mistral-db-sync
     - mistral-ks-user
     - mistral-ks-endpoints
-    service:
-    - keystone-api
-    - mariadb
+    services:
+    - service: oslo_db
+      endpoint: internal
+    - service: identity
+      endpoint: internal
   event_engine:
     jobs:
     - mistral-db-sync
     - mistral-ks-user
     - mistral-ks-endpoints
-    service:
-    - keystone-api
-    - mariadb
+    services:
+    - service: oslo_db
+      endpoint: internal
+    - service: identity
+      endpoint: internal
   executor:
     jobs:
     - mistral-db-sync
     - mistral-ks-user
     - mistral-ks-endpoints
-    service:
-    - keystone-api
-    - mariadb
+    services:
+    - service: oslo_db
+      endpoint: internal
+    - service: identity
+      endpoint: internal
+
+# Names of secrets used by bootstrap and environmental checks
+secrets:
+  identity:
+    admin: mistral-keystone-admin
+    user: mistral-keystone-user
+  oslo_db:
+    admin: mistral-db-admin
+    user: mistral-db-user
 
 # typically overriden by environmental
 # values, but should include all endpoints
@@ -137,21 +131,47 @@ dependencies:
 endpoints:
   identity:
     name: keystone
+    auth:
+      admin:
+        region_name: RegionOne
+        username: admin
+        password: password
+        project_name: admin
+        user_domain_name: default
+        project_domain_name: default
+      user:
+        role: admin
+        region_name: RegionOne
+        username: mistral
+        password: password
+        project_name: service
+        user_domain_name: default
+        project_domain_name: default
     hosts:
       default: keystone-api
-    path: /v3
-    scheme: 'http'
+      public: keystone
+    path:
+      default: /v3
+    scheme:
+      default: http
     port:
-      admin: 35357
-      api: 5000
+      admin:
+        default: 35357
+      api:
+        default: 80
   workflow:
     name: mistral
     hosts:
       default: mistral-api
-    path: /v2
-    scheme: 'http'
+      public: mistral
+    path:
+      default: /v2
+    scheme:
+      default: 'http'
     port:
-      api: 8989
+      api:
+        default: 8989
+        public: 80
   oslo_db:
     auth:
       admin:
@@ -165,7 +185,8 @@ endpoints:
     path: /mistral
     scheme: mysql+pymysql
     port:
-      mysql: 3306
+      mysql:
+        default: 3306
   oslo_messaging:
     auth:
       admin:
@@ -179,26 +200,14 @@ endpoints:
     path: /
     scheme: rabbit
     port:
-      amqp: 5672
+      amqp:
+        default: 5672
   oslo_cache:
     hosts:
-      default: memcache
+      default: memcached
     port:
-      memcache: 11211
-
-mounts:
-  mistral_api:
-    init_container: null
-    mistral_api:
-  mistral_executor:
-    init_container: null
-    mistral_executor:
-  mistral_engine:
-    init_container: null
-    mistral_engine:
-  mistral_event_engine:
-    init_container: null
-    mistral_event_engine:
+      memcache:
+        default: 11211
 
 conf:
   policy:
@@ -228,75 +237,146 @@ conf:
         auth_token:
           auth_type: password
           auth_version: v3
-          region_name: RegionOne
-          project_name: service
-          project_domain_name: default
-          user_domain_name: default
-          username: mistral
-          password: password
 
-resources:
-  enabled: false
-  api:
-    requests:
-      memory: "124Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-  mistral_db_init:
-    requests:
-      memory: "124Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-  mistral_db_sync:
-    requests:
-      memory: "124Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-  mistral_ks_endpoints:
-    requests:
-      memory: "124Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-  mistral_ks_service:
-    requests:
-      memory: "124Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-  mistral_ks_user:
-    requests:
-      memory: "124Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-  engine:
-    requests:
-      memory: "124Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-  event_engine:
-    requests:
-      memory: "124Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-  executor:
-    requests:
-      memory: "124Mi"
-      cpu: "100m"
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
+pod:
+  affinity:
+      anti:
+        type:
+          default: preferredDuringSchedulingIgnoredDuringExecution
+        topologyKey:
+          default: kubernetes.io/hostname
+  mounts:
+    mistral_api:
+      init_container: null
+      mistral_api:
+    mistral_executor:
+      init_container: null
+      mistral_executor:
+    mistral_engine:
+      init_container: null
+      mistral_engine:
+    mistral_event_engine:
+      init_container: null
+      mistral_event_engine:
+    mistral_bootstrap:
+      init_container: null
+      mistral_bootstrap:
+  replicas:
+    api: 1
+    engine: 1
+    event_engine: 1
+    executor: 1
+  lifecycle:
+    upgrades:
+      deployments:
+        revision_history: 3
+        pod_replacement_strategy: RollingUpdate
+        rolling_update:
+          max_unavailable: 1
+          max_surge: 3
+    disruption_budget:
+      api:
+        min_available: 0
+    termination_grace_period:
+      api:
+        timeout: 30
+  resources:
+    enabled: false
+    api:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    engine:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    event_engine:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    executor:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    jobs:
+      bootstrap:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      db_init:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      db_sync:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      ks_endpoints:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      ks_service:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      ks_user:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      tests:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+
+manifests:
+  configmap_bin: true
+  configmap_etc: true
+  deployment_api: true
+  deployment_executor: true
+  ingress_api: true
+  job_bootstrap: true
+  job_db_init: true
+  job_db_sync: true
+  job_ks_endpoints: true
+  job_ks_service: true
+  job_ks_user: true
+  pdb_api: true
+  secret_db: true
+  secret_keystone: true
+  service_ingress_api: true
+  service_api: true
+  statefulset_engine: true
+  statefulset_event_engine: true

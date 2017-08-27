@@ -1,22 +1,26 @@
-# Copyright 2017 The Openstack-Helm Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+{{/*
+Copyright 2017 The Openstack-Helm Authors.
 
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/}}
+
+{{- if .Values.manifests.job_bootstrap }}
 {{- $envAll := . }}
-{{- $ksAdminSecret := $envAll.Values.keystone.admin_secret | default "nova-env-keystone-admin" }}
+{{- if .Values.bootstrap.enabled }}
 {{- $dependencies := .Values.dependencies.bootstrap }}
-{{- $mounts_nova_bootstrap := .Values.mounts.nova_bootstrap.nova_bootstrap }}
-{{- $mounts_nova_bootstrap_init := .Values.mounts.nova_bootstrap.init_container }}
+{{- $mounts_nova_bootstrap := .Values.pod.mounts.nova_bootstrap.nova_bootstrap }}
+{{- $mounts_nova_bootstrap_init := .Values.pod.mounts.nova_bootstrap.init_container }}
+---
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -24,49 +28,44 @@ metadata:
 spec:
   template:
     metadata:
-      annotations:
-        pod.beta.kubernetes.io/init-containers: '[
-{{ tuple $envAll $dependencies $mounts_nova_bootstrap_init | include "helm-toolkit.kubernetes_entrypoint_init_container" | indent 10 }}
-        ]'
+      labels:
+{{ tuple $envAll "nova" "bootstrap" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
     spec:
       restartPolicy: OnFailure
       nodeSelector:
         {{ .Values.labels.job.node_selector_key }}: {{ .Values.labels.job.node_selector_value }}
+      initContainers:
+{{ tuple $envAll $dependencies $mounts_nova_bootstrap_init | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
       containers:
         - name: nova-bootstrap
           image: {{ .Values.images.bootstrap }}
           imagePullPolicy: {{ .Values.images.pull_policy }}
-          {{- if .Values.resources.enabled }}
-          resources:
-            requests:
-              memory: {{ .Values.resources.bootstrap.requests.memory | quote }}
-              cpu: {{ .Values.resources.bootstrap.requests.cpu | quote }}
-            limits:
-              memory: {{ .Values.resources.bootstrap.limits.memory | quote }}
-              cpu: {{ .Values.resources.bootstrap.limits.cpu | quote }}
-          {{- end }}
+{{ tuple $envAll $envAll.Values.pod.resources.jobs.bootstrap | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
           command:
-            - bash
             - /tmp/bootstrap.sh
           env:
-{{- with $env := dict "ksUserSecret" $ksAdminSecret }}
-{{- include "helm-toolkit.keystone_openrc_env_vars" $env | indent 12 }}
+{{- with $env := dict "ksUserSecret" .Values.secrets.identity.admin }}
+{{- include "helm-toolkit.snippets.keystone_openrc_env_vars" $env | indent 12 }}
 {{- end }}
           volumeMounts:
             - name: nova-bin
               mountPath: /tmp/bootstrap.sh
               subPath: bootstrap.sh
               readOnly: true
-            - name: novaconf
+            - name: nova-etc
               mountPath: /etc/nova/nova.conf
               subPath: nova.conf
               readOnly: true
-{{ if $mounts_nova_bootstrap.volumeMounts }}{{ toYaml $mounts_nova_bootstrap.volumeMounts | indent 12 }}{{ end }}
+{{- if $mounts_nova_bootstrap.volumeMounts }}{{ toYaml $mounts_nova_bootstrap.volumeMounts | indent 12 }}{{ end }}
       volumes:
-        - name: novaconf
+        - name: nova-etc
           configMap:
             name: nova-etc
+            defaultMode: 0444
         - name: nova-bin
           configMap:
             name: nova-bin
-{{ if $mounts_nova_bootstrap.volumes }}{{ toYaml $mounts_nova_bootstrap.volumes | indent 8 }}{{ end }}
+            defaultMode: 0555
+{{- if $mounts_nova_bootstrap.volumes }}{{ toYaml $mounts_nova_bootstrap.volumes | indent 8 }}{{ end }}
+{{- end }}
+{{- end }}

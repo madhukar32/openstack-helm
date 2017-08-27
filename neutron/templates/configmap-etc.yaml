@@ -1,16 +1,21 @@
-# Copyright 2017 The Openstack-Helm Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+{{/*
+Copyright 2017 The Openstack-Helm Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/}}
+
+{{- if .Values.manifests.configmap_etc }}
+{{- $envAll := . }}
 
 {{- include "neutron.conf.neutron_values_skeleton" .Values.conf.neutron | trunc 0 -}}
 
@@ -26,38 +31,64 @@
 {{- include "neutron.conf.ml2_conf_sriov_values_skeleton" .Values.conf.ml2_conf_sriov | trunc 0 -}}
 {{- include "neutron.conf.openvswitch_agent_values_skeleton" .Values.conf.openvswitch_agent | trunc 0 -}}
 {{- include "neutron.conf.sriov_agent_values_skeleton" .Values.conf.sriov_agent | trunc 0 -}}
+{{- include "neutron.conf.opencontrail_values_skeleton" .Values.conf.opencontrail | trunc 0 -}}
 {{- end }} 
 
 {{- if empty .Values.conf.neutron.keystone_authtoken.keystonemiddleware.auth_token.auth_uri -}}
-{{- tuple "identity" "internal" "api" . | include "helm-toolkit.keystone_endpoint_uri_lookup"| set .Values.conf.neutron.keystone_authtoken.keystonemiddleware.auth_token "auth_uri" | quote | trunc 0 -}}
+{{- tuple "identity" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup"| set .Values.conf.neutron.keystone_authtoken.keystonemiddleware.auth_token "auth_uri" | quote | trunc 0 -}}
 {{- end }}
 
 {{- if empty .Values.conf.neutron.keystone_authtoken.keystonemiddleware.auth_token.auth_url -}}
-{{- tuple "identity" "internal" "api" . | include "helm-toolkit.keystone_endpoint_uri_lookup"| set .Values.conf.neutron.keystone_authtoken.keystonemiddleware.auth_token "auth_url" | quote | trunc 0 -}}
+{{- tuple "identity" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup"| set .Values.conf.neutron.keystone_authtoken.keystonemiddleware.auth_token "auth_url" | quote | trunc 0 -}}
 {{- end }}
 
+{{- if empty .Values.conf.neutron.keystone_authtoken.keystonemiddleware.auth_token.project_name -}}
+{{- set .Values.conf.neutron.keystone_authtoken.keystonemiddleware.auth_token "project_name" .Values.endpoints.identity.auth.user.project_name | quote | trunc 0 -}}
+{{- end -}}
+{{- if empty .Values.conf.neutron.keystone_authtoken.keystonemiddleware.auth_token.project_domain_name -}}
+{{- set .Values.conf.neutron.keystone_authtoken.keystonemiddleware.auth_token "project_domain_name" .Values.endpoints.identity.auth.user.project_domain_name | quote | trunc 0 -}}
+{{- end -}}
+{{- if empty .Values.conf.neutron.keystone_authtoken.keystonemiddleware.auth_token.user_domain_name -}}
+{{- set .Values.conf.neutron.keystone_authtoken.keystonemiddleware.auth_token "user_domain_name" .Values.endpoints.identity.auth.user.user_domain_name | quote | trunc 0 -}}
+{{- end -}}
+{{- if empty .Values.conf.neutron.keystone_authtoken.keystonemiddleware.auth_token.username -}}
+{{- set .Values.conf.neutron.keystone_authtoken.keystonemiddleware.auth_token "username" .Values.endpoints.identity.auth.user.username | quote | trunc 0 -}}
+{{- end -}}
+{{- if empty .Values.conf.neutron.keystone_authtoken.keystonemiddleware.auth_token.password -}}
+{{- set .Values.conf.neutron.keystone_authtoken.keystonemiddleware.auth_token "password" .Values.endpoints.identity.auth.user.password | quote | trunc 0 -}}
+{{- end -}}
+{{- if empty .Values.conf.neutron.keystone_authtoken.keystonemiddleware.auth_token.region_name -}}
+{{- set .Values.conf.neutron.keystone_authtoken.keystonemiddleware.auth_token "region_name" .Values.endpoints.identity.auth.user.region_name | quote | trunc 0 -}}
+{{- end -}}
+
 {{- if empty .Values.conf.neutron.keystone_authtoken.keystonemiddleware.auth_token.memcached_servers -}}
-{{- tuple "oslo_cache" "internal" "memcache" . | include "helm-toolkit.hostname_endpoint_uri_lookup" | set .Values.conf.neutron.keystone_authtoken.keystonemiddleware.auth_token "memcached_servers" | quote | trunc 0 -}}
+{{- tuple "oslo_cache" "internal" "memcache" . | include "helm-toolkit.endpoints.host_and_port_endpoint_uri_lookup" | set .Values.conf.neutron.keystone_authtoken.keystonemiddleware.auth_token "memcached_servers" | quote | trunc 0 -}}
 {{- end }}
 
 {{- if empty .Values.conf.neutron.database.oslo.db.connection -}}
-{{- tuple "oslo_db" "internal" "user" "mysql" . | include "helm-toolkit.authenticated_endpoint_uri_lookup"| set .Values.conf.neutron.database.oslo.db "connection" | quote | trunc 0 -}}
+{{- tuple "oslo_db" "internal" "user" "mysql" . | include "helm-toolkit.endpoints.authenticated_endpoint_uri_lookup"| set .Values.conf.neutron.database.oslo.db "connection" | quote | trunc 0 -}}
 {{- end }}
 
 {{- if empty .Values.conf.neutron.default.oslo.messaging.transport_url -}}
-{{- tuple "oslo_messaging" "internal" "user" "amqp" . | include "helm-toolkit.authenticated_endpoint_uri_lookup" | set .Values.conf.neutron.default.oslo.messaging "transport_url" | quote | trunc 0 -}}
+{{- tuple "oslo_messaging" "internal" "user" "amqp" . | include "helm-toolkit.endpoints.authenticated_endpoint_uri_lookup" | set .Values.conf.neutron.default.oslo.messaging "transport_url" | quote | trunc 0 -}}
 {{- end }}
 
 {{- if empty .Values.conf.neutron.nova.nova.auth.auth_url -}}
-{{- tuple "identity" "internal" "api" . | include "helm-toolkit.keystone_endpoint_uri_lookup"| set .Values.conf.neutron.nova.nova.auth "auth_url" | quote | trunc 0 -}}
+{{- tuple "identity" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup"| set .Values.conf.neutron.nova.nova.auth "auth_url" | quote | trunc 0 -}}
 {{- end }}
 
+{{- if empty .Values.conf.metadata_agent.cache.oslo.cache.memcache_servers -}}
+{{- tuple "oslo_cache" "internal" "memcache" . | include "helm-toolkit.endpoints.host_and_port_endpoint_uri_lookup" | set .Values.conf.metadata_agent.cache.oslo.cache "memcache_servers" | quote | trunc 0 -}}
+{{- end -}}
+
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: neutron-etc
 data:
-{{- if not .Values.sdn.opencontrail.enabled }}
+  rally_tests.yaml: |+
+{{ tuple "etc/_rally_tests.yaml.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
   api-paste.ini: |+
 {{ if .Values.conf.paste.override -}}
 {{ .Values.conf.paste.override | indent 4 }}
@@ -65,7 +96,7 @@ data:
 {{- if .Values.conf.paste.prefix -}}
 {{ .Values.conf.paste.prefix | indent 4 }}
 {{- end }}
-{{ tuple "etc/_api-paste.ini.tpl" . | include "helm-toolkit.template" | indent 4 }}
+{{ tuple "etc/_api-paste.ini.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
 {{- end }}
 {{- if .Values.conf.paste.append -}}
 {{ .Values.conf.paste.append | indent 4 }}
@@ -77,11 +108,12 @@ data:
 {{- if .Values.conf.policy.prefix -}}
 {{ .Values.conf.policy.prefix | indent 4 }}
 {{- end }}
-{{ tuple "etc/_policy.json.tpl" . | include "helm-toolkit.template" | indent 4 }}
+{{ tuple "etc/_policy.json.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
 {{- end }}
 {{- if .Values.conf.policy.append -}}
 {{ .Values.conf.policy.append | indent 4 }}
 {{- end }}
+{{- if not .Values.sdn.opencontrail.enabled }}
   dhcp_agent.ini: |+
 {{ if .Values.conf.dhcp_agent.override -}}
 {{ .Values.conf.dhcp_agent.override | indent 4 }}
@@ -89,7 +121,7 @@ data:
 {{- if .Values.conf.dhcp_agent.prefix -}}
 {{ .Values.conf.dhcp_agent.prefix | indent 4 }}
 {{- end }}
-{{ tuple "etc/_dhcp_agent.ini.tpl" . | include "helm-toolkit.template" | indent 4 }}
+{{ tuple "etc/_dhcp_agent.ini.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
 {{- end }}
 {{- if .Values.conf.dhcp_agent.append -}}
 {{ .Values.conf.dhcp_agent.append | indent 4 }}
@@ -101,34 +133,10 @@ data:
 {{- if .Values.conf.l3_agent.prefix -}}
 {{ .Values.conf.l3_agent.prefix | indent 4 }}
 {{- end }}
-{{ tuple "etc/_l3_agent.ini.tpl" . | include "helm-toolkit.template" | indent 4 }}
+{{ tuple "etc/_l3_agent.ini.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
 {{- end }}
 {{- if .Values.conf.l3_agent.append -}}
 {{ .Values.conf.l3_agent.append | indent 4 }}
-{{- end }}
-  metadata_agent.ini: |+
-{{ if .Values.conf.metadata_agent.override -}}
-{{ .Values.conf.metadata_agent.override | indent 4 }}
-{{- else -}}
-{{- if .Values.conf.metadata_agent.prefix -}}
-{{ .Values.conf.metadata_agent.prefix | indent 4 }}
-{{- end }}
-{{ tuple "etc/_metadata_agent.ini.tpl" . | include "helm-toolkit.template" | indent 4 }}
-{{- end }}
-{{- if .Values.conf.metadata_agent.append -}}
-{{ .Values.conf.metadata_agent.append | indent 4 }}
-{{- end }}
-  metering_agent.ini: |+
-{{ if .Values.conf.metering_agent.override -}}
-{{ .Values.conf.metering_agent.override | indent 4 }}
-{{- else -}}
-{{- if .Values.conf.metering_agent.prefix -}}
-{{ .Values.conf.metering_agent.prefix | indent 4 }}
-{{- end }}
-{{ tuple "etc/_metering_agent.ini.tpl" . | include "helm-toolkit.template" | indent 4 }}
-{{- end }}
-{{- if .Values.conf.metering_agent.append -}}
-{{ .Values.conf.metering_agent.append | indent 4 }}
 {{- end }}
   ml2_conf.ini: |+
 {{ if .Values.conf.ml2_conf.override -}}
@@ -137,7 +145,7 @@ data:
 {{- if .Values.conf.ml2_conf.prefix -}}
 {{ .Values.conf.ml2_conf.prefix | indent 4 }}
 {{- end }}
-{{ tuple "etc/plugins/_ml2_conf.ini.tpl" . | include "helm-toolkit.template" | indent 4 }}
+{{ tuple "etc/plugins/_ml2_conf.ini.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
 {{- end }}
 {{- if .Values.conf.ml2_conf.append -}}
 {{ .Values.conf.ml2_conf.append | indent 4 }}
@@ -149,7 +157,7 @@ data:
 {{- if .Values.conf.ml2_conf_sriov.prefix -}}
 {{ .Values.conf.ml2_conf_sriov.prefix | indent 4 }}
 {{- end }}
-{{ tuple "etc/plugins/_ml2_conf_sriov.ini.tpl" . | include "helm-toolkit.template" | indent 4 }}
+{{ tuple "etc/plugins/_ml2_conf_sriov.ini.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
 {{- end }}
 {{- if .Values.conf.ml2_conf_sriov.append -}}
 {{ .Values.conf.ml2_conf_sriov.append | indent 4 }}
@@ -161,7 +169,7 @@ data:
 {{- if .Values.conf.macvtap_agent.prefix -}}
 {{ .Values.conf.macvtap_agent.prefix | indent 4 }}
 {{- end }}
-{{ tuple "etc/plugins/_macvtap_agent.ini.tpl" . | include "helm-toolkit.template" | indent 4 }}
+{{ tuple "etc/plugins/_macvtap_agent.ini.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
 {{- end }}
 {{- if .Values.conf.macvtap_agent.append -}}
 {{ .Values.conf.macvtap_agent.append | indent 4 }}
@@ -173,7 +181,7 @@ data:
 {{- if .Values.conf.linuxbridge_agent.prefix -}}
 {{ .Values.conf.linuxbridge_agent.prefix | indent 4 }}
 {{- end }}
-{{ tuple "etc/plugins/_linuxbridge_agent.ini.tpl" . | include "helm-toolkit.template" | indent 4 }}
+{{ tuple "etc/plugins/_linuxbridge_agent.ini.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
 {{- end }}
 {{- if .Values.conf.linuxbridge_agent.append -}}
 {{ .Values.conf.linuxbridge_agent.append | indent 4 }}
@@ -185,10 +193,35 @@ data:
 {{- if .Values.conf.openvswitch_agent.prefix -}}
 {{ .Values.conf.openvswitch_agent.prefix | indent 4 }}
 {{- end }}
-{{ tuple "etc/plugins/_openvswitch_agent.ini.tpl" . | include "helm-toolkit.template" | indent 4 }}
+{{ tuple "etc/plugins/_openvswitch_agent.ini.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
 {{- end }}
 {{- if .Values.conf.openvswitch_agent.append -}}
 {{ .Values.conf.openvswitch_agent.append | indent 4 }}
+{{- end }}
+{{- end }}
+  metadata_agent.ini: |+
+{{ if .Values.conf.metadata_agent.override -}}
+{{ .Values.conf.metadata_agent.override | indent 4 }}
+{{- else -}}
+{{- if .Values.conf.metadata_agent.prefix -}}
+{{ .Values.conf.metadata_agent.prefix | indent 4 }}
+{{- end }}
+{{ tuple "etc/_metadata_agent.ini.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
+{{- end }}
+{{- if .Values.conf.metadata_agent.append -}}
+{{ .Values.conf.metadata_agent.append | indent 4 }}
+{{- end }}
+  metering_agent.ini: |+
+{{ if .Values.conf.metering_agent.override -}}
+{{ .Values.conf.metering_agent.override | indent 4 }}
+{{- else -}}
+{{- if .Values.conf.metering_agent.prefix -}}
+{{ .Values.conf.metering_agent.prefix | indent 4 }}
+{{- end }}
+{{ tuple "etc/_metering_agent.ini.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
+{{- end }}
+{{- if .Values.conf.metering_agent.append -}}
+{{ .Values.conf.metering_agent.append | indent 4 }}
 {{- end }}
   sriov_agent.ini: |+
 {{ if .Values.conf.sriov_agent.override -}}
@@ -197,15 +230,14 @@ data:
 {{- if .Values.conf.sriov_agent.prefix -}}
 {{ .Values.conf.sriov_agent.prefix | indent 4 }}
 {{- end }}
-{{ tuple "etc/plugins/_sriov_agent.ini.tpl" . | include "helm-toolkit.template" | indent 4 }}
+{{ tuple "etc/plugins/_sriov_agent.ini.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
 {{- end }}
 {{- if .Values.conf.sriov_agent.append -}}
 {{ .Values.conf.sriov_agent.append | indent 4 }}
 {{- end }}
   resolv.conf: |+
-{{ tuple "etc/_resolv.conf.tpl" . | include "helm-toolkit.template" | indent 4 }}
+{{ tuple "etc/_resolv.conf.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
   dnsmasq.conf: ""
-{{- else }}
   neutron.conf: |+
 {{ if .Values.conf.neutron.override -}}
 {{ .Values.conf.neutron.override | indent 4 }}
@@ -213,11 +245,22 @@ data:
 {{- if .Values.conf.neutron.prefix -}}
 {{ .Values.conf.neutron.prefix | indent 4 }}
 {{- end }}
-{{ tuple "etc/_neutron.conf.tpl" . | include "helm-toolkit.template" | indent 4 }}
+{{ tuple "etc/_neutron.conf.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
 {{- end }}
 {{- if .Values.conf.neutron.append -}}
 {{ .Values.conf.neutron.append | indent 4 }}
 {{- end }}
+{{- if .Values.sdn.opencontrail.enabled }}
   opencontrail_plugin.ini: |+
+{{ if .Values.conf.opencontrail.override -}}
+{{ .Values.conf.opencontrail.override | indent 4 }}
+{{- else -}}
+{{- if .Values.conf.opencontrail.prefix -}}
+{{ .Values.conf.opencontrail.prefix | indent 4 }}
+{{- end }}
 {{ tuple "etc/_opencontrail_plugin.ini.tpl" . | include "helm-toolkit.template" | indent 4 }}
+{{- end }}
+{{- if .Values.conf.opencontrail.append -}}
+{{ .Values.conf.opencontrail.append | indent 4 }}
+{{- end }}
 {{- end }}

@@ -1,19 +1,23 @@
-# Copyright 2017 The Openstack-Helm Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+{{/*
+Copyright 2017 The Openstack-Helm Authors.
 
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/}}
+
+{{- if .Values.manifests.job_db_sync }}
 {{- $envAll := . }}
 {{- $dependencies := .Values.dependencies.db_sync }}
+---
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -21,42 +25,29 @@ metadata:
 spec:
   template:
     metadata:
-      annotations:
-        pod.beta.kubernetes.io/init-containers: '[
-{{ tuple $envAll $dependencies "[]" | include "helm-toolkit.kubernetes_entrypoint_init_container" | indent 10 }}
-        ]'
+      labels:
+{{ tuple $envAll "neutron" "db-sync" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
     spec:
       restartPolicy: OnFailure
       nodeSelector:
         {{ .Values.labels.server.node_selector_key }}: {{ .Values.labels.server.node_selector_value }}
+      initContainers:
+{{ tuple $envAll $dependencies "[]" | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
       containers:
         - name: neutron-db-sync
           image: {{ .Values.images.db_sync }}
           imagePullPolicy: {{ .Values.images.pull_policy }}
-          command:
-            - neutron-db-manage
-            - --config-file
-            - /etc/neutron/neutron.conf
-            {{- if .Values.sdn.opencontrail.enabled }}
-            - --config-file
-            - /etc/neutron/plugins/opencontrail_plugin.ini
-            {{- else }}
-            - --config-file
-            - /etc/neutron/plugins/ml2/ml2_conf.ini
-            {{- end }}
-            - upgrade
-            - head
-          {{- if .Values.resources.enabled }}
+{{ tuple $envAll $envAll.Values.pod.resources.jobs.db_sync | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
+          {{- if .Values.pod.resources.enabled }}
           resources:
             limits:
-              cpu: {{ .Values.resources.jobs.db_sync.limits.cpu | quote }}
-              memory: {{ .Values.resources.jobs.db_sync.limits.memory | quote }}
+              cpu: {{ .Values.pod.resources.jobs.db_sync.limits.cpu | quote }}
+              memory: {{ .Values.pod.resources.jobs.db_sync.limits.memory | quote }}
             requests:
-              cpu: {{ .Values.resources.jobs.db_sync.requests.cpu | quote }}
-              memory: {{ .Values.resources.jobs.db_sync.requests.memory | quote }}
+              cpu: {{ .Values.pod.resources.jobs.db_sync.requests.cpu | quote }}
+              memory: {{ .Values.pod.resources.jobs.db_sync.requests.memory | quote }}
           {{- end }}
           command:
-            - bash
             - /tmp/db-sync.sh
           volumeMounts:
             - name: neutron-bin
@@ -65,16 +56,16 @@ spec:
               readOnly: true
             - name: etcneutron
               mountPath: /etc/neutron
-            - name: neutronconf
+            - name: neutron-etc
               mountPath: /etc/neutron/neutron.conf
               subPath: neutron.conf
               readOnly: true
             {{- if .Values.sdn.opencontrail.enabled }}
-            - name: neutronconf
+            - name: neutron-etc
               mountPath: /etc/neutron/plugins/opencontrail_plugin.ini
               subPath: opencontrail_plugin.ini
             {{- else }}
-            - name: neutronconf
+            - name: neutron-etc
               mountPath: /etc/neutron/plugins/ml2/ml2_conf.ini
               subPath: ml2_conf.ini
               readOnly: true
@@ -82,9 +73,12 @@ spec:
       volumes:
         - name: etcneutron
           emptyDir: {}
-        - name: neutronconf
+        - name: neutron-etc
           configMap:
             name: neutron-etc
+            defaultMode: 0444
         - name: neutron-bin
           configMap:
             name: neutron-bin
+            defaultMode: 0555
+{{- end }}

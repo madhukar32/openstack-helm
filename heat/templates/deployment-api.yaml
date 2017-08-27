@@ -1,63 +1,61 @@
-# Copyright 2017 The Openstack-Helm Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+{{/*
+Copyright 2017 The Openstack-Helm Authors.
 
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/}}
+
+{{- if .Values.manifests.deployment_api }}
 {{- $envAll := . }}
 {{- $dependencies := .Values.dependencies.api }}
-{{- $mounts_heat_api := .Values.mounts.heat_api.heat_api }}
-{{- $mounts_heat_api_init := .Values.mounts.heat_api.init_container }}
-apiVersion: extensions/v1beta1
+{{- $mounts_heat_api := .Values.pod.mounts.heat_api.heat_api }}
+{{- $mounts_heat_api_init := .Values.pod.mounts.heat_api.init_container }}
+---
+apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
   name: heat-api
 spec:
-  replicas: {{ .Values.replicas.api }}
-  revisionHistoryLimit: {{ .Values.upgrades.revision_history }}
-  strategy:
-    type: {{ .Values.upgrades.pod_replacement_strategy }}
-    {{ if eq .Values.upgrades.pod_replacement_strategy "RollingUpdate" }}
-    rollingUpdate:
-      maxUnavailable: {{ .Values.upgrades.rolling_update.max_unavailable }}
-      maxSurge: {{ .Values.upgrades.rolling_update.max_surge }}
-    {{ end }}
+  replicas: {{ .Values.pod.replicas.api }}
+{{ tuple $envAll | include "helm-toolkit.snippets.kubernetes_upgrades_deployment" | indent 2 }}
   template:
     metadata:
       labels:
-        app: heat-api
+{{ tuple $envAll "heat" "api" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
       annotations:
-        pod.beta.kubernetes.io/init-containers: '[
-{{ tuple $envAll $dependencies $mounts_heat_api_init | include "helm-toolkit.kubernetes_entrypoint_init_container" | indent 10 }}
-        ]'
+        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.utils.hash" }}
+        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.utils.hash" }}
     spec:
+      affinity:
+{{ tuple $envAll "heat" "api" | include "helm-toolkit.snippets.kubernetes_pod_anti_affinity" | indent 8 }}
       nodeSelector:
         {{ .Values.labels.node_selector_key }}: {{ .Values.labels.node_selector_value }}
+      terminationGracePeriodSeconds: {{ .Values.pod.lifecycle.termination_grace_period.api.timeout | default "30" }}
+      initContainers:
+{{ tuple $envAll $dependencies $mounts_heat_api_init | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
       containers:
         - name: heat-api
           image: {{ .Values.images.api }}
           imagePullPolicy: {{ .Values.images.pull_policy }}
-          {{- if .Values.resources.enabled }}
-          resources:
-            requests:
-              memory: {{ .Values.resources.heat_api.requests.memory | quote }}
-              cpu: {{ .Values.resources.heat_api.requests.cpu | quote }}
-            limits:
-              memory: {{ .Values.resources.heat_api.limits.memory | quote }}
-              cpu: {{ .Values.resources.heat_api.limits.cpu | quote }}
-          {{- end }}
+{{ tuple $envAll $envAll.Values.pod.resources.api | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
           command:
-            - heat-api
-            - --config-dir
-            - /etc/heat/conf
+            - /tmp/heat-api.sh
+            - start
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - /tmp/heat-api.sh
+                  - stop
           ports:
             - containerPort: {{ .Values.conf.heat.heat_api.heat.common.wsgi.bind_port }}
           readinessProbe:
@@ -68,31 +66,35 @@ spec:
               mountPath: /etc/heat
             - name: pod-var-cache-heat
               mountPath: /var/cache/heat
-            - name: heatconf
-              mountPath: /etc/heat/conf/heat.conf
+            - name: heat-bin
+              mountPath: /tmp/heat-api.sh
+              subPath: heat-api.sh
+              readOnly: true
+            - name: heat-etc
+              mountPath: /etc/heat/heat.conf
               subPath: heat.conf
               readOnly: true
-            - name: heatpaste
+            - name: heat-etc
               mountPath: /etc/heat/api-paste.ini
               subPath: api-paste.ini
               readOnly: true
-            - name: heatpolicy
+            - name: heat-etc
               mountPath: /etc/heat/policy.json
               subPath: policy.json
               readOnly: true
-{{ if $mounts_heat_api.volumeMounts }}{{ toYaml $mounts_heat_api.volumeMounts | indent 12 }}{{ end }}
+{{- if $mounts_heat_api.volumeMounts }}{{ toYaml $mounts_heat_api.volumeMounts | indent 12 }}{{ end }}
       volumes:
         - name: pod-etc-heat
           emptyDir: {}
         - name: pod-var-cache-heat
           emptyDir: {}
-        - name: heatconf
+        - name: heat-bin
+          configMap:
+            name: heat-bin
+            defaultMode: 0555
+        - name: heat-etc
           configMap:
             name: heat-etc
-        - name: heatpaste
-          configMap:
-            name: heat-etc
-        - name: heatpolicy
-          configMap:
-            name: heat-etc
-{{ if $mounts_heat_api.volumes }}{{ toYaml $mounts_heat_api.volumes | indent 8 }}{{ end }}
+            defaultMode: 0444
+{{- if $mounts_heat_api.volumes }}{{ toYaml $mounts_heat_api.volumes | indent 8 }}{{ end }}
+{{- end }}

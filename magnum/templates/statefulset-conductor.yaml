@@ -1,54 +1,49 @@
-# Copyright 2017 The Openstack-Helm Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+{{/*
+Copyright 2017 The Openstack-Helm Authors.
 
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/}}
+
+{{- if .Values.manifests.configmap_etc }}
 {{- $envAll := . }}
 {{- $dependencies := .Values.dependencies.conductor }}
-{{- $mounts_magnum_conductor := .Values.mounts.magnum_conductor.magnum_conductor }}
-{{- $mounts_magnum_conductor_init := .Values.mounts.magnum_conductor.init_container }}
+{{- $mounts_magnum_conductor := .Values.pod.mounts.magnum_conductor.magnum_conductor }}
+{{- $mounts_magnum_conductor_init := .Values.pod.mounts.magnum_conductor.init_container }}
+---
 apiVersion: apps/v1beta1
 kind: StatefulSet
 metadata:
   name: magnum-conductor
 spec:
   serviceName: magnum-conductor
-  replicas: {{ .Values.replicas.conductor }}
+  replicas: {{ .Values.pod.replicas.conductor }}
   template:
     metadata:
       labels:
-        app: magnum-conductor
-      annotations:
-        pod.beta.kubernetes.io/init-containers: '[
-{{ tuple $envAll $dependencies $mounts_magnum_conductor_init | include "helm-toolkit.kubernetes_entrypoint_init_container" | indent 10 }}
-        ]'
+{{ tuple $envAll "magnum" "conductor" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
     spec:
+      affinity:
+{{ tuple $envAll "magnum" "conductor" | include "helm-toolkit.snippets.kubernetes_pod_anti_affinity" | indent 8 }}
       nodeSelector:
         {{ .Values.labels.node_selector_key }}: {{ .Values.labels.node_selector_value }}
+      initContainers:
+{{ tuple $envAll $dependencies $mounts_magnum_conductor_init | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
       containers:
         - name: magnum-conductor
           image: {{ .Values.images.conductor }}
           imagePullPolicy: {{ .Values.images.pull_policy }}
-          {{- if .Values.resources.enabled }}
-          resources:
-            requests:
-              memory: {{ .Values.resources.magnum_conductor.requests.memory | quote }}
-              cpu: {{ .Values.resources.magnum_conductor.requests.cpu | quote }}
-            limits:
-              memory: {{ .Values.resources.magnum_conductor.limits.memory | quote }}
-              cpu: {{ .Values.resources.magnum_conductor.limits.cpu | quote }}
-          {{- end }}
+{{ tuple $envAll $envAll.Values.pod.resources.conductor | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
           command:
-            - bash
             - /tmp/magnum-conductor.sh
           volumeMounts:
             - name: magnum-bin
@@ -67,7 +62,7 @@ spec:
               mountPath: /etc/magnum/policy.json
               subPath: policy.json
               readOnly: true
-{{ if $mounts_magnum_conductor.volumeMounts }}{{ toYaml $mounts_magnum_conductor.volumeMounts | indent 12 }}{{ end }}
+{{- if $mounts_magnum_conductor.volumeMounts }}{{ toYaml $mounts_magnum_conductor.volumeMounts | indent 12 }}{{ end }}
       volumes:
         - name: pod-etc-magnum
           emptyDir: {}
@@ -76,7 +71,10 @@ spec:
         - name: magnum-bin
           configMap:
             name: magnum-bin
+            defaultMode: 0555
         - name: magnum-etc
           configMap:
             name: magnum-etc
-{{ if $mounts_magnum_conductor.volumes }}{{ toYaml $mounts_magnum_conductor.volumes | indent 8 }}{{ end }}
+            defaultMode: 0444
+{{- if $mounts_magnum_conductor.volumes }}{{ toYaml $mounts_magnum_conductor.volumes | indent 8 }}{{ end }}
+{{- end }}

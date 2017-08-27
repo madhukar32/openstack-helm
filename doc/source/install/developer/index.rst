@@ -1,10 +1,11 @@
-Developer installation
-======================
+Development
+===========
 
 Contents:
 
 .. toctree::
    :maxdepth: 2
 
-   minikube
+   all-in-one
+   gates
    vagrant

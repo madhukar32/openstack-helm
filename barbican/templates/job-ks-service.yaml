@@ -1,18 +1,23 @@
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+{{/*
+Copyright 2017 The Openstack-Helm Authors.
 
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/}}
+
+{{- if .Values.manifests.job_ks_service }}
 {{- $envAll := . }}
-{{- $ksAdminSecret := .Values.keystone.admin_secret | default "barbican-env-keystone-admin" }}
 {{- $dependencies := .Values.dependencies.ks_service }}
+---
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -20,30 +25,21 @@ metadata:
 spec:
   template:
     metadata:
-      annotations:
-        pod.beta.kubernetes.io/init-containers: '[
-{{ tuple $envAll $dependencies "[]" | include "helm-toolkit.kubernetes_entrypoint_init_container" | indent 10 }}
-        ]'
+      labels:
+{{ tuple $envAll "barbican" "ks-service" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
     spec:
       restartPolicy: OnFailure
       nodeSelector:
         {{ .Values.labels.node_selector_key }}: {{ .Values.labels.node_selector_value }}
+      initContainers:
+{{ tuple $envAll $dependencies "[]" | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
       containers:
 {{- range $key1, $osServiceType := tuple "key-manager" }}
         - name: {{ $osServiceType }}-ks-service-registration
           image: {{ $envAll.Values.images.ks_service }}
           imagePullPolicy: {{ $envAll.Values.images.pull_policy }}
-          {{- if $envAll.Values.resources.enabled }}
-          resources:
-            requests:
-              memory: {{ $envAll.Values.resources.ks_service.requests.memory | quote }}
-              cpu: {{ $envAll.Values.resources.ks_service.requests.cpu | quote }}
-            limits:
-              memory: {{ $envAll.Values.resources.ks_service.limits.memory | quote }}
-              cpu: {{ $envAll.Values.resources.ks_service.limits.cpu | quote }}
-          {{- end }}
+{{ tuple $envAll $envAll.Values.pod.resources.jobs.ks_service | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
           command:
-            - bash
             - /tmp/ks-service.sh
           volumeMounts:
             - name: ks-service-sh
@@ -51,11 +47,11 @@ spec:
               subPath: ks-service.sh
               readOnly: true
           env:
-{{- with $env := dict "ksUserSecret" $ksAdminSecret }}
-{{- include "helm-toolkit.keystone_openrc_env_vars" $env | indent 12 }}
+{{- with $env := dict "ksUserSecret" $envAll.Values.secrets.identity.admin }}
+{{- include "helm-toolkit.snippets.keystone_openrc_env_vars" $env | indent 12 }}
 {{- end }}
             - name: OS_SERVICE_NAME
-              value: {{ tuple $osServiceType $envAll | include "helm-toolkit.keystone_endpoint_name_lookup" }}
+              value: {{ tuple $osServiceType $envAll | include "helm-toolkit.endpoints.keystone_endpoint_name_lookup" }}
             - name: OS_SERVICE_TYPE
               value: {{ $osServiceType }}
 {{- end }}
@@ -63,3 +59,5 @@ spec:
         - name: ks-service-sh
           configMap:
             name: barbican-bin
+            defaultMode: 0555
+{{- end }}

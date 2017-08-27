@@ -17,17 +17,17 @@
 # Declare name/value pairs to be passed into your templates.
 # name: value
 
-replicas:
-  api: 1
-  registry: 1
-
-storage: file
+# ceph or pvc
+storage: ceph
 
 labels:
   node_selector_key: openstack-control-plane
   node_selector_value: enabled
 
+release_group: null
+
 images:
+  test: docker.io/kolla/ubuntu-binary-rally:4.0.0
   db_init: docker.io/kolla/ubuntu-source-glance-api:3.0.3
   db_sync: docker.io/kolla/ubuntu-source-glance-api:3.0.3
   ks_user: docker.io/kolla/ubuntu-source-kolla-toolbox:3.0.3
@@ -35,20 +35,15 @@ images:
   ks_endpoints: docker.io/kolla/ubuntu-source-kolla-toolbox:3.0.3
   api: docker.io/kolla/ubuntu-source-glance-api:3.0.3
   registry: docker.io/kolla/ubuntu-source-glance-registry:3.0.3
+  bootstrap: docker.io/kolla/ubuntu-source-kolla-toolbox:3.0.3
   dep_check: docker.io/kolla/ubuntu-source-kubernetes-entrypoint:4.0.0
   pull_policy: "IfNotPresent"
-
-upgrades:
-  revision_history: 3
-  pod_replacement_strategy: RollingUpdate
-  rolling_update:
-    max_unavailable: 1
-    max_surge: 3
 
 bootstrap:
   enabled: true
   images:
     cirros:
+      id: null
       name: "Cirros 0.3.5 64-bit"
       source_url: "http://download.cirros-cloud.net/0.3.5/"
       image_file: "cirros-0.3.5-x86_64-disk.img"
@@ -60,18 +55,17 @@ bootstrap:
         hypervisor_type: "qemu"
         os_distro: "cirros"
 
-keystone:
-  admin_user: "admin"
-  admin_user_domain: "default"
-  admin_password: "password"
-  admin_project_name: "admin"
-  admin_project_domain: "default"
-  admin_region_name: "RegionOne"
-  glance_user_role: "admin"
-
-
 conf:
+  rally_tests:
+    override:
+    append:
+    images:
+      image_location: http://download.cirros-cloud.net/0.3.5/cirros-0.3.5-x86_64-disk.img
+      disk_format: qcow2
+      container_format: bare
   ceph:
+    monitors: []
+    keyring: null
     override:
     append:
   ceph_client:
@@ -95,24 +89,20 @@ conf:
         auth_token:
           auth_type: password
           auth_version: v3
-          region_name: RegionOne
-          project_domain_name: default
-          project_name: service
-          user_domain_name: default
-          username: glance
-          password: password
     glance_store:
       glance:
         store:
-          #stores: file, http, rbd
-          #stores: file, http
-          #default_store: file
-          #default_store: rbd
-          #rbd_store_chunk_size: 8
-          #rbd_store_pool: images
-          #rbd_store_user: admin
-          #rbd_store_ceph_conf: /etc/ceph/ceph.conf
-          #filesystem_store_datadir: /var/lib/glance/images
+          stores: file, http, rbd
+          default_store: rbd
+          rbd_store_chunk_size: 8
+          rbd_store_pool: images
+          rbd_store_user: admin
+          rbd_store_ceph_conf: /etc/ceph/ceph.conf
+          filesystem_store_datadir: /var/lib/glance/images
+    paste_deploy:
+      glance:
+        api:
+          flavor: keystone
   paste_registry:
     override:
     append:
@@ -128,136 +118,105 @@ conf:
         auth_token:
           auth_type: password
           auth_version: v3
-          region_name: RegionOne
-          project_domain_name: default
-          project_name: service
-          user_domain_name: default
-          username: glance
-          password: password
+    paste_deploy:
+      glance:
+        registry:
+          flavor: keystone
 
 network:
   api:
-    name: "glance-api"
+    ingress:
+      public: true
+      proxy_body_size: 1024M
     node_port:
       enabled: false
       port: 30092
   registry:
-    name: "glance-registry"
+    ingress:
+      public: true
     node_port:
       enabled: false
       port: 30091
 
-ceph:
-  enabled: false
-  monitors: []
-  # a null value for the keyring will
-  # attempt to use the key from
-  # common/secrets/ceph-client-key
-  glance_keyring: foo
-
 volume:
-  class_path: volume.beta.kubernetes.io/storage-class
   class_name: general
   size: 2Gi
   storage_path: /var/lib/localkube/glance
 
-misc:
-  workers: 8
-  debug: false
-
-resources:
-  enabled: false
-  api:
-    limits:
-      memory: "128Mi"
-      cpu: "500m"
-    requests:
-      memory: "128Mi"
-      cpu: "500m"
-  registry:
-    limits:
-      memory: "128Mi"
-      cpu: "500m"
-    requests:
-      memory: "128Mi"
-      cpu: "500m"
-  jobs:
-    db:
-      limits:
-        memory: "128Mi"
-        cpu: "500m"
-      requests:
-        memory: "128Mi"
-        cpu: "500m"
-    init:
-      limits:
-        memory: "128Mi"
-        cpu: "500m"
-      requests:
-        memory: "128Mi"
-        cpu: "500m"
-    post:
-      limits:
-        memory: "128Mi"
-        cpu: "500m"
-      requests:
-        memory: "128Mi"
-        cpu: "500m"
-    bootstrap:
-      limits:
-        memory: "128Mi"
-        cpu: "500m"
-      requests:
-        memory: "128Mi"
-        cpu: "500m"
-
 dependencies:
   db_init:
-    jobs:
-    - mariadb-seed
-    service:
-    - mariadb
+    services:
+    - service: oslo_db
+      endpoint: internal
   db_sync:
     jobs:
     - glance-db-init
-    service:
-    - mariadb
+    services:
+    - service: oslo_db
+      endpoint: internal
   bootstrap:
     jobs:
     - glance-db-sync
     - glance-ks-user
     - glance-ks-endpoints
-    service:
-    - mariadb
-    - glance-api
+    services:
+    - service: identity
+      endpoint: internal
+    - service: image
+      endpoint: internal
   ks_user:
-    service:
-    - keystone-api
+    services:
+    - service: identity
+      endpoint: internal
   ks_service:
-    service:
-    - keystone-api
+    services:
+    - service: identity
+      endpoint: internal
   ks_endpoints:
     jobs:
     - glance-ks-service
-    service:
-    - keystone-api
+    services:
+    - service: identity
+      endpoint: internal
   api:
     jobs:
     - glance-db-sync
     - glance-ks-user
     - glance-ks-endpoints
-    service:
-    - keystone-api
-    - mariadb
+    services:
+    - service: oslo_db
+      endpoint: internal
+    - service: identity
+      endpoint: internal
   registry:
     jobs:
     - glance-db-sync
     - glance-ks-user
     - glance-ks-endpoints
-    service:
-    - keystone-api
-    - mariadb
-    - glance-api
+    services:
+    - service: oslo_db
+      endpoint: internal
+    - service: identity
+      endpoint: internal
+    - service: image
+      endpoint: internal
+  tests:
+    services:
+    - service: oslo_db
+      endpoint: internal
+    - service: identity
+      endpoint: internal
+    - service: image
+      endpoint: internal
+
+# Names of secrets used by bootstrap and environmental checks
+secrets:
+  identity:
+    admin: glance-keystone-admin
+    user: glance-keystone-user
+  oslo_db:
+    admin: glance-db-admin
+    user: glance-db-user
 
 # typically overriden by environmental
 # values, but should include all endpoints
@@ -265,29 +224,60 @@ dependencies:
 endpoints:
   identity:
     name: keystone
+    auth:
+      admin:
+        region_name: RegionOne
+        username: admin
+        password: password
+        project_name: admin
+        user_domain_name: default
+        project_domain_name: default
+      user:
+        role: admin
+        region_name: RegionOne
+        username: glance
+        password: password
+        project_name: service
+        user_domain_name: default
+        project_domain_name: default
     hosts:
       default: keystone-api
-    path: /v3
-    scheme: 'http'
+      public: keystone
+    path:
+      default: /v3
+    scheme:
+      default: http
     port:
-      admin: 35357
-      api: 5000
+      admin:
+        default: 35357
+      api:
+        default: 80
   image:
     name: glance
     hosts:
       default: glance-api
-    path: null
-    scheme: 'http'
+      public: glance
+    path:
+      default: null
+    scheme:
+      default: http
     port:
-      api: 9292
+      api:
+        default: 9292
+        public: 80
   image_registry:
     name: glance-registry
     hosts:
       default: glance-registry
-    path: null
-    scheme: 'http'
+      public: glance-reg
+    path:
+      default: null
+    scheme:
+      default: 'http'
     port:
-      api: 9191
+      api:
+        default: 9191
+        public: 80
   oslo_db:
     auth:
       admin:
@@ -301,12 +291,14 @@ endpoints:
     path: /glance
     scheme: mysql+pymysql
     port:
-      mysql: 3306
+      mysql:
+        default: 3306
   oslo_cache:
     hosts:
-      default: memcache
+      default: memcached
     port:
-      memcache: 11211
+      memcache:
+        default: 11211
   oslo_messaging:
     auth:
       admin:
@@ -320,4 +312,135 @@ endpoints:
     path: /
     scheme: rabbit
     port:
-      amqp: 5672
+      amqp:
+        default: 5672
+
+pod:
+  affinity:
+      anti:
+        type:
+          default: preferredDuringSchedulingIgnoredDuringExecution
+        topologyKey:
+          default: kubernetes.io/hostname
+  mounts:
+    glance_api:
+      init_container: null
+      glance_api:
+    glance_registry:
+      init_container: null
+      glance_registry:
+    glance_tests:
+      init_container: null
+      glance_tests:
+  replicas:
+    api: 1
+    registry: 1
+  lifecycle:
+    upgrades:
+      deployments:
+        revision_history: 3
+        pod_replacement_strategy: RollingUpdate
+        rolling_update:
+          max_unavailable: 1
+          max_surge: 3
+    disruption_budget:
+      api:
+        min_available: 0
+      registry:
+        min_available: 0
+    termination_grace_period:
+      api:
+        timeout: 600
+      registry:
+        timeout: 600
+  resources:
+    enabled: false
+    api:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    registry:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    jobs:
+      db_sync:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      db_init:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      ks_user:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      ks_service:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      ks_endpoints:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      bootstrap:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      tests:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+
+manifests:
+  configmap_bin: true
+  configmap_etc: true
+  deployment_api: true
+  deployment_registry: true
+  ingress_api: true
+  ingress_registry: true
+  job_bootstrap: true
+  job_clean: true
+  job_db_init: true
+  job_db_sync: true
+  job_ks_endpoints: true
+  job_ks_service: true
+  job_ks_user: true
+  pdb_api: true
+  pdb_registry: true
+  pod_rally_test: true
+  pvc_images: true
+  secret_db: true
+  secret_keystone: true
+  service_ingress_api: true
+  service_ingress_registry: true
+  service_api: true
+  service_registry: true

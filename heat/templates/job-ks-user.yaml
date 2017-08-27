@@ -1,24 +1,23 @@
-# Copyright 2017 The Openstack-Helm Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+{{/*
+Copyright 2017 The Openstack-Helm Authors.
 
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/}}
+
+{{- if .Values.manifests.job_ks_user }}
 {{- $envAll := . }}
 {{- $dependencies := .Values.dependencies.ks_user }}
-{{- $ksAdminSecret := .Values.keystone_secrets.admin }}
-{{- $ksUserSecret := .Values.keystone_secrets.user }}
-# The heat user management job is a bit different from other services as it also needs to create a stack domain and trusts user
-{{- $ksTrusteeUserSecret := .Values.keystone_secrets.trustee }}
-{{- $ksStackUserSecret := .Values.keystone_secrets.stack }}
+---
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -26,29 +25,20 @@ metadata:
 spec:
   template:
     metadata:
-      annotations:
-        pod.beta.kubernetes.io/init-containers: '[
-{{ tuple $envAll $dependencies "[]" | include "helm-toolkit.kubernetes_entrypoint_init_container" | indent 10 }}
-        ]'
+      labels:
+{{ tuple $envAll "heat" "ks-user" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
     spec:
       restartPolicy: OnFailure
       nodeSelector:
         {{ .Values.labels.node_selector_key }}: {{ .Values.labels.node_selector_value }}
+      initContainers:
+{{ tuple $envAll $dependencies "[]" | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
       containers:
         - name: heat-ks-user
           image: {{ .Values.images.ks_user }}
           imagePullPolicy: {{ .Values.images.pull_policy }}
-          {{- if .Values.resources.enabled }}
-          resources:
-            requests:
-              memory: {{ .Values.resources.heat_ks_user.requests.memory | quote }}
-              cpu: {{ .Values.resources.heat_ks_user.requests.cpu | quote }}
-            limits:
-              memory: {{ .Values.resources.heat_ks_user.limits.memory | quote }}
-              cpu: {{ .Values.resources.heat_ks_user.limits.cpu | quote }}
-          {{- end }}
+{{ tuple $envAll $envAll.Values.pod.resources.jobs.ks_user | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
           command:
-            - bash
             - /tmp/ks-user.sh
           volumeMounts:
             - name: ks-user-sh
@@ -56,21 +46,20 @@ spec:
               subPath: ks-user.sh
               readOnly: true
           env:
-{{- with $env := dict "ksUserSecret" $ksAdminSecret }}
-{{- include "helm-toolkit.keystone_openrc_env_vars" $env | indent 12 }}
+{{- with $env := dict "ksUserSecret" $envAll.Values.secrets.identity.admin }}
+{{- include "helm-toolkit.snippets.keystone_openrc_env_vars" $env | indent 12 }}
 {{- end }}
             - name: SERVICE_OS_SERVICE_NAME
               value: "heat"
-{{- with $env := dict "ksUserSecret" $ksUserSecret }}
-{{- include "helm-toolkit.keystone_user_create_env_vars" $env | indent 12 }}
+{{- with $env := dict "ksUserSecret" .Values.secrets.identity.user }}
+{{- include "helm-toolkit.snippets.keystone_user_create_env_vars" $env | indent 12 }}
 {{- end }}
             - name: SERVICE_OS_ROLE
-              value: {{ .Values.keystone.heat_user_role | quote }}
+              value: {{ .Values.endpoints.identity.auth.user.role | quote }}
         - name: heat-ks-trustee-user
           image: {{ .Values.images.ks_user }}
           imagePullPolicy: {{ .Values.images.pull_policy }}
           command:
-            - bash
             - /tmp/ks-user.sh
           volumeMounts:
             - name: ks-user-sh
@@ -78,21 +67,20 @@ spec:
               subPath: ks-user.sh
               readOnly: true
           env:
-{{- with $env := dict "ksUserSecret" $ksAdminSecret }}
-{{- include "helm-toolkit.keystone_openrc_env_vars" $env | indent 12 }}
+{{- with $env := dict "ksUserSecret" $envAll.Values.secrets.identity.admin }}
+{{- include "helm-toolkit.snippets.keystone_openrc_env_vars" $env | indent 12 }}
 {{- end }}
             - name: SERVICE_OS_SERVICE_NAME
               value: "heat"
-{{- with $env := dict "ksUserSecret" $ksTrusteeUserSecret }}
-{{- include "helm-toolkit.keystone_user_create_env_vars" $env | indent 12 }}
+{{- with $env := dict "ksUserSecret" .Values.secrets.identity.trustee }}
+{{- include "helm-toolkit.snippets.keystone_user_create_env_vars" $env | indent 12 }}
 {{- end }}
             - name: SERVICE_OS_ROLE
-              value: {{ .Values.keystone.heat_trustee_role | quote }}
+              value: {{ .Values.endpoints.identity.auth.trustee.role | quote }}
         - name: heat-ks-domain-user
           image: {{ .Values.images.ks_user }}
           imagePullPolicy: {{ .Values.images.pull_policy }}
           command:
-            - bash
             - /tmp/ks-domain-user.sh
           volumeMounts:
             - name: ks-user-sh
@@ -100,34 +88,36 @@ spec:
               subPath: ks-domain-user.sh
               readOnly: true
           env:
-{{- with $env := dict "ksUserSecret" $ksAdminSecret }}
-{{- include "helm-toolkit.keystone_openrc_env_vars" $env | indent 12 }}
+{{- with $env := dict "ksUserSecret" $envAll.Values.secrets.identity.admin }}
+{{- include "helm-toolkit.snippets.keystone_openrc_env_vars" $env | indent 12 }}
 {{- end }}
             - name: SERVICE_OS_SERVICE_NAME
               value: "heat"
             - name: SERVICE_OS_REGION_NAME
               valueFrom:
                 secretKeyRef:
-                  name: {{ $ksStackUserSecret }}
+                  name: {{ .Values.secrets.identity.stack_user }}
                   key: OS_REGION_NAME
             - name: SERVICE_OS_DOMAIN_NAME
               valueFrom:
                 secretKeyRef:
-                  name: {{ $ksStackUserSecret }}
+                  name: {{ .Values.secrets.identity.stack_user }}
                   key: OS_DOMAIN_NAME
             - name: SERVICE_OS_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: {{ $ksStackUserSecret }}
+                  name: {{ .Values.secrets.identity.stack_user }}
                   key: OS_USERNAME
             - name: SERVICE_OS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ $ksStackUserSecret }}
+                  name: {{ .Values.secrets.identity.stack_user }}
                   key: OS_PASSWORD
             - name: SERVICE_OS_ROLE
-              value: {{ .Values.keystone.heat_stack_user_role | quote }}
+              value: {{ .Values.endpoints.identity.auth.stack_user.role | quote }}
       volumes:
         - name: ks-user-sh
           configMap:
             name: heat-bin
+            defaultMode: 0555
+{{- end }}
