@@ -238,7 +238,6 @@ conf:
   rally_tests:
     override:
     append:
->>>>>>> origin/upstream/master
 
 dependencies:
   db_init:

@@ -15,7 +15,6 @@ limitations under the License.
 */}}
 
 {{- if .Values.manifests.daemonset_metadata_agent }}
->>>>>>> origin/upstream/master
 {{- $envAll := . }}
 {{- $dependencies := .Values.dependencies.metadata }}
 {{- $mounts_neutron_metadata_agent := .Values.pod.mounts.neutron_metadata_agent.neutron_metadata_agent }}

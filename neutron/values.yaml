@@ -65,7 +65,7 @@ network:
     # this must list the skydns server first, and in calico
     # this is consistently 10.96.0.10
     servers:
-    - 10.87.116.10
+    - 10.96.0.10
     - 8.8.8.8
   external_bridge: br-ex
   ip_address: 0.0.0.0
@@ -373,11 +373,14 @@ conf:
     append:
     default: 
       apiserver:
-        api_server_ip: 10.87.65.151
-        api_server_port: 8082
-      collector:
-        analytics_api_ip: 10.87.65.151
-        analytics_api_port: 8081
+        ip: 10.87.65.151
+        port: 8082
+        extensions: "ipam:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_ipam.NeutronPluginContrailIpam,policy:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_policy.NeutronPluginContrailPolicy,route-table:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_vpc.NeutronPluginContrailVpc,contrail:None,service-interface:None,vf-binding:None"
+      analytics:
+        ip: 10.87.65.151
+        port: 8081
+      keystone_auth:
+        admin_user: 
   policy:
     override:
     append:
@@ -391,7 +394,7 @@ conf:
         allow_overlapping_ips: True
         #core_plugin: ml2
         core_plugin: neutron_plugin_contrail.plugins.opencontrail.contrail_plugin.NeutronPluginContrailCoreV2
-        #service_plugins: router
+        service_plugins: neutron_plugin_contrail.plugins.opencontrail.loadbalancer.v2.plugin.LoadBalancerPluginV2
         #interface_driver: openvswitch
         metadata_proxy_socket: /var/lib/neutron/openstack-helm/metadata_proxy
         db:
@@ -405,6 +408,7 @@ conf:
           #router_auto_schedule: True
         agent:
           #interface_driver: openvswitch
+        api_extensions_path: extensions:/usr/lib/python2.7/dist-packages/neutron_plugin_contrail/extensions:/usr/lib/python2.7/dist-packages/neutron_lbaas/extensions
     oslo_concurrency:
       oslo:
         concurrency:
@@ -658,12 +662,12 @@ endpoints:
 manifests:
   configmap_bin: true
   configmap_etc: true
-  daemonset_dhcp_agent: true
-  daemonset_l3_agent: true
+  daemonset_dhcp_agent: false
+  daemonset_l3_agent: false
   daemonset_metadata_agent: true
-  daemonset_ovs_agent: true
-  daemonset_ovs_db: true
-  daemonset_ovs_vswitchd: true
+  daemonset_ovs_agent: false
+  daemonset_ovs_db: false
+  daemonset_ovs_vswitchd: false
   deployment_server: true
   ingress_server: true
   job_bootstrap: true

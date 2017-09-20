@@ -128,7 +128,6 @@ data:
 {{- if .Values.conf.rally_tests.append -}}
 {{ .Values.conf.rally_tests.append | indent 4 }}
 {{- end }}
-{{- end }}
   glance-api.conf: |+
 {{ if .Values.conf.glance.override -}}
 {{ .Values.conf.glance.override | indent 4 }}

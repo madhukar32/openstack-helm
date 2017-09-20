@@ -131,5 +131,4 @@ data:
 {{ tuple "etc/_libvirtd.conf.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
   qemu.conf: |+
 {{ tuple "etc/_qemu.conf.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
->>>>>>> origin/upstream/master
 {{- end }}

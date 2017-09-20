@@ -19,7 +19,6 @@ limitations under the License.
 
 {{- include "neutron.conf.neutron_values_skeleton" .Values.conf.neutron | trunc 0 -}}
 
-{{- if not .Values.sdn.opencontrail.enabled }}
 {{- include "neutron.conf.dhcp_agent_values_skeleton" .Values.conf.dhcp_agent | trunc 0 -}}
 {{- include "neutron.conf.l3_agent_values_skeleton" .Values.conf.l3_agent | trunc 0 -}}
 {{- include "neutron.conf.metadata_agent_values_skeleton" .Values.conf.metadata_agent | trunc 0 -}}
@@ -258,7 +257,7 @@ data:
 {{- if .Values.conf.opencontrail.prefix -}}
 {{ .Values.conf.opencontrail.prefix | indent 4 }}
 {{- end }}
-{{ tuple "etc/_opencontrail_plugin.ini.tpl" . | include "helm-toolkit.template" | indent 4 }}
+{{ tuple "etc/_opencontrail_plugin.ini.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
 {{- end }}
 {{- if .Values.conf.opencontrail.append -}}
 {{ .Values.conf.opencontrail.append | indent 4 }}
