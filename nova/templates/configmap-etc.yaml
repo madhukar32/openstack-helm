@@ -130,5 +130,15 @@ data:
   libvirtd.conf: |+
 {{ tuple "etc/_libvirtd.conf.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
   qemu.conf: |+
+{{ if .Values.conf.qemu.override -}}
+{{ .Values.conf.qemu.override | indent 4 }}
+{{- else -}}
+{{- if .Values.conf.qemu.prefix -}}
+{{ .Values.conf.qemu.prefix | indent 4 }}
+{{- end }}
 {{ tuple "etc/_qemu.conf.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
+{{- end }}
+{{- if .Values.conf.qemu.append -}}
+{{ .Values.conf.qemu.append | indent 4 }}
+{{- end }}
 {{- end }}
