@@ -1,0 +1,53 @@
+{{- if .Values.manifests.daemonset_controller }}
+{{- $envAll := . }}
+# host_os is a mandatory field
+{{- $_ := required ".Values.conf.host_os must be specified, valid values are ubuntu, centos" .Values.conf.host_os }}
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: contrail-controller
+spec:
+  template:
+    metadata:
+      labels:
+{{ tuple $envAll "opencontrail" "controller" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: {{ .Values.labels.controller.node_selector_key }}
+                operator: In
+                values:
+                - {{ .Values.labels.controller.node_selector_value }}
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      hostNetwork: true
+      containers:
+      - name: contrail-controller
+        image: {{ .Values.images.tags.controller | quote }}
+        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - name: contrailctl-controller
+            mountPath: /etc/contrailctl/controller.conf
+            subPath: controller.conf
+          - name: configdb-data
+            mountPath: /var/lib/cassandra
+          - name: zookeeper-data
+            mountPath: /var/lib/zookeeper
+      volumes:
+      - name: contrailctl-controller
+        configMap:
+          name: configmap-contrailctl
+      - name: configdb-data
+        hostPath:
+          path: /var/lib/configdb
+      - name: zookeeper-data
+        hostPath:
+          path: /var/lib/config_zookeeper_data
+{{- end }}

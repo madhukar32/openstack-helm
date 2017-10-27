@@ -1,0 +1,52 @@
+{{- if .Values.manifests.daemonset_kubemanager }}
+{{- $envAll := . }}
+# host_os is a mandatory field
+{{- $_ := required ".Values.conf.host_os must be specified, valid values are ubuntu, centos" .Values.conf.host_os }}
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: contrail-kube-manager
+spec:
+  template:
+    metadata:
+      labels:
+{{ tuple $envAll "opencontrail" "kubemanager" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: {{ .Values.labels.kubemanager.node_selector_key }}
+                operator: In
+                values:
+                - {{ .Values.labels.kubemanager.node_selector_value }}
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      hostNetwork: true
+      automountServiceAccountToken: false
+      containers:
+      - name: contrail-kube-manager
+        image: {{ .Values.images.tags.kubemanager | quote }}
+        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: contrailctl-kube-manager
+          mountPath: /tmp/contrailctl/kubemanager.conf
+          subPath: kubemanager.conf
+        - name: contrailctl-kube-manager
+          mountPath: /tmp/contrailctl/global.conf
+          subPath: global.conf
+        - mountPath: /tmp/serviceaccount
+          name: pod-secret
+      volumes:
+      - name: contrailctl-kube-manager
+        configMap:
+          name: configmap-contrailctl
+      - name: pod-secret
+        secret:
+          secretName: contrail-kube-manager-token
+{{- end }}

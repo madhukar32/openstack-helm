@@ -64,6 +64,8 @@ images:
     novncproxy: docker.io/kolla/ubuntu-source-nova-novncproxy:3.0.3
     novncproxy_assets: docker.io/kolla/ubuntu-source-nova-novncproxy:3.0.3
     consoleauth: docker.io/kolla/ubuntu-source-nova-consoleauth:3.0.3
+    # for opencontrail use the below nova-compute image
+    # compute: docker.io/madhukar32/ubuntu-source-nova-compute:3.0.4
     compute: docker.io/kolla/ubuntu-source-nova-compute:3.0.3
     compute_ssh: docker.io/kolla/ubuntu-source-nova-ssh:3.0.3
     placement: docker.io/kolla/ubuntu-source-nova-placement-api:3.0.3-beta.1
@@ -225,6 +227,7 @@ dependencies:
     daemonset:
     - libvirt
     # this should be set to corresponding neutron L2 agent
+    # for opencontrail, set to contrail-vrouter-agent
     - neutron-ovs-agent
   consoleauth:
     jobs:

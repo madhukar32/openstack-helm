@@ -65,7 +65,7 @@ labels:
 
 network:
   # provide what type of network wiring will be used
-  # possible options: ovs, linuxbridge
+  # possible options: ovs, linuxbridge, opencontrail
   backend: ovs
   external_bridge: br-ex
   ip_address: 0.0.0.0
@@ -149,6 +149,7 @@ dependencies:
       endpoint: internal
     - service: identity
       endpoint: internal
+    daemonset:
   dhcp:
     services:
     - service: oslo_messaging
@@ -172,6 +173,8 @@ dependencies:
       endpoint: public
     daemonset:
     # this should be set to corresponding neutron L2 agent
+    # for opencontrail, set to contrail-vrouter-agent
+    # - contrail-vrouter-agent
     - neutron-ovs-agent
   ovs_agent:
     services:
@@ -214,6 +217,7 @@ dependencies:
 
 pod:
   user:
+    # for opencontrail, set neutron uid to 107
     neutron:
       uid: 1000
   affinity:
@@ -952,13 +956,16 @@ conf:
       default_availability_zones: nova
       api_workers: 4
       allow_overlapping_ips: True
-      # core_plugin can be: ml2, calico
+      # core_plugin can be: ml2, calico,
+      # neutron_plugin_contrail.plugins.opencontrail.contrail_plugin.NeutronPluginContrailCoreV2 for opencontrail
       core_plugin: ml2
       # service_plugin can be: router, odl-router, empty for calico,
-      # networking_ovn.l3.l3_ovn.OVNL3RouterPlugin for OVN
+      # networking_ovn.l3.l3_ovn.OVNL3RouterPlugin for OVN,
+      # neutron_plugin_contrail.plugins.opencontrail.loadbalancer.v2.plugin.LoadBalancerPluginV2 for opencontrail
       service_plugins: router
       metadata_proxy_socket: /var/lib/neutron/openstack-helm/metadata_proxy
       allow_automatic_l3agent_failover: True
+      # for opencontrail, set l3_ha to False
       l3_ha: True
       min_l3_agents_per_router: 2
       max_l3_agents_per_router: 2
@@ -967,7 +974,18 @@ conf:
       network_auto_schedule: True
       router_auto_schedule: True
       # we can define here, which driver we are using: openvswitch or linuxbridge
+      # for opencontrail, comment out interface_driver option
       interface_driver: openvswitch
+      # api_extensions_path can be:
+      # /usr/lib/python2.7/dist-packages/neutron_plugin_contIrail/extensions:/usr/lib/python2.7/dist-packages/neutron_lbaas/extensions for opencontrail
+      # api_extensions_path:
+    quotas:
+      quota_network: -1
+      quota_subnet: -1
+      quota_port: -1
+      # quota_driver can be:
+      # neutron_plugin_contrail.plugins.opencontrail.quota.driver.QuotaDriver for opencontrail
+      # quota_driver:
     oslo_concurrency:
       lock_path: /var/lib/neutron/tmp
     database:
@@ -984,6 +1002,24 @@ conf:
       auth_type: password
       auth_version: v3
   plugins:
+    # neutron_plugin_framework can be: ml2, opencontrail
+    neutron_plugin_framework: ml2
+    # neutron_plugin_conf can be: ml2_conf.ini, ContrailPlugin.ini
+    neutron_plugin_conf: ml2_conf.ini
+    opencontrail:
+      APISERVER:
+        api_server_ip: 10.87.65.153
+        api_server_port: 8082
+        contrail_extensions: "ipam:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_ipam.NeutronPluginContrailIpam,policy:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_policy.NeutronPluginContrailPolicy,route-table:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_vpc.NeutronPluginContrailVpc,contrail:None,service-interface:None,vf-binding:None"
+        multi_tenancy: True
+      COLLECTOR:
+        analytics_api_ip: 10.87.65.153
+        analytics_api_port: 8081
+      KEYSTONE:
+        admin_user: admin
+        admin_password: password
+        admin_tenant_name: admin
+        auth_user: admin
     ml2_conf:
       ml2:
         extension_drivers: port_security
@@ -1199,10 +1235,14 @@ endpoints:
 manifests:
   configmap_bin: true
   configmap_etc: true
+  # for opencontrail: set daemonset_dhcp_agent to false
   daemonset_dhcp_agent: true
+  # for opencontrail: set daemonset_l3_agent to false
   daemonset_l3_agent: true
+  # for opencontrail: set daemonset_lb_agent to false
   daemonset_lb_agent: false
   daemonset_metadata_agent: true
+  # for opencontrail: set daemonset_ovs_agent to false
   daemonset_ovs_agent: true
   deployment_server: true
   ingress_server: true

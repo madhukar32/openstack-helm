@@ -25,6 +25,10 @@ limitations under the License.
 {{- tuple "identity" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup"| set .Values.conf.neutron.keystone_authtoken "auth_url" | quote | trunc 0 -}}
 {{- end }}
 
+{{- if empty .Values.conf.plugins.opencontrail.KEYSTONE.auth_url -}}
+{{- tuple "identity" "internal" "admin" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup"| set .Values.conf.plugins.opencontrail.KEYSTONE "auth_url" | quote | trunc 0 -}}
+{{- end }}
+
 # Set a random string as secret key.
 {{- if empty .Values.conf.neutron.keystone_authtoken.memcache_secret_key -}}
 {{- randAlphaNum 64 | set .Values.conf.neutron.keystone_authtoken "memcache_secret_key" | quote | trunc 0 -}}
@@ -122,6 +126,8 @@ data:
 {{ include "helm-toolkit.utils.to_oslo_conf" .Values.conf.plugins.openvswitch_agent | indent 4 }}
   sriov_agent.ini: |+
 {{ include "helm-toolkit.utils.to_oslo_conf" .Values.conf.plugins.sriov_agent | indent 4 }}
+  ContrailPlugin.ini: |+
+{{ include "helm-toolkit.utils.to_oslo_conf" .Values.conf.plugins.opencontrail | indent 4 }}
   dnsmasq.conf: ""
   neutron_sudoers: |+
 {{- tuple .Values.conf.neutron_sudoers "etc/_neutron_sudoers.tpl" . | include "helm-toolkit.utils.configmap_templater" }}

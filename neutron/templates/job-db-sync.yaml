@@ -17,9 +17,8 @@ limitations under the License.
 {{- if .Values.manifests.job_db_sync }}
 {{- $envAll := . }}
 {{- $dependencies := .Values.dependencies.db_sync }}
-
-{{- $serviceAccountName := "neutron-db-sync" }}
-{{ tuple $envAll $dependencies $serviceAccountName | include "helm-toolkit.snippets.kubernetes_pod_rbac_serviceaccount" }}
+{{- $neutron_plugin := .Values.conf.plugins.neutron_plugin_framework }}
+{{- $neutron_plugin_conf := .Values.conf.plugins.neutron_plugin_conf }}
 ---
 apiVersion: batch/v1
 kind: Job
@@ -65,8 +64,8 @@ spec:
               subPath: neutron.conf
               readOnly: true
             - name: neutron-etc
-              mountPath: /etc/neutron/plugins/ml2/ml2_conf.ini
-              subPath: ml2_conf.ini
+              mountPath: /etc/neutron/plugins/{{ $neutron_plugin }}/{{ $neutron_plugin_conf }}
+              subPath: {{ $neutron_plugin_conf }}
               readOnly: true
       volumes:
         - name: etcneutron
