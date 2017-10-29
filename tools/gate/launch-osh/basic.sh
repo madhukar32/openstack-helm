@@ -145,15 +145,25 @@ helm install --namespace=openstack ${WORK_DIR}/glance --name=glance \
   --set storage=${GLANCE}
 kube_wait_for_pods openstack ${POD_START_TIMEOUT_OPENSTACK}
 
+if [ "x$SDN_PLUGIN" == "xopencontrail" ]; then
+  libvirt_values="--values ${WORK_DIR}/tools/overrides/mvp/libvirt-opencontrail.yaml"
+fi
 if [ "x${PVC_BACKEND}" == "xceph" ]; then
-    helm install --namespace=openstack ${WORK_DIR}/libvirt --name=libvirt
+    helm install --namespace=openstack ${WORK_DIR}/libvirt --name=libvirt $libvirt_values
 else
     helm install --namespace=openstack ${WORK_DIR}/libvirt --name=libvirt \
-        --set ceph.enabled="false"
+        --set ceph.enabled="false" $libvirt_values
 fi
 
+local_ip="$(net_default_host_ip)"
 if [ "x$SDN_PLUGIN" == "xovs" ]; then
   helm install --namespace=openstack ${WORK_DIR}/openvswitch --name=openvswitch
+elif [ "x$SDN_PLUGIN" == "xopencontrail" ]; then
+  helm install --namespace=openstack ${WORK_DIR}/opencontrail --name=opencontrail \
+    --set conf.global_config.GLOBAL.controller_nodes=$local_ip \
+    --set conf.global_config.GLOBAL.controller_ip=$local_ip \
+    --set conf.global_config.GLOBAL.analytics_nodes=$local_ip \
+    --set conf.global_config.GLOBAL.analyticsdb_nodes=$local_ip
 fi
 kube_wait_for_pods openstack ${POD_START_TIMEOUT_OPENSTACK}
 
@@ -175,17 +185,25 @@ fi
 
 if [ "x$SDN_PLUGIN" == "xlinuxbridge" ]; then
   NOVA_INSTALL+=" --set dependencies.compute.daemonset={neutron-lb-agent}"
+elif [ "x$SDN_PLUGIN" == "xopencontrail" ]; then
+  NOVA_INSTALL+=" --values=${WORK_DIR}/tools/overrides/mvp/nova-opencontrail.yaml"
 fi
 
 $NOVA_INSTALL
 
 if [ "x$SDN_PLUGIN" == "xovs" ]; then
   helm install --namespace=openstack ${WORK_DIR}/neutron --name=neutron \
-      --values=${WORK_DIR}/tools/overrides/mvp/neutron-ovs.yaml
+    --values=${WORK_DIR}/tools/overrides/mvp/neutron-ovs.yaml
 
 elif [ "x$SDN_PLUGIN" == "xlinuxbridge" ]; then
   helm install --namespace=openstack ${WORK_DIR}/neutron --name=neutron \
-      --values=${WORK_DIR}/tools/overrides/mvp/neutron-linuxbridge.yaml
+    --values=${WORK_DIR}/tools/overrides/mvp/neutron-linuxbridge.yaml
+
+elif [ "x$SDN_PLUGIN" == "xopencontrail" ]; then
+  helm install --namespace=openstack ${WORK_DIR}/neutron --name=neutron \
+    --set conf.plugins.opencontrail.APISERVER.api_server_ip=$local_ip \
+    --set conf.plugins.opencontrail.COLLECTOR.analytics_api_ip=$local_ip \
+    --values=${WORK_DIR}/tools/overrides/mvp/neutron-opencontrail.yaml
 fi
 
 kube_wait_for_pods openstack ${POD_START_TIMEOUT_OPENSTACK}

@@ -20,8 +20,13 @@ export KUBECONFIG=/root/admin.conf
 
 echo 'Labeling the nodes for Openstack-Helm deployment'
 kubectl label nodes openstack-control-plane=enabled --all --namespace=openstack --overwrite
-kubectl label nodes openvswitch=enabled --all --namespace=openstack --overwrite
 kubectl label nodes openstack-compute-node=enabled --all --namespace=openstack --overwrite
+
+if [ "x$SDN_PLUGIN" == "xopencontrail" ]; then
+  kubectl label nodes opencontrail.org/controller=enabled --all --namespace=openstack --overwrite
+else
+  kubectl label nodes openvswitch=enabled --all --namespace=openstack --overwrite
+fi
 
 echo 'RBAC: applying development rules (totally open!)'
 kubectl replace -f /opt/rbac/dev.yaml

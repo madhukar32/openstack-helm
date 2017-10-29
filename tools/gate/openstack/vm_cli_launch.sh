@@ -35,8 +35,11 @@ $NEUTRON router-gateway-set \
   $($NEUTRON router-show ${OSH_ROUTER} -f value -c id) \
   $($NEUTRON net-show ${OSH_EXT_NET_NAME} -f value -c id)
 
-ROUTER_PUBLIC_IP=$($NEUTRON router-show ${OSH_ROUTER} -f value -c external_gateway_info | jq -r '.external_fixed_ips[].ip_address')
-wait_for_ping ${ROUTER_PUBLIC_IP}
+if [ "x$SDN_PLUGIN" != "xopencontrail" ]; then
+  # in opencontrail deployment router doesn't have IP in public network
+  ROUTER_PUBLIC_IP=$($NEUTRON router-show ${OSH_ROUTER} -f value -c external_gateway_info | jq -r '.external_fixed_ips[].ip_address')
+  wait_for_ping ${ROUTER_PUBLIC_IP}
+fi
 
 # Loosen up security group to allow access to the VM
 PROJECT=$($OPENSTACK project show admin -f value -c id)
@@ -71,21 +74,8 @@ openstack_wait_for_vm ${OSH_VM_NAME_CLI}
 FLOATING_IP=$($OPENSTACK floating ip create ${OSH_EXT_NET_NAME} -f value -c floating_ip_address)
 $OPENSTACK server add floating ip ${OSH_VM_NAME_CLI} ${FLOATING_IP}
 
-# Ping our VM
-wait_for_ping ${FLOATING_IP} ${SERVICE_TEST_TIMEOUT}
-
-# Wait for SSH to come up
-wait_for_ssh_port ${FLOATING_IP} ${SERVICE_TEST_TIMEOUT}
-
-# SSH into the VM and check it can reach the outside world
-ssh-keyscan "$FLOATING_IP" >> ~/.ssh/known_hosts
-ssh -i ${KEYPAIR_LOC} cirros@${FLOATING_IP} ping -q -c 1 -W 2 ${OSH_BR_EX_ADDR%/*}
-
-# SSH into the VM and check it can reach the metadata server
-ssh -i ${KEYPAIR_LOC} cirros@${FLOATING_IP} curl -sSL 169.254.169.254
-
-# Bonus round - display a Unicorn
-ssh -i ${KEYPAIR_LOC} cirros@${FLOATING_IP} curl http://artscene.textfiles.com/asciiart/unicorn || true
+# Check the VM
+check_vm ${FLOATING_IP} "${KEYPAIR_LOC}"
 
 
 if $OPENSTACK service list -f value -c Type | grep -q volume; then

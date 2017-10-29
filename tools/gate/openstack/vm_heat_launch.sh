@@ -47,21 +47,8 @@ FLOATING_IP=$($OPENSTACK floating ip show \
       -f value -c physical_resource_id) \
       -f value -c floating_ip_address)
 
-# Ping our VM
-wait_for_ping ${FLOATING_IP} ${SERVICE_TEST_TIMEOUT}
-
-# Wait for SSH to come up
-wait_for_ssh_port ${FLOATING_IP} ${SERVICE_TEST_TIMEOUT}
-
-# SSH into the VM and check it can reach the outside world
-ssh-keyscan "$FLOATING_IP" >> ~/.ssh/known_hosts
-ssh -i ${KEYPAIR_LOC} cirros@${FLOATING_IP} ping -q -c 1 -W 2 ${OSH_BR_EX_ADDR%/*}
-
-# SSH into the VM and check it can reach the metadata server
-ssh -i ${KEYPAIR_LOC} cirros@${FLOATING_IP} curl -sSL 169.254.169.254
-
-# Bonus round - display a Unicorn
-ssh -i ${KEYPAIR_LOC} cirros@${FLOATING_IP} curl http://artscene.textfiles.com/asciiart/unicorn || true
+# Check the VM
+check_vm ${FLOATING_IP} "${KEYPAIR_LOC}"
 
 # Remove the test stack
 $OPENSTACK stack delete ${OSH_BASIC_VM_STACK}

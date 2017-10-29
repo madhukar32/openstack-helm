@@ -139,3 +139,24 @@ function openstack_wait_for_volume {
   done
   set -x
 }
+
+function check_vm {
+  local floating_ip=$1
+  local keypair_loc="$2"
+
+  # Ping our VM
+  wait_for_ping ${floating_ip} ${SERVICE_TEST_TIMEOUT}
+
+  # Wait for SSH to come up
+  wait_for_ssh_port ${floating_ip} ${SERVICE_TEST_TIMEOUT}
+
+  # SSH into the VM and check it can reach the outside world
+  ssh-keyscan "$floating_ip" >> ~/.ssh/known_hosts
+  ssh -i ${keypair_loc} cirros@${floating_ip} ping -q -c 1 -W 2 ${OSH_BR_EX_ADDR%/*}
+
+  # SSH into the VM and check it can reach the metadata server
+  ssh -i ${keypair_loc} cirros@${floating_ip} curl -sSL 169.254.169.254
+
+  # Bonus round - display a Unicorn
+  ssh -i ${keypair_loc} cirros@${floating_ip} curl http://artscene.textfiles.com/asciiart/unicorn || true
+}

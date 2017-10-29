@@ -57,8 +57,9 @@ function kube_wait_for_nodes {
       NUMBER_OF_NODES=$(kubectl get nodes --no-headers -o name | wc -l)
       [ $NUMBER_OF_NODES -eq $NUMBER_OF_NODES_EXPECTED ] && \
           NODES_ONLINE="True" || NODES_ONLINE="False"
+      NODES_READY="False"
       while read SUB_NODE; do
-        echo $SUB_NODE | grep -q ^Ready && NODES_READY="True" || NODES_READY="False"
+        echo $SUB_NODE | grep -q ^Ready && NODES_READY="True"
       done < <(kubectl get nodes --no-headers | awk '{ print $2 }')
       [ $NODES_ONLINE == "True" -a $NODES_READY == "True"  ] && \
           break || true

@@ -1,0 +1,75 @@
+# Copyright 2017 The Openstack-Helm Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# MVP values for neutron.
+# This file contains overrides to launch a MVP deployment of neutron for the
+# OpenStack-Helm gates, and local development use. It should be
+# kept to the bare minimum required for this purpose.
+
+network:
+  backend: opencontrail
+  interface:
+    tunnel: docker0
+
+images:
+  tags:
+    # For opencontrail, use below neutron-server image
+    server: madhukar32/ubuntu-neutron-server-contrail-plugin:3.0.4
+    # For opencontrail, use below metadata image
+    metadata: docker.io/kolla/ubuntu-binary-neutron-metadata-agent:3.0.3
+
+pod:
+  user:
+    neutron:
+      # current image has this strange UID for neutron
+      uid: 107
+
+dependencies:
+  server:
+    daemonset:
+      - contrail-controller
+      - contrail-analytics
+      - contrail-analyticsdb
+  metadata:
+    daemonset:
+      - contrail-vrouter-agent
+
+conf:
+  neutron:
+    DEFAULT:
+      core_plugin: neutron_plugin_contrail.plugins.opencontrail.contrail_plugin.NeutronPluginContrailCoreV2
+      service_plugins: neutron_plugin_contrail.plugins.opencontrail.loadbalancer.v2.plugin.LoadBalancerPluginV2
+      l3_ha: False
+      api_extensions_path: /usr/lib/python2.7/dist-packages/neutron_plugin_contrail/extensions:/usr/lib/python2.7/dist-packages/neutron_lbaas/extensions
+    quotas:
+      quota_driver: neutron_plugin_contrail.plugins.opencontrail.quota.driver.QuotaDriver
+  plugins:
+    neutron_plugin_framework: opencontrail
+    neutron_plugin_conf: ContrailPlugin.ini
+
+endpoints:
+  cluster_domain_suffix: cluster.local
+  etcd:
+    hosts:
+      default: etcd
+    host_fqdn_override:
+      default: null
+    port: 2379
+
+manifests:
+  daemonset_dhcp_agent: false
+  daemonset_l3_agent: false
+  daemonset_lb_agent: false
+  daemonset_metadata_agent: false
+  daemonset_ovs_agent: false
