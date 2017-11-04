@@ -1,7 +1,13 @@
 {{- if .Values.manifests.daemonset_analytics }}
 {{- $envAll := . }}
-# host_os is a mandatory field
-{{- $_ := required ".Values.conf.host_os must be specified, valid values are ubuntu, centos" .Values.conf.host_os }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: analytics-env
+data:
+  CONTROLLER_NODES: 10.0.2.15
+---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
@@ -27,18 +33,52 @@ spec:
         effect: NoSchedule
       hostNetwork: true
       containers:
-      - name: contrail-analytics
-        image: {{ .Values.images.tags.analytics | quote }}
-        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
+      - name: contrail-analytics-api
+        image: "localhost:5000/contrail-analytics-api:4.0.2.0-35"
+        imagePullPolicy: ""
         securityContext:
           privileged: true
-        volumeMounts:
-        - name: contrailctl-analytics
-          mountPath: /etc/contrailctl/analytics.conf
-          subPath: analytics.conf
-      volumes:
-      - name: contrailctl-analytics
-        configMap:
-          name: configmap-contrailctl
-          defaultMode: 0444
+        envFrom:
+        - configMapRef:
+            name: analytics-env
+      - name: contrail-analytics-collector
+        image: "localhost:5000/contrail-analytics-collector:4.0.2.0-35"
+        imagePullPolicy: ""
+        envFrom:
+        - configMapRef:
+            name: analytics-env
+        securityContext:
+          privileged: true
+      - name: contrail-analytics-alarm-gen
+        image: "localhost:5000/contrail-analytics-alarm-gen:4.0.2.0-35"
+        imagePullPolicy: ""
+        envFrom:
+        - configMapRef:
+            name: analytics-env
+        securityContext:
+          privileged: true
+      - name: contrail-analytics-query-engine
+        image: "localhost:5000/contrail-analytics-query-engine:4.0.2.0-35"
+        imagePullPolicy: ""
+        envFrom:
+        - configMapRef:
+            name: analytics-env
+        securityContext:
+          privileged: true
+      - name: contrail-analytics-snmp-collector
+        image: "localhost:5000/contrail-analytics-snmp-collector:4.0.2.0-35"
+        imagePullPolicy: ""
+        envFrom:
+        - configMapRef:
+            name: analytics-env
+        securityContext:
+          privileged: true
+      - name: contrail-analytics-topology
+        image: "localhost:5000/contrail-analytics-topology:4.0.2.0-35"
+        imagePullPolicy: ""
+        envFrom:
+        - configMapRef:
+            name: analytics-env
+        securityContext:
+          privileged: true
 {{- end }}

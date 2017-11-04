@@ -1,7 +1,52 @@
 {{- if .Values.manifests.daemonset_analyticsdb }}
 {{- $envAll := . }}
-# host_os is a mandatory field
-{{- $_ := required ".Values.conf.host_os must be specified, valid values are ubuntu, centos" .Values.conf.host_os }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: contrail-analyticsdb-config
+data:
+  CASSANDRA_SEEDS: 10.0.2.15
+  CASSANDRA_CLUSTER_NAME: Contrail
+  CASSANDRA_START_RPC: "true"
+  CASSANDRA_LISTEN_ADDRESS: 10.0.2.15
+  JVM_EXTRA_OPTS: >-
+    -Dcassandra.rpc_port=9160
+    -Dcassandra.native_transport_port=9042
+    -Dcassandra.ssl_storage_port=7001
+    -Dcassandra.storage_port=7000
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: kafka
+spec:
+  template:
+    metadata:
+      labels:
+{{ tuple $envAll "opencontrail" "analyticsdb" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: {{ .Values.labels.analyticsdb.node_selector_key }}
+                operator: In
+                values:
+                - {{ .Values.labels.analyticsdb.node_selector_value }}
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      hostNetwork: true
+      containers:
+      - name: kafka
+        image: "localhost:5000/contrail-analyticsdb-kafka:4.0.2.0-35"
+        imagePullPolicy: ""
+        securityContext:
+          privileged: true
+---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
@@ -28,27 +73,49 @@ spec:
       hostNetwork: true
       containers:
       - name: contrail-analyticsdb
-        image: {{ .Values.images.tags.analyticsdb }}
-        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
+        image: "cassandra:2.2.10"
+        imagePullPolicy: ""
         securityContext:
           privileged: true
+        envFrom:
+        - configMapRef:
+            name: contrail-analyticsdb-config
         volumeMounts:
-        - name: contrailctl-analyticsdb
-          mountPath: /etc/contrailctl/analyticsdb.conf
-          subPath: analyticsdb.conf
-        - name: analyticsdb-data
-          mountPath: /var/lib/cassandra
-        - name: zookeeper-analyticsdb-data
-          mountPath: /var/lib/zookeeper
+        - mountPath: /var/lib/cassandra
+          name: analyticsdb-data
       volumes:
-      - name: contrailctl-analyticsdb
-        configMap:
-          name: configmap-contrailctl
-          defaultMode: 0444
       - name: analyticsdb-data
         hostPath:
           path: /var/lib/analyticsdb
-      - name: zookeeper-analyticsdb-data
-        hostPath:
-          path: /var/lib/analyticsdb_zookeeper_data
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: redis
+spec:
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: {{ .Values.labels.analyticsdb.node_selector_key }}
+                operator: In
+                values:
+                - {{ .Values.labels.analyticsdb.node_selector_value }}
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      hostNetwork: true
+      containers:
+      - name: redis
+        image: "redis:4.0.2"
+        imagePullPolicy: ""
+        securityContext:
+          privileged: true
 {{- end }}

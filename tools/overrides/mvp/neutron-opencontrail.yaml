@@ -38,7 +38,7 @@ pod:
 dependencies:
   server:
     daemonset:
-      - contrail-controller
+      - contrail-controller-control
       - contrail-analytics
       - contrail-analyticsdb
   metadata:
