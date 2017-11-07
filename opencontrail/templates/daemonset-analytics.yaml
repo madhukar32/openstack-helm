@@ -7,7 +7,12 @@ metadata:
   name: analytics-env
 data:
   CONTROLLER_NODES: 10.0.2.15
-  RABBITMQ_PORT: 5672
+  RABBITMQ_NODES: rabbitmq.openstack.svc.cluster.local
+  RABBITMQ_PORT: "5672"
+  RABBITMQ_USER: rabbitmq
+  RABBITMQ_PASSWORD: password
+  ANALYTICS_API_AAA_MODE: cloud-admin
+  CONFIG_AUTHN_SERVER: keystone-api.openstack.svc.cluster.local
 ---
 apiVersion: v1
 kind: ConfigMap

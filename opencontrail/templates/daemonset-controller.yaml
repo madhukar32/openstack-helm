@@ -7,7 +7,22 @@ metadata:
   name: config-env
 data:
   CONTROLLER_NODES: 10.0.2.15
-  RABBITMQ_PORT: 5672
+  RABBITMQ_NODES: rabbitmq.openstack.svc.cluster.local
+  RABBITMQ_PORT: "5672"
+  RABBITMQ_USER: rabbitmq
+  RABBITMQ_PASSWORD: password
+  CONFIG_API_AAA_MODE: cloud-admin
+  CONFIG_AUTHN_SERVER: keystone-api.openstack.svc.cluster.local
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-webui-env
+data:
+  CONTROLLER_NODES: 10.0.2.15
+  orchestration_Manager: openstack
+  identityManager_ip: keystone-api.openstack.svc.cluster.local
+  identityManager_port: "80"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -292,13 +307,13 @@ spec:
           privileged: true
         envFrom:
         - configMapRef:
-            name: config-env
+            name: config-webui-env
       - name: contrail-controller-webui-web
         image: "localhost:5000/contrail-controller-webui-web:4.0.2.0-35"
         imagePullPolicy: ""
         envFrom:
         - configMapRef:
-            name: config-env
+            name: config-webui-env
         securityContext:
           privileged: true
 {{- end }}

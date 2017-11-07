@@ -46,6 +46,9 @@ spec:
         imagePullPolicy: ""
         securityContext:
           privileged: true
+        env:
+        - name: CONTROLLER_NODES
+          value: 10.0.2.15
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
