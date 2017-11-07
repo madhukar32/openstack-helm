@@ -11,6 +11,14 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  name: controller-nodemgr-config
+data:
+  DOCKER_HOST: "unix://mnt/docker.sock"
+  CONTROLLER_NODES: 10.0.2.15
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
   name: contrail-configdb-config
 data:
   CASSANDRA_SEEDS: 10.0.2.15
@@ -152,6 +160,26 @@ spec:
             name: config-env
         securityContext:
           privileged: true
+      - name: contrail-controller-control-nodemgr
+        image: "localhost:5000/contrail-controller-control-nodemgr:4.0.2.0-35"
+        imagePullPolicy: ""
+        envFrom:
+        - configMapRef:
+            name: controller-nodemgr-config
+        securityContext:
+          privileged: true
+# todo: there is type Socket in new kubernetes, it is possible to use full
+# path:
+# hostPath:
+#   path: /var/run/docker.sock and
+#   type: Socket
+        volumeMounts:
+        - mountPath: /mnt
+          name: docker-unix-socket
+      volumes:
+      - name: docker-unix-socket
+        hostPath:
+          path: /var/run
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
@@ -210,14 +238,14 @@ spec:
         envFrom:
         - configMapRef:
             name: config-env
-#      - name: contrail-controller-config-nodemgr
-#        image: "localhost:5000/contrail-controller-config-nodemgr:4.0.2.0-35"
-#        imagePullPolicy: ""
-#        envFrom:
-#        - configMapRef:
-#            name: nodemgr-config
-#        securityContext:
-#          privileged: true
+      - name: contrail-controller-config-nodemgr
+        image: "localhost:5000/contrail-controller-config-nodemgr:4.0.2.0-35"
+        imagePullPolicy: ""
+        envFrom:
+        - configMapRef:
+            name: controller-nodemgr-config
+        securityContext:
+          privileged: true
 # todo: there is type Socket in new kubernetes, it is possible to use full
 # path:
 # hostPath:
