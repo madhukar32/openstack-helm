@@ -2,8 +2,8 @@
 {{- $envAll := . }}
 {{- $cloud_orchestrator := .Values.conf.global_config.GLOBAL.cloud_orchestrator }}
 # host_os is a mandatory field
-#{{- $_ := required ".Values.conf.host_os must be specified, valid values are ubuntu, centos" .Values.conf.host_os }}
-#{{- $host_os := .Values.conf.host_os }}
+#{ {- $_ := required ".Values.conf.host_os must be specified, valid values are ubuntu, centos" .Values.conf.host_os }}
+#{ {- $host_os := .Values.conf.host_os }}
 {{- $host_os := "centos" }}
 ---
 apiVersion: v1
@@ -58,8 +58,8 @@ spec:
       automountServiceAccountToken: false
       hostNetwork: true
       initContainers:
-#{{- if eq $host_os "centos" }}
-#{{- $_ := required ".Values.images.tags.vrouter_compiler must be specified, if hostOS is centos" .Values.images.vrouter_compiler }}
+#{ {- if eq $host_os "centos" }}
+#{ {- $_ := required ".Values.images.tags.vrouter_compiler must be specified, if hostOS is centos" .Values.images.vrouter_compiler }}
 #      - name: contrail-vrouter-compiler
 #        image: {{ .Values.images.tags.vrouter_compiler | quote }}
 #        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
@@ -73,7 +73,7 @@ spec:
 #        env:
 #        - name: INSTALL_VROUTER_MODULE
 #          value: 'true'
-#{{- end }}
+#{ {- end }}
 {{- if eq $cloud_orchestrator "kubernetes" }}
       - name: contrail-kubernetes-agent
         image: {{ .Values.images.tags.kubernetes_agent | quote }}
@@ -96,7 +96,7 @@ spec:
         - name: var-log-contrail-cni
           mountPath: /var/log/contrail/cni
 {{- end }}
-#{{- if eq $cloud_orchestrator "openstack" }}
+#{ {- if eq $cloud_orchestrator "openstack" }}
 #      - name: register-vrouter-to-controller
 #        image: {{ .Values.images.tags.register_vrouter | quote }}
 #        imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
@@ -115,7 +115,7 @@ spec:
 #        - name: register-vrouter
 #          mountPath: /tmp/register-vrouter.sh
 #          subPath: register-vrouter.sh
-#{{- end }}
+#{ {- end }}
       containers:
       - name: contrail-agent
         image: "localhost:5000/contrail-agent-vrouter:4.0.2.0-35"
@@ -186,15 +186,15 @@ spec:
         hostPath:
           path: /var/log/contrail/cni/
 {{- end }}
-#{{- if eq $cloud_orchestrator "openstack"}}
+#{ {- if eq $cloud_orchestrator "openstack"}}
 #      - name: register-vrouter
 #        configMap:
 #          name: vrouter-bin
 #          defaultMode: 0555
-#{{- end }}
-#{{- if eq $host_os "centos" }}
+#{ {- end }}
+#{ {- if eq $host_os "centos" }}
 #      - name: usr-src-kernels
 #        hostPath:
 #          path: /usr/src/kernels
-#{{- end }}
+#{ {- end }}
 {{- end }}
