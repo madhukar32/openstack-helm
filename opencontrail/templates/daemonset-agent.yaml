@@ -20,7 +20,7 @@ data:
   ADMIN_PASSWORD: password
   AUTH_URL_VERSION: v3
   AUTH_URL_TOKENS: /v3/auth/tokens
-  PHYSICAL_INTERFACE: {{physical_interface}}
+  PHYSICAL_INTERFACE: eth0
 ---
 apiVersion: v1
 kind: ConfigMap
