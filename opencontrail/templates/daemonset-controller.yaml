@@ -11,7 +11,9 @@ data:
   RABBITMQ_PORT: "5672"
   RABBITMQ_USER: rabbitmq
   RABBITMQ_PASSWORD: password
+  CONFIG_API_AUTH: keystone
   CONFIG_API_AAA_MODE: cloud-admin
+  ANALYTICS_API_AAA_MODE: cloud-admin
   CONFIG_AUTHN_SERVER: keystone-api.openstack.svc.cluster.local
 ---
 apiVersion: v1
