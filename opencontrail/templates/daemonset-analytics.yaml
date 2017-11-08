@@ -14,6 +14,11 @@ data:
   CONFIG_API_AUTH: keystone
   ANALYTICS_API_AAA_MODE: cloud-admin
   CONFIG_AUTHN_SERVER: keystone-api.openstack.svc.cluster.local
+  ADMIN_USER: admin
+  ADMIN_TENANT: admin
+  ADMIN_PASSWORD: password
+  AUTH_URL_VERSION: v3
+  AUTH_URL_TOKENS: /v3/auth/tokens
 ---
 apiVersion: v1
 kind: ConfigMap
