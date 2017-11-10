@@ -10,7 +10,7 @@ kind: ConfigMap
 metadata:
   name: vrouter-env
 data:
-  CONTROLLER_NODES: 10.0.2.15
+  CONTROLLER_NODES: {{ .Values.conf.controller_nodes }}
   CONFIG_API_AUTH: keystone
   CONFIG_API_AAA_MODE: cloud-admin
   CONFIG_AUTHN_SERVER: keystone-api.openstack.svc.cluster.local
@@ -27,7 +27,7 @@ metadata:
   name: vrouter-nodemgr-config
 data:
   DOCKER_HOST: "unix://mnt/docker.sock"
-  CONTROLLER_NODES: 10.0.2.15
+  CONTROLLER_NODES: {{ .Values.conf.controller_nodes }}
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet

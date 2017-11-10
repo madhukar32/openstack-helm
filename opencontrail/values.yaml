@@ -30,6 +30,7 @@ labels:
 conf:
   # host_os - (OPTIONAL) host operating system release. Sample values "ubuntu" and "centos". Default is ubuntu
   host_os: ubuntu
+  controller_nodes: 10.87.65.153
   global_config:
     # global section configuration needed by all containers
     GLOBAL:

@@ -6,7 +6,7 @@ kind: ConfigMap
 metadata:
   name: config-env
 data:
-  CONTROLLER_NODES: 10.0.2.15
+  CONTROLLER_NODES: {{ .Values.conf.controller_nodes }}
   RABBITMQ_NODES: rabbitmq.openstack.svc.cluster.local
   RABBITMQ_PORT: "5672"
   RABBITMQ_USER: rabbitmq
@@ -26,7 +26,7 @@ kind: ConfigMap
 metadata:
   name: config-webui-env
 data:
-  CONTROLLER_NODES: 10.0.2.15
+  CONTROLLER_NODES: {{ .Values.conf.controller_nodes }}
   orchestration_Manager: openstack
   identityManager_ip: keystone-api.openstack.svc.cluster.local
   identityManager_port: "80"
@@ -37,17 +37,18 @@ metadata:
   name: controller-nodemgr-config
 data:
   DOCKER_HOST: "unix://mnt/docker.sock"
-  CONTROLLER_NODES: 10.0.2.15
+  CONTROLLER_NODES: {{ .Values.conf.controller_nodes }}
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: contrail-configdb-config
 data:
-  CASSANDRA_SEEDS: 10.0.2.15
+# TODO: fix seeds and listen address
+  CASSANDRA_SEEDS: {{ .Values.conf.controller_nodes }}
   CASSANDRA_CLUSTER_NAME: ContrailConfigDB
   CASSANDRA_START_RPC: "true"
-  CASSANDRA_LISTEN_ADDRESS: 10.0.2.15
+  CASSANDRA_LISTEN_ADDRESS: {{ .Values.conf.controller_nodes }}
   JVM_EXTRA_OPTS: >-
     -Dcassandra.rpc_port=9161
     -Dcassandra.native_transport_port=9041
