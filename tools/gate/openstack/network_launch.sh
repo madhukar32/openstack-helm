@@ -30,7 +30,7 @@ if [ "x$SDN_PLUGIN" != "xopencontrail" ]; then
   sudo iptables -t nat -A POSTROUTING -o $(net_default_iface) -s ${OSH_EXT_SUBNET} -j MASQUERADE
 elif [ "x$SDN_PLUGIN" == "xopencontrail" ]; then
   # Using Simple Gateway feature for OpenContrail
-  CONTRAIL_AGENT_POD=$(kubectl get -n openstack pods -l application=opencontrail --no-headers -o name | grep vrouter-agent | head -1 | cut -d '/' -f 2)
+  CONTRAIL_AGENT_POD=$(kubectl get -n openstack pods -l application=opencontrail --no-headers -o name | grep contrail-agent | head -1 | cut -d '/' -f 2)
   kubectl exec -n openstack ${CONTRAIL_AGENT_POD} -- /opt/contrail/utils/provision_vgw_interface.py --oper create --interface vgw --subnets ${OSH_EXT_SUBNET} --routes 0.0.0.0/0 --vrf default-domain:admin:${OSH_EXT_NET_NAME}:${OSH_EXT_SUBNET_NAME}
 fi
 
