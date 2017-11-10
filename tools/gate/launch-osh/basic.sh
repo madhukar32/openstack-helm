@@ -163,7 +163,8 @@ elif [ "x$SDN_PLUGIN" == "xopencontrail" ]; then
     --set conf.global_config.GLOBAL.controller_nodes=$local_ip \
     --set conf.global_config.GLOBAL.controller_ip=$local_ip \
     --set conf.global_config.GLOBAL.analytics_nodes=$local_ip \
-    --set conf.global_config.GLOBAL.analyticsdb_nodes=$local_ip
+    --set conf.global_config.GLOBAL.analyticsdb_nodes=$local_ip \
+    --set conf.host_os=$HOST_OS
 fi
 kube_wait_for_pods openstack ${POD_START_TIMEOUT_OPENSTACK}
 

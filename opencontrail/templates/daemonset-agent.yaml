@@ -4,16 +4,42 @@
 # host_os is a mandatory field
 {{- $_ := required ".Values.conf.host_os must be specified, valid values are ubuntu, centos" .Values.conf.host_os }}
 {{- $host_os := .Values.conf.host_os }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vrouter-env
+data:
+  CONTROLLER_NODES: 10.0.2.15
+  CONFIG_API_AUTH: keystone
+  CONFIG_API_AAA_MODE: cloud-admin
+  CONFIG_AUTHN_SERVER: keystone-api.openstack.svc.cluster.local
+  ADMIN_USER: admin
+  ADMIN_TENANT: admin
+  ADMIN_PASSWORD: password
+  AUTH_URL_VERSION: v3
+  AUTH_URL_TOKENS: /v3/auth/tokens
+  PHYSICAL_INTERFACE: eth0
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vrouter-nodemgr-config
+data:
+  DOCKER_HOST: "unix://mnt/docker.sock"
+  CONTROLLER_NODES: 10.0.2.15
+---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
-  name: contrail-vrouter-agent
+  name: contrail-agent
 spec:
   template:
     metadata:
       labels:
 {{ tuple $envAll "opencontrail" "vrouter-agent" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
     spec:
+      #Disable affinity for single node setup
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -23,12 +49,13 @@ spec:
                 operator: In
                 values:
                 - {{ .Values.labels.agent.node_selector_value }}
+      #Enable tolerations for single node setup
       tolerations:
       - key: node-role.kubernetes.io/master
         operator: Exists
         effect: NoSchedule
-      hostNetwork: true
       automountServiceAccountToken: false
+      hostNetwork: true
       initContainers:
 {{- if eq $host_os "centos" }}
 {{- $_ := required ".Values.images.tags.vrouter_compiler must be specified, if hostOS is centos" .Values.images.vrouter_compiler }}
@@ -68,78 +95,82 @@ spec:
         - name: var-log-contrail-cni
           mountPath: /var/log/contrail/cni
 {{- end }}
-{{- if eq $cloud_orchestrator "openstack" }}
-      - name: register-vrouter-to-controller
-        image: {{ .Values.images.tags.register_vrouter | quote }}
-        imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
-        command:
-        - /tmp/register-vrouter.sh
-        env:
-        - name: HOST_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: spec.nodeName
-        - name: HOST_IP
-          valueFrom:
-            fieldRef:
-              fieldPath: status.hostIP
-        volumeMounts:
-        - name: register-vrouter
-          mountPath: /tmp/register-vrouter.sh
-          subPath: register-vrouter.sh
-{{- end }}
+#{ {- if eq $cloud_orchestrator "openstack" }}
+#      - name: register-vrouter-to-controller
+#        image: {{ .Values.images.tags.register_vrouter | quote }}
+#        imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
+#        command:
+#        - /tmp/register-vrouter.sh
+#        env:
+#        - name: HOST_NAME
+#          valueFrom:
+#            fieldRef:
+#              fieldPath: spec.nodeName
+#        - name: HOST_IP
+#          valueFrom:
+#            fieldRef:
+#              fieldPath: status.hostIP
+#        volumeMounts:
+#        - name: register-vrouter
+#          mountPath: /tmp/register-vrouter.sh
+#          subPath: register-vrouter.sh
+#{ {- end }}
       containers:
       - name: contrail-agent
-        image: {{ .Values.images.tags.vrouter_agent | quote }}
+        image: "localhost:5000/contrail-agent-vrouter:4.0.2.0-35"
         imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
         securityContext:
           privileged: true
+        envFrom:
+        - configMapRef:
+            name: vrouter-env
         volumeMounts:
-        - name: tmp-contrail-config
-          mountPath: /tmp/contrailctl/global.conf
-          subPath: global.conf
-        - name: tmp-contrail-config
-          mountPath: /tmp/contrailctl/agent.conf
-          subPath: agent.conf
-        - name: tmp-contrail-config
-          mountPath: /tmp/contrailctl/kubemanager.conf
-          subPath: kubemanager.conf
-        - name: lib-modules
-          mountPath: /lib/modules
-        - name: usr-src
-          mountPath: /usr/src
-        - name: contrail-varlib
-          mountPath: /var/lib/contrail/
+        - mountPath: /usr/src
+          name: usr-src
+        - mountPath: /lib/modules
+          name: lib-modules
+        - mountPath: /var/lib/contrail/
+          name: var-lib-contrail
 {{- if eq $cloud_orchestrator "kubernetes" }}
-        - name: pod-secret
-          mountPath: /tmp/serviceaccount
-        - name: opt-cni-bin
-          mountPath: /host/opt_cni_bin
-        - name: etc-cni
-          mountPath: /host/etc_cni
+        - mountPath: /host/etc_cni
+          name: etc-cni
+        - mountPath: /host/opt_cni_bin
+          name: opt-cni-bin
         # This is a workaround just to make sure the directory is created on host
-        - name: var-log-contrail-cni
-          mountPath: /var/log/contrail/cni
+        - mountPath: /var/log/contrail/cni
+          name: var-log-contrail-cni
+        - mountPath: /tmp/serviceaccount
+          name: pod-secret
 {{- end }}
+      - name: contrail-agent-nodemgr
+        image: "localhost:5000/contrail-agent-nodemgr:4.0.2.0-35"
+        imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
+        envFrom:
+        - configMapRef:
+            name: vrouter-nodemgr-config
+        securityContext:
+          privileged: true
+# todo: there is type Socket in new kubernetes, it is possible to use full
+# path:
+# hostPath:
+#   path: /var/run/docker.sock and
+#   type: Socket
+        volumeMounts:
+        - mountPath: /mnt
+          name: docker-unix-socket
       volumes:
-      - name: tmp-contrail-config
-        configMap:
-          name: configmap-contrailctl
-          defaultMode: 0444
-      - name: lib-modules
+      - name: docker-unix-socket
         hostPath:
-          path: /lib/modules
+          path: /var/run
       - name: usr-src
         hostPath:
           path: /usr/src
-      - name: contrail-varlib
+      - name: lib-modules
+        hostPath:
+          path: /lib/modules
+      - name: var-lib-contrail
         hostPath:
           path: /var/lib/contrail/
-{{- if eq $host_os "centos" }}
-      - name: usr-src-kernels
-        hostPath:
-          path: /usr/src/kernels
-{{- end }}
 {{- if eq $cloud_orchestrator "kubernetes" }}
       - name: pod-secret
         secret:
@@ -154,10 +185,15 @@ spec:
         hostPath:
           path: /var/log/contrail/cni/
 {{- end }}
-{{- if eq $cloud_orchestrator "openstack"}}
-      - name: register-vrouter
-        configMap:
-          name: vrouter-bin
-          defaultMode: 0555
+#{ {- if eq $cloud_orchestrator "openstack"}}
+#      - name: register-vrouter
+#        configMap:
+#          name: vrouter-bin
+#          defaultMode: 0555
+#{ {- end }}
+{{- if eq $host_os "centos" }}
+      - name: usr-src-kernels
+        hostPath:
+          path: /usr/src/kernels
 {{- end }}
 {{- end }}

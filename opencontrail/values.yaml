@@ -7,7 +7,7 @@ images:
     vrouter_agent: "docker.io/opencontrail/contrail-agent-ubuntu16.04:4.0.2.0"
     kubernetes_agent: "docker.io/opencontrail/contrail-kubernetes-agent-ubuntu16.04:4.0.2.0"
     register_vrouter: "docker.io/opencontrail/contrail-agent-ubuntu16.04:4.0.2.0"
-    # vrouter_compiler: "contrail-vrouter-compiler-centos7:4.0.2.0"
+    vrouter_compiler: "docker.io/andreymp/contrail-vrouter-compiler-centos7:4.0.2.0"
   imagePullPolicy: "IfNotPresent"
 
 labels:
