@@ -144,6 +144,8 @@ function check_vm {
   local floating_ip=$1
   local keypair_loc="$2"
 
+  route -n
+
   # Ping our VM
   wait_for_ping ${floating_ip} ${SERVICE_TEST_TIMEOUT}
 
