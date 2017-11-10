@@ -57,22 +57,22 @@ spec:
       automountServiceAccountToken: false
       hostNetwork: true
       initContainers:
-{{- if eq $host_os "centos" }}
-{{- $_ := required ".Values.images.tags.vrouter_compiler must be specified, if hostOS is centos" .Values.images.vrouter_compiler }}
-      - name: contrail-vrouter-compiler
-        image: {{ .Values.images.tags.vrouter_compiler | quote }}
-        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
-        securityContext:
-          privileged: true
-        volumeMounts:
-        - mountPath: /lib/modules
-          name: lib-modules
-        - mountPath: /usr/src/kernels
-          name: usr-src-kernels
-        env:
-        - name: INSTALL_VROUTER_MODULE
-          value: 'true'
-{{- end }}
+#{ {- if eq $host_os "centos-fake" }}
+#{ {- $_ := required ".Values.images.tags.vrouter_compiler must be specified, if hostOS is centos" .Values.images.tags.vrouter_compiler }}
+#      - name: contrail-vrouter-compiler
+#        image: {{ .Values.images.tags.vrouter_compiler | quote }}
+#        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
+#        securityContext:
+#          privileged: true
+#        volumeMounts:
+#        - mountPath: /lib/modules
+#          name: lib-modules
+#        - mountPath: /usr/src/kernels
+#          name: usr-src-kernels
+#        env:
+#        - name: INSTALL_VROUTER_MODULE
+#          value: 'true'
+#{ {- end }}
 {{- if eq $cloud_orchestrator "kubernetes" }}
       - name: contrail-kubernetes-agent
         image: {{ .Values.images.tags.kubernetes_agent | quote }}
@@ -191,9 +191,9 @@ spec:
 #          name: vrouter-bin
 #          defaultMode: 0555
 #{ {- end }}
-{{- if eq $host_os "centos" }}
-      - name: usr-src-kernels
-        hostPath:
-          path: /usr/src/kernels
-{{- end }}
+#{ {- if eq $host_os "centos-fake" }}
+#      - name: usr-src-kernels
+#        hostPath:
+#          path: /usr/src/kernels
+#{ {- end }}
 {{- end }}

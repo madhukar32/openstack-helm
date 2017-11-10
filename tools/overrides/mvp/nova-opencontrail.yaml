@@ -20,4 +20,4 @@ dependencies:
   compute:
     daemonset:
     - libvirt
-    - contrail-vrouter-agent
+    - contrail-agent
