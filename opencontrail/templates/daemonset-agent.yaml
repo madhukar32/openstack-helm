@@ -20,14 +20,7 @@ data:
   AUTH_URL_VERSION: v3
   AUTH_URL_TOKENS: /v3/auth/tokens
   PHYSICAL_INTERFACE: eth0
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: vrouter-nodemgr-config
-data:
   DOCKER_HOST: "unix://mnt/docker.sock"
-  CONTROLLER_NODES: {{ .Values.conf.controller_nodes }}
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
@@ -147,7 +140,7 @@ spec:
         imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
-            name: vrouter-nodemgr-config
+            name: vrouter-env
         securityContext:
           privileged: true
 # todo: there is type Socket in new kubernetes, it is possible to use full

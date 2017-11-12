@@ -19,14 +19,7 @@ data:
   ADMIN_PASSWORD: password
   AUTH_URL_VERSION: v3
   AUTH_URL_TOKENS: /v3/auth/tokens
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: analytics-nodemgr-config
-data:
   DOCKER_HOST: "unix://mnt/docker.sock"
-  CONTROLLER_NODES: {{ .Values.conf.controller_nodes }}
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
@@ -106,7 +99,7 @@ spec:
         imagePullPolicy: ""
         envFrom:
         - configMapRef:
-            name: analytics-nodemgr-config
+            name: analytics-env
         securityContext:
           privileged: true
 # todo: there is type Socket in new kubernetes, it is possible to use full
