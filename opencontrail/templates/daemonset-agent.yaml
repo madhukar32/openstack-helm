@@ -51,7 +51,7 @@ spec:
       initContainers:
       containers:
       - name: contrail-agent
-        image: {{ .Values.images.tags.afent_vrouter | quote }}
+        image: {{ .Values.images.tags.agent_vrouter | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         securityContext:
           privileged: true
