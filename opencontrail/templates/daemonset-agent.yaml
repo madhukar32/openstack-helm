@@ -50,68 +50,10 @@ spec:
       automountServiceAccountToken: false
       hostNetwork: true
       initContainers:
-#{ {- if eq $host_os "centos-fake" }}
-#{ {- $_ := required ".Values.images.tags.vrouter_compiler must be specified, if hostOS is centos" .Values.images.tags.vrouter_compiler }}
-#      - name: contrail-vrouter-compiler
-#        image: {{ .Values.images.tags.vrouter_compiler | quote }}
-#        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
-#        securityContext:
-#          privileged: true
-#        volumeMounts:
-#        - mountPath: /lib/modules
-#          name: lib-modules
-#        - mountPath: /usr/src/kernels
-#          name: usr-src-kernels
-#        env:
-#        - name: INSTALL_VROUTER_MODULE
-#          value: 'true'
-#{ {- end }}
-{{- if eq $cloud_orchestrator "kubernetes" }}
-      - name: contrail-kubernetes-agent
-        image: {{ .Values.images.tags.kubernetes_agent | quote }}
-        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
-        securityContext:
-          privileged: true
-        volumeMounts:
-        - name: tmp-contrail-config
-          mountPath: /tmp/contrailctl/global.conf
-          subPath: global.conf
-        - name: tmp-contrail-config
-          mountPath: /tmp/contrailctl/kubernetesagent.conf
-          subPath: kubernetesagent.conf
-        - name: contrail-varlib
-          mountPath: /var/lib/contrail/
-        - name: etc-cni
-          mountPath: /host/etc_cni
-        - name: opt-cni-bin
-          mountPath: /host/opt_cni_bin
-        - name: var-log-contrail-cni
-          mountPath: /var/log/contrail/cni
-{{- end }}
-#{ {- if eq $cloud_orchestrator "openstack" }}
-#      - name: register-vrouter-to-controller
-#        image: {{ .Values.images.tags.register_vrouter | quote }}
-#        imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
-#        command:
-#        - /tmp/register-vrouter.sh
-#        env:
-#        - name: HOST_NAME
-#          valueFrom:
-#            fieldRef:
-#              fieldPath: spec.nodeName
-#        - name: HOST_IP
-#          valueFrom:
-#            fieldRef:
-#              fieldPath: status.hostIP
-#        volumeMounts:
-#        - name: register-vrouter
-#          mountPath: /tmp/register-vrouter.sh
-#          subPath: register-vrouter.sh
-#{ {- end }}
       containers:
       - name: contrail-agent
-        image: "localhost:5000/contrail-agent-vrouter:4.0.2.0-35"
-        imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
+        image: {{ .Values.images.tags.afent_vrouter | quote }}
+        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         securityContext:
           privileged: true
         envFrom:
@@ -124,20 +66,9 @@ spec:
           name: lib-modules
         - mountPath: /var/lib/contrail/
           name: var-lib-contrail
-{{- if eq $cloud_orchestrator "kubernetes" }}
-        - mountPath: /host/etc_cni
-          name: etc-cni
-        - mountPath: /host/opt_cni_bin
-          name: opt-cni-bin
-        # This is a workaround just to make sure the directory is created on host
-        - mountPath: /var/log/contrail/cni
-          name: var-log-contrail-cni
-        - mountPath: /tmp/serviceaccount
-          name: pod-secret
-{{- end }}
       - name: contrail-agent-nodemgr
-        image: "localhost:5000/contrail-agent-nodemgr:4.0.2.0-35"
-        imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
+        image: {{ .Values.images.tags.agent_nodemgr | quote }}
+        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: vrouter-env
@@ -164,29 +95,4 @@ spec:
       - name: var-lib-contrail
         hostPath:
           path: /var/lib/contrail/
-{{- if eq $cloud_orchestrator "kubernetes" }}
-      - name: pod-secret
-        secret:
-          secretName: contrail-kube-manager-token
-      - name: opt-cni-bin
-        hostPath:
-          path: /opt/cni/bin
-      - name: etc-cni
-        hostPath:
-          path: /etc/cni
-      - name: var-log-contrail-cni
-        hostPath:
-          path: /var/log/contrail/cni/
-{{- end }}
-#{ {- if eq $cloud_orchestrator "openstack"}}
-#      - name: register-vrouter
-#        configMap:
-#          name: vrouter-bin
-#          defaultMode: 0555
-#{ {- end }}
-#{ {- if eq $host_os "centos-fake" }}
-#      - name: usr-src-kernels
-#        hostPath:
-#          path: /usr/src/kernels
-#{ {- end }}
 {{- end }}

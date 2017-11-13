@@ -75,8 +75,8 @@ spec:
       hostNetwork: true
       containers:
       - name: zookeeper
-        image: "zookeeper:3.4.10"
-        imagePullPolicy: ""
+        image: {{ .Values.images.tags.zookeeper | quote }}
+        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         securityContext:
           privileged: true
         volumeMounts:
@@ -113,8 +113,8 @@ spec:
       hostNetwork: true
       containers:
       - name: contrail-configdb
-        image: "cassandra:2.2.10"
-        imagePullPolicy: ""
+        image: {{ .Values.images.tags.cassandra | quote }}
+        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         securityContext:
           privileged: true
         envFrom:
@@ -154,32 +154,32 @@ spec:
       hostNetwork: true
       containers:
       - name: contrail-controller-control
-        image: "localhost:5000/contrail-controller-control-control:4.0.2.0-35"
-        imagePullPolicy: ""
+        image: {{ .Values.images.tags.control_control | quote }}
+        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         securityContext:
           privileged: true
         envFrom:
         - configMapRef:
             name: config-env
       - name: contrail-controller-control-dns
-        image: "localhost:5000/contrail-controller-control-dns:4.0.2.0-35"
-        imagePullPolicy: ""
+        image: {{ .Values.images.tags.control_dns | quote }}
+        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: config-env
         securityContext:
           privileged: true
       - name: contrail-controller-control-named
-        image: "localhost:5000/contrail-controller-control-named:4.0.2.0-35"
-        imagePullPolicy: ""
+        image: {{ .Values.images.tags.control_named | quote }}
+        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: config-env
         securityContext:
           privileged: true
       - name: contrail-controller-control-nodemgr
-        image: "localhost:5000/contrail-controller-control-nodemgr:4.0.2.0-35"
-        imagePullPolicy: ""
+        image: {{ .Values.images.tags.control_nodemgr | quote }}
+        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: config-env
@@ -224,40 +224,40 @@ spec:
       hostNetwork: true
       containers:
       - name: contrail-controller-config-api
-        image: "localhost:5000/contrail-controller-config-api:4.0.2.0-35"
-        imagePullPolicy: ""
+        image: {{ .Values.images.tags.config_api | quote }}
+        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         securityContext:
           privileged: true
         envFrom:
         - configMapRef:
             name: config-env
       - name: contrail-controller-config-devicemgr
-        image: "localhost:5000/contrail-controller-config-devicemgr:4.0.2.0-35"
-        imagePullPolicy: ""
+        image: {{ .Values.images.tags.config_devicemgr | quote }}
+        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: config-env
         securityContext:
           privileged: true
       - name: contrail-controller-config-schema
-        image: "localhost:5000/contrail-controller-config-schema:4.0.2.0-35"
-        imagePullPolicy: ""
+        image: {{ .Values.images.tags.config_schema_transformer | quote }}
+        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: config-env
         securityContext:
           privileged: true
       - name: contrail-controller-config-svcmonitor
-        image: "localhost:5000/contrail-controller-config-svcmonitor:4.0.2.0-35"
-        imagePullPolicy: ""
+        image: {{ .Values.images.tags.config_svcmonitor | quote }}
+        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         securityContext:
           privileged: true
         envFrom:
         - configMapRef:
             name: config-env
       - name: contrail-controller-config-nodemgr
-        image: "localhost:5000/contrail-controller-config-nodemgr:4.0.2.0-35"
-        imagePullPolicy: ""
+        image: {{ .Values.images.tags.config_nodemgr | quote }}
+        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: config-env
@@ -302,16 +302,16 @@ spec:
       hostNetwork: true
       containers:
       - name: contrail-controller-webui-job
-        image: "localhost:5000/contrail-controller-webui-job:4.0.2.0-35"
-        imagePullPolicy: ""
+        image: {{ .Values.images.tags.webui_job | quote }}
+        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         securityContext:
           privileged: true
         envFrom:
         - configMapRef:
             name: config-webui-env
       - name: contrail-controller-webui-web
-        image: "localhost:5000/contrail-controller-webui-web:4.0.2.0-35"
-        imagePullPolicy: ""
+        image: {{ .Values.images.tags.webui_web | quote }}
+        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: config-webui-env

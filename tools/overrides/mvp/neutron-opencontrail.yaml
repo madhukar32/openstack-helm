@@ -38,12 +38,10 @@ pod:
 dependencies:
   server:
     daemonset:
-      - contrail-controller-control
-      - contrail-analytics
-      - contrail-analyticsdb
+      - contrail-controller-config
   metadata:
     daemonset:
-      - contrail-vrouter-agent
+      - contrail-agent
 
 conf:
   neutron:

@@ -50,8 +50,8 @@ spec:
       hostNetwork: true
       containers:
       - name: kafka
-        image: "localhost:5000/contrail-analyticsdb-kafka:4.0.2.0-35"
-        imagePullPolicy: ""
+        image: {{ .Values.images.tags.analyticsdb_kafka | quote }}
+        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         securityContext:
           privileged: true
         envFrom:
@@ -84,8 +84,8 @@ spec:
       hostNetwork: true
       containers:
       - name: contrail-analyticsdb
-        image: "cassandra:2.2.10"
-        imagePullPolicy: ""
+        image: {{ .Values.images.tags.cassandra | quote }}
+        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         securityContext:
           privileged: true
         envFrom:
@@ -125,8 +125,8 @@ spec:
       hostNetwork: true
       containers:
       - name: redis
-        image: "redis:4.0.2"
-        imagePullPolicy: ""
+        image: {{ .Values.images.tags.redis | quote }}
+        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         securityContext:
           privileged: true
 {{- end }}
