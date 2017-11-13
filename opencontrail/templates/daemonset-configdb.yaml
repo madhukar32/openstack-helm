@@ -1,60 +1,61 @@
-{{- if .Values.manifests.daemonset_analyticsdb }}
+{{- if .Values.manifests.daemonset_controller }}
 {{- $envAll := . }}
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: contrail-analyticsdb
+  name: contrail-configdb
 data:
 # TODO: fix seeds and listen address
   CASSANDRA_SEEDS: {{ .Values.conf.controller_nodes }}
-  CASSANDRA_CLUSTER_NAME: Contrail
+  CASSANDRA_CLUSTER_NAME: ContrailConfigDB
   CASSANDRA_START_RPC: "true"
   CASSANDRA_LISTEN_ADDRESS: {{ .Values.conf.controller_nodes }}
   JVM_EXTRA_OPTS: >-
-    -Dcassandra.rpc_port=9160
-    -Dcassandra.native_transport_port=9042
-    -Dcassandra.ssl_storage_port=7001
-    -Dcassandra.storage_port=7000
+    -Dcassandra.rpc_port=9161
+    -Dcassandra.native_transport_port=9041
+    -Dcassandra.ssl_storage_port=7011
+    -Dcassandra.storage_port=7010
+    -Dcassandra.jmx.local.port=7200
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
-  name: contrail-analyticsdb
+  name: contrail-configdb
 spec:
   template:
     metadata:
       labels:
-{{ tuple $envAll "opencontrail" "analyticsdb" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
+{{ tuple $envAll "opencontrail" "controller" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
     spec:
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
             - matchExpressions:
-              - key: {{ .Values.labels.analyticsdb.node_selector_key }}
+              - key: {{ .Values.labels.controller.node_selector_key }}
                 operator: In
                 values:
-                - {{ .Values.labels.analyticsdb.node_selector_value }}
+                - {{ .Values.labels.controller.node_selector_value }}
       tolerations:
       - key: node-role.kubernetes.io/master
         operator: Exists
         effect: NoSchedule
       hostNetwork: true
       containers:
-      - name: contrail-analyticsdb
+      - name: contrail-configdb
         image: {{ .Values.images.tags.cassandra | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         securityContext:
           privileged: true
         envFrom:
         - configMapRef:
-            name: contrail-analyticsdb
+            name: contrail-configdb
         volumeMounts:
         - mountPath: /var/lib/cassandra
-          name: analyticsdb-data
+          name: configdb-data
       volumes:
-      - name: analyticsdb-data
+      - name: configdb-data
         hostPath:
-          path: /var/lib/analyticsdb
+          path: /var/lib/configdb
 {{- end }}

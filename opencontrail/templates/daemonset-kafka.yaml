@@ -1,26 +1,10 @@
 {{- if .Values.manifests.daemonset_analyticsdb }}
 {{- $envAll := . }}
 ---
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: contrail-analyticsdb
-data:
-# TODO: fix seeds and listen address
-  CASSANDRA_SEEDS: {{ .Values.conf.controller_nodes }}
-  CASSANDRA_CLUSTER_NAME: Contrail
-  CASSANDRA_START_RPC: "true"
-  CASSANDRA_LISTEN_ADDRESS: {{ .Values.conf.controller_nodes }}
-  JVM_EXTRA_OPTS: >-
-    -Dcassandra.rpc_port=9160
-    -Dcassandra.native_transport_port=9042
-    -Dcassandra.ssl_storage_port=7001
-    -Dcassandra.storage_port=7000
----
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
-  name: contrail-analyticsdb
+  name: kafka
 spec:
   template:
     metadata:
@@ -42,19 +26,12 @@ spec:
         effect: NoSchedule
       hostNetwork: true
       containers:
-      - name: contrail-analyticsdb
-        image: {{ .Values.images.tags.cassandra | quote }}
+      - name: kafka
+        image: {{ .Values.images.tags.kafka | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         securityContext:
           privileged: true
-        envFrom:
-        - configMapRef:
-            name: contrail-analyticsdb
-        volumeMounts:
-        - mountPath: /var/lib/cassandra
-          name: analyticsdb-data
-      volumes:
-      - name: analyticsdb-data
-        hostPath:
-          path: /var/lib/analyticsdb
+        env:
+        - name: CONTROLLER_NODES
+          value: {{ .Values.conf.controller_nodes }}
 {{- end }}

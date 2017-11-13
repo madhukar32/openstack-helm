@@ -1,0 +1,94 @@
+{{- if .Values.manifests.daemonset_controller }}
+{{- $envAll := . }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: control-env
+data:
+  CONTROLLER_NODES: {{ .Values.conf.controller_nodes }}
+  RABBITMQ_NODES: rabbitmq.openstack.svc.cluster.local
+  RABBITMQ_PORT: "5672"
+  RABBITMQ_USER: rabbitmq
+  RABBITMQ_PASSWORD: password
+  CONFIG_API_AUTH: keystone
+  CONFIG_API_AAA_MODE: cloud-admin
+  ANALYTICS_API_AAA_MODE: cloud-admin
+  CONFIG_AUTHN_SERVER: keystone-api.openstack.svc.cluster.local
+  ADMIN_USER: admin
+  ADMIN_TENANT: admin
+  ADMIN_PASSWORD: password
+  AUTH_URL_VERSION: v3
+  AUTH_URL_TOKENS: /v3/auth/tokens
+  DOCKER_HOST: "unix://mnt/docker.sock"
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: contrail-control
+spec:
+  template:
+    metadata:
+      labels:
+{{ tuple $envAll "opencontrail" "controller" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: {{ .Values.labels.controller.node_selector_key }}
+                operator: In
+                values:
+                - {{ .Values.labels.controller.node_selector_value }}
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      hostNetwork: true
+      containers:
+      - name: contrail-controller-control
+        image: {{ .Values.images.tags.control_control | quote }}
+        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
+        securityContext:
+          privileged: true
+        envFrom:
+        - configMapRef:
+            name: control-env
+      - name: contrail-controller-control-dns
+        image: {{ .Values.images.tags.control_dns | quote }}
+        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
+        envFrom:
+        - configMapRef:
+            name: control-env
+        securityContext:
+          privileged: true
+      - name: contrail-controller-control-named
+        image: {{ .Values.images.tags.control_named | quote }}
+        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
+        envFrom:
+        - configMapRef:
+            name: control-env
+        securityContext:
+          privileged: true
+      - name: contrail-controller-control-nodemgr
+        image: {{ .Values.images.tags.control_nodemgr | quote }}
+        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
+        envFrom:
+        - configMapRef:
+            name: control-env
+        securityContext:
+          privileged: true
+# todo: there is type Socket in new kubernetes, it is possible to use full
+# path:
+# hostPath:
+#   path: /var/run/docker.sock and
+#   type: Socket
+        volumeMounts:
+        - mountPath: /mnt
+          name: docker-unix-socket
+      volumes:
+      - name: docker-unix-socket
+        hostPath:
+          path: /var/run
+{{- end }}

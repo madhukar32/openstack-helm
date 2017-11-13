@@ -1,0 +1,34 @@
+{{- if .Values.manifests.daemonset_analyticsdb }}
+{{- $envAll := . }}
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: redis
+spec:
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: {{ .Values.labels.analyticsdb.node_selector_key }}
+                operator: In
+                values:
+                - {{ .Values.labels.analyticsdb.node_selector_value }}
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      hostNetwork: true
+      containers:
+      - name: redis
+        image: {{ .Values.images.tags.redis | quote }}
+        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
+        securityContext:
+          privileged: true
+{{- end }}

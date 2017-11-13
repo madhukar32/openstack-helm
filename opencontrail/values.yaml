@@ -2,7 +2,6 @@ images:
   tags:
     agent_vrouter: "localhost:5000/contrail-agent-vrouter:4.0.2.0-35"
     agent_nodemgr: "localhost:5000/contrail-agent-nodemgr:4.0.2.0-35"
-    analyticsdb_kafka: "localhost:5000/contrail-analyticsdb-kafka:4.0.2.0-35"
     analytics_api: "localhost:5000/contrail-analytics-api:4.0.2.0-35"
     analytics_collector: "localhost:5000/contrail-analytics-collector:4.0.2.0-35"
     analytics_alarm_gen: "localhost:5000/contrail-analytics-alarm-gen:4.0.2.0-35"
@@ -21,6 +20,7 @@ images:
     config_nodemgr: "localhost:5000/contrail-controller-config-nodemgr:4.0.2.0-35"
     webui_job: "localhost:5000/contrail-controller-webui-job:4.0.2.0-35"
     webui_web: "localhost:5000/contrail-controller-webui-web:4.0.2.0-35"
+    kafka: "localhost:5000/contrail-analyticsdb-kafka:4.0.2.0-35"
     cassandra: "cassandra:2.2.10"
     redis: "redis:4.0.2"
     zookeeper: "zookeeper:3.4.10"
