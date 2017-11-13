@@ -38,7 +38,7 @@ $OPENSTACK stack create \
   --parameter cidr=${OSH_PRIVATE_SUBNET} \
   -t /tmp/${OSH_BASIC_VM_STACK}.yaml \
   ${OSH_BASIC_VM_STACK}
-openstack_wait_for_stack ${OSH_BASIC_VM_STACK} ${SERVICE_TEST_TIMEOUT}
+openstack_wait_for_stack ${OSH_BASIC_VM_STACK} ${OPENSTACK_TEST_TIMEOUT}
 
 FLOATING_IP=$($OPENSTACK floating ip show \
   $($OPENSTACK stack resource show \

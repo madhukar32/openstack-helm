@@ -37,14 +37,14 @@ OPENSTACK_POD=$(kubectl get -n openstack pods -l application=heat,component=engi
 OPENSTACK="kubectl exec -n openstack ${OPENSTACK_POD} -- openstack ${KEYSTONE_CREDS} --os-identity-api-version 3 --os-image-api-version 2"
 
 function wait_for_ping {
-  # Default wait timeout is 180 seconds
+  # Default wait timeout is 60 seconds
   set +x
   PING_CMD="ping -q -c 1 -W 1"
   end=$(date +%s)
   if ! [ -z $2 ]; then
    end=$((end + $2))
   else
-   end=$((end + 180))
+   end=$((end + OPENSTACK_TEST_TIMEOUT))
   fi
   while true; do
       $PING_CMD $1 > /dev/null && \
@@ -58,13 +58,13 @@ function wait_for_ping {
 }
 
 function openstack_wait_for_vm {
-  # Default wait timeout is 180 seconds
+  # Default wait timeout is 60 seconds
   set +x
   end=$(date +%s)
   if ! [ -z $2 ]; then
    end=$((end + $2))
   else
-   end=$((end + 180))
+   end=$((end + OPENSTACK_TEST_TIMEOUT))
   fi
   while true; do
       STATUS=$($OPENSTACK server show $1 -f value -c status)
@@ -79,13 +79,13 @@ function openstack_wait_for_vm {
 }
 
 function wait_for_ssh_port {
-  # Default wait timeout is 180 seconds
+  # Default wait timeout is 60 seconds
   set +x
   end=$(date +%s)
   if ! [ -z $2 ]; then
    end=$((end + $2))
   else
-   end=$((end + 180))
+   end=$((end + OPENSTACK_TEST_TIMEOUT))
   fi
   while true; do
       # Use Nmap as its the same on Ubuntu and RHEL family distros
@@ -99,13 +99,13 @@ function wait_for_ssh_port {
 }
 
 function openstack_wait_for_stack {
-  # Default wait timeout is 180 seconds
+  # Default wait timeout is 60 seconds
   set +x
   end=$(date +%s)
   if ! [ -z $2 ]; then
    end=$((end + $2))
   else
-   end=$((end + 180))
+   end=$((end + OPENSTACK_TEST_TIMEOUT))
   fi
   while true; do
       STATUS=$($OPENSTACK stack show $1 -f value -c stack_status)
@@ -120,13 +120,13 @@ function openstack_wait_for_stack {
 }
 
 function openstack_wait_for_volume {
-  # Default wait timeout is 180 seconds
+  # Default wait timeout is 60 seconds
   set +x
   end=$(date +%s)
   if ! [ -z $3 ]; then
    end=$((end + $3))
   else
-   end=$((end + 180))
+   end=$((end + OPENSTACK_TEST_TIMEOUT))
   fi
   while true; do
       STATUS=$($OPENSTACK volume show $1 -f value -c status)
@@ -147,10 +147,10 @@ function check_vm {
   route -n
 
   # Ping our VM
-  wait_for_ping ${floating_ip} ${SERVICE_TEST_TIMEOUT}
+  wait_for_ping ${floating_ip} ${OPENSTACK_TEST_TIMEOUT}
 
   # Wait for SSH to come up
-  wait_for_ssh_port ${floating_ip} ${SERVICE_TEST_TIMEOUT}
+  wait_for_ssh_port ${floating_ip} ${OPENSTACK_TEST_TIMEOUT}
 
   # SSH into the VM and check it can reach the outside world
   ssh-keyscan "$floating_ip" >> ~/.ssh/known_hosts

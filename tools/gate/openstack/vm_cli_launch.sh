@@ -87,10 +87,10 @@ if $OPENSTACK service list -f value -c Type | grep -q volume; then
     --size ${OSH_VOL_SIZE_CLI} \
     --type ${OSH_VOL_TYPE_CLI} \
     ${OSH_VOL_NAME_CLI}
-  openstack_wait_for_volume ${OSH_VOL_NAME_CLI} available ${SERVICE_TEST_TIMEOUT}
+  openstack_wait_for_volume ${OSH_VOL_NAME_CLI} available ${OPENSTACK_TEST_TIMEOUT}
 
   $OPENSTACK server add volume ${OSH_VM_NAME_CLI} ${OSH_VOL_NAME_CLI}
-  openstack_wait_for_volume ${OSH_VOL_NAME_CLI} in-use ${SERVICE_TEST_TIMEOUT}
+  openstack_wait_for_volume ${OSH_VOL_NAME_CLI} in-use ${OPENSTACK_TEST_TIMEOUT}
 
   VOL_DEV=$($OPENSTACK volume show ${OSH_VOL_NAME_CLI} \
     -f value -c attachments | \
@@ -99,7 +99,7 @@ if $OPENSTACK service list -f value -c Type | grep -q volume; then
   ssh -i ${KEYPAIR_LOC} cirros@${FLOATING_IP} sudo /usr/sbin/mkfs.ext4 ${VOL_DEV}
 
   $OPENSTACK server remove volume  ${OSH_VM_NAME_CLI} ${OSH_VOL_NAME_CLI}
-  openstack_wait_for_volume ${OSH_VOL_NAME_CLI} available ${SERVICE_TEST_TIMEOUT}
+  openstack_wait_for_volume ${OSH_VOL_NAME_CLI} available ${OPENSTACK_TEST_TIMEOUT}
 
   $OPENSTACK volume delete ${OSH_VOL_NAME_CLI}
 fi
