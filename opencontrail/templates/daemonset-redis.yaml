@@ -29,6 +29,4 @@ spec:
       - name: redis
         image: {{ .Values.images.tags.redis | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
-        securityContext:
-          privileged: true
 {{- end }}

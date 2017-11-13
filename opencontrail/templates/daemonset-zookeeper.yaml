@@ -29,8 +29,6 @@ spec:
       - name: zookeeper
         image: {{ .Values.images.tags.zookeeper | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
-        securityContext:
-          privileged: true
         volumeMounts:
         - mountPath: /var/lib/zookeeper
           name: zookeeper-config-data

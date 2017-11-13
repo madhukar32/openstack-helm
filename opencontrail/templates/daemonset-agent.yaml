@@ -71,8 +71,6 @@ spec:
         envFrom:
         - configMapRef:
             name: vrouter-env
-        securityContext:
-          privileged: true
 # todo: there is type Socket in new kubernetes, it is possible to use full
 # path:
 # hostPath:

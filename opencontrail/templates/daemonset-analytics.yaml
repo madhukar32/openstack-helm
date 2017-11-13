@@ -49,8 +49,6 @@ spec:
       - name: contrail-analytics-api
         image: {{ .Values.images.tags.analytics_api | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
-        securityContext:
-          privileged: true
         envFrom:
         - configMapRef:
             name: analytics-env
@@ -60,48 +58,36 @@ spec:
         envFrom:
         - configMapRef:
             name: analytics-env
-        securityContext:
-          privileged: true
       - name: contrail-analytics-alarm-gen
         image: {{ .Values.images.tags.analytics_alarm_gen | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: analytics-env
-        securityContext:
-          privileged: true
       - name: contrail-analytics-query-engine
         image: {{ .Values.images.tags.analytics_query_engine | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: analytics-env
-        securityContext:
-          privileged: true
       - name: contrail-analytics-snmp-collector
         image: {{ .Values.images.tags.analytics_snmp_collector | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: analytics-env
-        securityContext:
-          privileged: true
       - name: contrail-analytics-topology
         image: {{ .Values.images.tags.analytics_topology | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: analytics-env
-        securityContext:
-          privileged: true
       - name: contrail-analytics-nodemgr
         image: {{ .Values.images.tags.analytics_nodemgr | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: analytics-env
-        securityContext:
-          privileged: true
 # todo: there is type Socket in new kubernetes, it is possible to use full
 # path:
 # hostPath:

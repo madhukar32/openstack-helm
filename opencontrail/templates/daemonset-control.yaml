@@ -50,8 +50,6 @@ spec:
       - name: contrail-controller-control
         image: {{ .Values.images.tags.control_control | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
-        securityContext:
-          privileged: true
         envFrom:
         - configMapRef:
             name: control-env
@@ -61,24 +59,18 @@ spec:
         envFrom:
         - configMapRef:
             name: control-env
-        securityContext:
-          privileged: true
       - name: contrail-controller-control-named
         image: {{ .Values.images.tags.control_named | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: control-env
-        securityContext:
-          privileged: true
       - name: contrail-controller-control-nodemgr
         image: {{ .Values.images.tags.control_nodemgr | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: control-env
-        securityContext:
-          privileged: true
 # todo: there is type Socket in new kubernetes, it is possible to use full
 # path:
 # hostPath:

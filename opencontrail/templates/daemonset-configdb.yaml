@@ -46,8 +46,6 @@ spec:
       - name: contrail-configdb
         image: {{ .Values.images.tags.cassandra | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
-        securityContext:
-          privileged: true
         envFrom:
         - configMapRef:
             name: contrail-configdb

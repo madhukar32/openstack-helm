@@ -29,8 +29,6 @@ spec:
       - name: kafka
         image: {{ .Values.images.tags.kafka | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
-        securityContext:
-          privileged: true
         env:
         - name: CONTROLLER_NODES
           value: {{ .Values.conf.controller_nodes }}

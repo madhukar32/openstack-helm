@@ -39,8 +39,6 @@ spec:
       - name: contrail-controller-webui-job
         image: {{ .Values.images.tags.webui_job | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
-        securityContext:
-          privileged: true
         envFrom:
         - configMapRef:
             name: config-webui-env
@@ -50,6 +48,4 @@ spec:
         envFrom:
         - configMapRef:
             name: config-webui-env
-        securityContext:
-          privileged: true
 {{- end }}
