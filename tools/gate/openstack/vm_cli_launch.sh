@@ -75,6 +75,10 @@ FLOATING_IP=$($OPENSTACK floating ip create ${OSH_EXT_NET_NAME} -f value -c floa
 $OPENSTACK server add floating ip ${OSH_VM_NAME_CLI} ${FLOATING_IP}
 
 # Check the VM
+if [ "x$SDN_PLUGIN" == "xopencontrail" ]; then
+  # check link-local address for contrail
+  check_vm 169.254.0.4  "${KEYPAIR_LOC}"
+fi
 check_vm ${FLOATING_IP} "${KEYPAIR_LOC}"
 
 
