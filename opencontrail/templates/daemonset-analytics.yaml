@@ -52,31 +52,31 @@ spec:
         envFrom:
         - configMapRef:
             name: analytics-env
-      - name: contrail-analytics-collector
+      - name: contrail-collector
         image: {{ .Values.images.tags.analytics_collector | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: analytics-env
-      - name: contrail-analytics-alarm-gen
+      - name: contrail-alarm-gen
         image: {{ .Values.images.tags.analytics_alarm_gen | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: analytics-env
-      - name: contrail-analytics-query-engine
+      - name: contrail-query-engine
         image: {{ .Values.images.tags.analytics_query_engine | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: analytics-env
-      - name: contrail-analytics-snmp-collector
+      - name: contrail-snmp-collector
         image: {{ .Values.images.tags.analytics_snmp_collector | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: analytics-env
-      - name: contrail-analytics-topology
+      - name: contrail-topology
         image: {{ .Values.images.tags.analytics_topology | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:

@@ -36,13 +36,13 @@ spec:
         effect: NoSchedule
       hostNetwork: true
       containers:
-      - name: contrail-controller-webui-job
+      - name: contrail-webui-job
         image: {{ .Values.images.tags.webui_job | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: config-webui-env
-      - name: contrail-controller-webui-web
+      - name: contrail-webui-web
         image: {{ .Values.images.tags.webui_web | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:

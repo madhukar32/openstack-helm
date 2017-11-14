@@ -47,19 +47,19 @@ spec:
         effect: NoSchedule
       hostNetwork: true
       containers:
-      - name: contrail-controller-control
+      - name: contrail-control
         image: {{ .Values.images.tags.control_control | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: control-env
-      - name: contrail-controller-control-dns
+      - name: contrail-dns
         image: {{ .Values.images.tags.control_dns | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: control-env
-      - name: contrail-controller-control-named
+      - name: contrail-named
         image: {{ .Values.images.tags.control_named | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         securityContext:
@@ -67,7 +67,7 @@ spec:
         envFrom:
         - configMapRef:
             name: control-env
-      - name: contrail-controller-control-nodemgr
+      - name: contrail-control-nodemgr
         image: {{ .Values.images.tags.control_nodemgr | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:

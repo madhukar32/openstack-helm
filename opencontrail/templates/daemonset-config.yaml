@@ -47,31 +47,31 @@ spec:
         effect: NoSchedule
       hostNetwork: true
       containers:
-      - name: contrail-controller-config-api
+      - name: contrail-config-api
         image: {{ .Values.images.tags.config_api | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: config-env
-      - name: contrail-controller-config-devicemgr
+      - name: contrail-devicemgr
         image: {{ .Values.images.tags.config_devicemgr | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: config-env
-      - name: contrail-controller-config-schema
+      - name: contrail-schema-transformer
         image: {{ .Values.images.tags.config_schema_transformer | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: config-env
-      - name: contrail-controller-config-svcmonitor
+      - name: contrail-svcmonitor
         image: {{ .Values.images.tags.config_svcmonitor | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: config-env
-      - name: contrail-controller-config-nodemgr
+      - name: contrail-config-nodemgr
         image: {{ .Values.images.tags.config_nodemgr | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
