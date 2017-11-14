@@ -62,6 +62,8 @@ spec:
       - name: contrail-controller-control-named
         image: {{ .Values.images.tags.control_named | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
+        securityContext:
+          privileged: true
         envFrom:
         - configMapRef:
             name: control-env
