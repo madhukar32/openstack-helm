@@ -38,7 +38,7 @@ pod:
 dependencies:
   server:
     daemonset:
-      - contrail-controller-config
+      - contrail-config
   metadata:
     daemonset:
       - contrail-agent
