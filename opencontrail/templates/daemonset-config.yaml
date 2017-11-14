@@ -72,11 +72,14 @@ spec:
         - configMapRef:
             name: config-env
       - name: contrail-config-nodemgr
-        image: {{ .Values.images.tags.config_nodemgr | quote }}
+        image: {{ .Values.images.tags.nodemgr | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: config-env
+        env:
+        - name: NODE_TYPE
+          value: config
 # todo: there is type Socket in new kubernetes, it is possible to use full
 # path:
 # hostPath:

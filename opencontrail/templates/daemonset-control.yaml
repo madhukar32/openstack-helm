@@ -68,11 +68,14 @@ spec:
         - configMapRef:
             name: control-env
       - name: contrail-control-nodemgr
-        image: {{ .Values.images.tags.control_nodemgr | quote }}
+        image: {{ .Values.images.tags.nodemgr | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: control-env
+        env:
+        - name: NODE_TYPE
+          value: control
 # todo: there is type Socket in new kubernetes, it is possible to use full
 # path:
 # hostPath:

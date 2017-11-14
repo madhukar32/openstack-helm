@@ -66,11 +66,14 @@ spec:
         - mountPath: /var/lib/contrail/
           name: var-lib-contrail
       - name: contrail-agent-nodemgr
-        image: {{ .Values.images.tags.agent_nodemgr | quote }}
+        image: {{ .Values.images.tags.nodemgr | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: vrouter-env
+        env:
+        - name: NODE_TYPE
+          value: vrouter
 # todo: there is type Socket in new kubernetes, it is possible to use full
 # path:
 # hostPath:
