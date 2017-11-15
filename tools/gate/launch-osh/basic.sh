@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 set -ex
-#: ${WORK_DIR:="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/.."}
+: ${WORK_DIR:="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/.."}
 source ${WORK_DIR}/tools/gate/vars.sh
 source ${WORK_DIR}/tools/gate/funcs/helm.sh
 source ${WORK_DIR}/tools/gate/funcs/kube.sh
@@ -159,10 +159,11 @@ local_ip="$(net_default_host_ip)"
 if [ "x$SDN_PLUGIN" == "xovs" ]; then
   helm install --namespace=openstack ${WORK_DIR}/openvswitch --name=openvswitch
 elif [ "x$SDN_PLUGIN" == "xopencontrail" ]; then
-  helm install --namespace openstack stable/redis
-
-  helm repo add incubator http://storage.googleapis.com/kubernetes-charts-incubator
-  helm install --namespace openstack incubator/zookeeper
+  # TODO: try to ad these to deployment
+  #helm repo add stable http://storage.googleapis.com/kubernetes-charts
+  #helm install --namespace openstack --name redis --set persistence.storageClass=general stable/redis
+  #helm repo add incubator http://storage.googleapis.com/kubernetes-charts-incubator
+  #helm install --namespace openstack --name zookeeper --set storageClass=general --set servers=1 incubator/zookeeper
 
   helm install --namespace=openstack ${WORK_DIR}/opencontrail --name=opencontrail \
     --set conf.controller_nodes=$local_ip \

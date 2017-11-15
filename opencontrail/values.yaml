@@ -168,5 +168,5 @@ manifests:
   daemonset_analytics: true
   daemonset_analyticsdb: true
   daemonset_agent: true
-  daemonset_redis: false
-  daemonset_zookeeper: false
+  daemonset_redis: true
+  daemonset_zookeeper: true
