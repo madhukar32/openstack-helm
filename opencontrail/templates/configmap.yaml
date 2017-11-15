@@ -5,14 +5,14 @@
 {{- $identityURIParts := split ":" $identityURI -}}
 
 {{- if empty .Values.conf.tokens_path -}}
-{{- if .Values.endpoints.identity.path.default == "/v3" -}}
-{{- set .Values.conf "tokens_path" "/v3/auth/tokens" -}}
+{{- if eq .Values.endpoints.identity.path.default "/v3" -}}
+{{- set .Values.conf "tokens_path" "/v3/auth/tokens" | quote | trunc 0 -}}
 {{- else -}}
-{{- set .Values.conf "tokens_path" "/v2.0/tokens" -}}
+{{- set .Values.conf "tokens_path" "/v2.0/tokens" | quote | trunc 0 -}}
 {{- end -}}
 {{- end -}}
 
-{{- $rabbitmqURI := tuple "oslo_messaging" "internal" "api" . | include "helm-toolkit.endpoints.host_and_port_endpoint_uri_lookup" }}
+{{- $rabbitmqURI := tuple "oslo_messaging" "internal" "amqp" . | include "helm-toolkit.endpoints.host_and_port_endpoint_uri_lookup" }}
 {{- $rabbitmqURIParts := split ":" $rabbitmqURI -}}
 
 ---
