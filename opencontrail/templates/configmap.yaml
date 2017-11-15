@@ -23,8 +23,8 @@ data:
   KEYSTONE_AUTH_URL_VERSION: {{ .Values.endpoints.identity.path.default }}
   KEYSTONE_AUTH_HOST: {{ $identityURIParts._0 }}
   KEYSTONE_AUTH_PROTO: {{ .Values.endpoints.identity.scheme.default }}
-  KEYSTONE_AUTH_ADMIN_PORT: {{ .Values.endpoints.identity.port.admin.default }}
-  KEYSTONE_AUTH_PUBLIC_PORT: {{ .Values.endpoints.identity.port.api.default }}
+  KEYSTONE_AUTH_ADMIN_PORT: {{ .Values.endpoints.identity.port.admin.default | quote }}
+  KEYSTONE_AUTH_PUBLIC_PORT: {{ .Values.endpoints.identity.port.api.default | quote }}
 ---
 apiVersion: v1
 kind: ConfigMap
