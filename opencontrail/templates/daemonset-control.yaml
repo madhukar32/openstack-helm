@@ -7,7 +7,6 @@ metadata:
   name: control-env
 data:
   CONTROLLER_NODES: {{ .Values.conf.controller_nodes }}
-  DOCKER_HOST: "unix://mnt/docker.sock"
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
@@ -77,6 +76,8 @@ spec:
         env:
         - name: NODE_TYPE
           value: control
+        - name: DOCKER_HOST
+          value: "unix://mnt/docker.sock"
 # todo: there is type Socket in new kubernetes, it is possible to use full
 # path:
 # hostPath:
