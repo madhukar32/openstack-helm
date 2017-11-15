@@ -7,9 +7,6 @@ metadata:
   name: config-webui-env
 data:
   CONTROLLER_NODES: {{ .Values.conf.controller_nodes }}
-  orchestration_Manager: openstack
-  identityManager_ip: keystone-api.openstack.svc.cluster.local
-  identityManager_port: "80"
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
@@ -42,10 +39,14 @@ spec:
         envFrom:
         - configMapRef:
             name: config-webui-env
+        - configMapRef:
+            name: configmap-auth
       - name: contrail-webui-web
         image: {{ .Values.images.tags.webui_web | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: config-webui-env
+        - configMapRef:
+            name: configmap-auth
 {{- end }}

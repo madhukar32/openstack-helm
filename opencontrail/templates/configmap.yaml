@@ -4,14 +4,6 @@
 {{- $identityURI := tuple "identity" "internal" "api" . | include "helm-toolkit.endpoints.host_and_port_endpoint_uri_lookup" }}
 {{- $identityURIParts := split ":" $identityURI -}}
 
-{{- if empty .Values.conf.tokens_path -}}
-{{- if eq .Values.endpoints.identity.path.default "/v3" -}}
-{{- set .Values.conf "tokens_path" "/v3/auth/tokens" | quote | trunc 0 -}}
-{{- else -}}
-{{- set .Values.conf "tokens_path" "/v2.0/tokens" | quote | trunc 0 -}}
-{{- end -}}
-{{- end -}}
-
 {{- $rabbitmqURI := tuple "oslo_messaging" "internal" "amqp" . | include "helm-toolkit.endpoints.host_and_port_endpoint_uri_lookup" }}
 {{- $rabbitmqURIParts := split ":" $rabbitmqURI -}}
 
@@ -21,17 +13,18 @@ kind: ConfigMap
 metadata:
   name: configmap-auth
 data:
-  CONFIG_API_AUTH: {{ .Values.conf.auth_type }}
-  CONFIG_API_AAA_MODE: {{ .Values.conf.aaa_mode }}
-  ANALYTICS_API_AAA_MODE: {{ .Values.conf.aaa_mode }}
-  CONFIG_AUTHN_SERVER: {{ $identityURIParts._0 }}
-  AUTH_URL_TOKENS: {{ .Values.conf.tokens_path }}
-  ADMIN_USER: {{ .Values.endpoints.identity.auth.admin.username }}
-  ADMIN_TENANT: {{ .Values.endpoints.identity.auth.admin.project_name }}
-  ADMIN_PASSWORD: {{ .Values.endpoints.identity.auth.admin.password }}
-  AUTH_URL_VERSION: {{ .Values.endpoints.identity.path.default }}
-  AUTH_USER_DOMAIN_NAME: {{ .Values.endpoints.identity.auth.admin.user_domain_name }}
-  AUTH_PROJECT_DOMAIN_NAME: {{ .Values.endpoints.identity.auth.admin.project_domain_name }}
+  CLOUD_ORCHESTRATOR: {{ .Values.conf.cloud_orchestrator }}
+  AAA_MODE: {{ .Values.conf.aaa_mode }}
+  KEYSTONE_AUTH_ADMIN_USER: {{ .Values.endpoints.identity.auth.admin.username }}
+  KEYSTONE_AUTH_ADMIN_TENANT: {{ .Values.endpoints.identity.auth.admin.project_name }}
+  KEYSTONE_AUTH_ADMIN_PASSWORD: {{ .Values.endpoints.identity.auth.admin.password }}
+  KEYSTONE_AUTH_USER_DOMAIN_NAME: {{ .Values.endpoints.identity.auth.admin.user_domain_name }}
+  KEYSTONE_AUTH_PROJECT_DOMAIN_NAME: {{ .Values.endpoints.identity.auth.admin.project_domain_name }}
+  KEYSTONE_AUTH_URL_VERSION: {{ .Values.endpoints.identity.path.default }}
+  KEYSTONE_AUTH_HOST: {{ $identityURIParts._0 }}
+  KEYSTONE_AUTH_PROTO: {{ .Values.endpoints.identity.scheme.default }}
+  KEYSTONE_AUTH_ADMIN_PORT: {{ .Values.endpoints.identity.port.admin.default }}
+  KEYSTONE_AUTH_PUBLIC_PORT: {{ .Values.endpoints.identity.port.api.default }}
 ---
 apiVersion: v1
 kind: ConfigMap

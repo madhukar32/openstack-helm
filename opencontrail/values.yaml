@@ -42,27 +42,8 @@ conf:
   host_os: ubuntu
   controller_nodes: 10.87.65.153
 
-  auth_type: keystone
+  cloud_orchestrator: openstack
   aaa_mode: cloud-admin
-
-  keystone_config:
-    KEYSTONE:
-      version: v3
-      # server for vnc_api_lib.ini and host for keystone-auth.conf
-      server: dsfsdf
-      host: dsfsdf
-      tokens_url: /v2.0/tokens
-      auth_url: http://dsfsdf/v2.0
-      admin_port: 35357
-      public_port: 80
-      auth_protocol: http
-      admin_user: admin
-      admin_password: password
-      admin_tenant: admin
-      insecure: True
-      user_domain_name: Default
-      project_domain_name: Default
-
 
 # typically overriden by environmental
 # values, but should include all endpoints
@@ -150,7 +131,7 @@ endpoints:
         username: admin
         password: password
       user:
-        username: contrail
+        username: rabbitmq
         password: password
     hosts:
       default: rabbitmq
