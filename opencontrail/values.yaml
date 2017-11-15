@@ -17,7 +17,7 @@ images:
     config_svcmonitor: "localhost:5000/contrail-controller-config-svcmonitor:4.0.2.0-35"
     webui_job: "localhost:5000/contrail-controller-webui-job:4.0.2.0-35"
     webui_web: "localhost:5000/contrail-controller-webui-web:4.0.2.0-35"
-    kafka: "localhost:5000/contrail-analyticsdb-kafka:4.0.2.0-35"
+    kafka: "localhost:5000/contrail-external-kafka:4.0.2.0-35"
     cassandra: "cassandra:2.2.10"
     redis: "redis:4.0.2"
     zookeeper: "zookeeper:3.4.10"
