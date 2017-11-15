@@ -1,4 +1,4 @@
-{{- if .Values.manifests.daemonset_analyticsdb }}
+{{- if .Values.manifests.daemonset_redis }}
 {{- $envAll := . }}
 ---
 apiVersion: extensions/v1beta1
