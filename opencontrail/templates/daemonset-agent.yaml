@@ -10,14 +10,6 @@ metadata:
   name: vrouter-env
 data:
   CONTROLLER_NODES: {{ .Values.conf.controller_nodes }}
-  CONFIG_API_AUTH: keystone
-  CONFIG_API_AAA_MODE: cloud-admin
-  CONFIG_AUTHN_SERVER: keystone-api.openstack.svc.cluster.local
-  ADMIN_USER: admin
-  ADMIN_TENANT: admin
-  ADMIN_PASSWORD: password
-  AUTH_URL_VERSION: v3
-  AUTH_URL_TOKENS: /v3/auth/tokens
   PHYSICAL_INTERFACE: eth0
   DOCKER_HOST: "unix://mnt/docker.sock"
 ---
@@ -58,6 +50,8 @@ spec:
         envFrom:
         - configMapRef:
             name: vrouter-env
+        - configMapRef:
+            name: configmap-auth
         volumeMounts:
         - mountPath: /usr/src
           name: usr-src
@@ -71,6 +65,8 @@ spec:
         envFrom:
         - configMapRef:
             name: vrouter-env
+        - configMapRef:
+            name: configmap-auth
         env:
         - name: NODE_TYPE
           value: vrouter

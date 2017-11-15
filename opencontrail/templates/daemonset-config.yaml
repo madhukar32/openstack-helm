@@ -11,15 +11,6 @@ data:
   RABBITMQ_PORT: "5672"
   RABBITMQ_USER: rabbitmq
   RABBITMQ_PASSWORD: password
-  CONFIG_API_AUTH: keystone
-  CONFIG_API_AAA_MODE: cloud-admin
-  ANALYTICS_API_AAA_MODE: cloud-admin
-  CONFIG_AUTHN_SERVER: keystone-api.openstack.svc.cluster.local
-  ADMIN_USER: admin
-  ADMIN_TENANT: admin
-  ADMIN_PASSWORD: password
-  AUTH_URL_VERSION: v3
-  AUTH_URL_TOKENS: /v3/auth/tokens
   DOCKER_HOST: "unix://mnt/docker.sock"
 ---
 apiVersion: extensions/v1beta1
@@ -53,30 +44,48 @@ spec:
         envFrom:
         - configMapRef:
             name: config-env
+        - configMapRef:
+            name: configmap-auth
+        - configMapRef:
+            name: configmap-rabbitmq
       - name: contrail-devicemgr
         image: {{ .Values.images.tags.config_devicemgr | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: config-env
+        - configMapRef:
+            name: configmap-auth
+        - configMapRef:
+            name: configmap-rabbitmq
       - name: contrail-schema-transformer
         image: {{ .Values.images.tags.config_schema_transformer | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: config-env
+        - configMapRef:
+            name: configmap-auth
+        - configMapRef:
+            name: configmap-rabbitmq
       - name: contrail-svcmonitor
         image: {{ .Values.images.tags.config_svcmonitor | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: config-env
+        - configMapRef:
+            name: configmap-auth
+        - configMapRef:
+            name: configmap-rabbitmq
       - name: contrail-config-nodemgr
         image: {{ .Values.images.tags.nodemgr | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: config-env
+        - configMapRef:
+            name: configmap-auth
         env:
         - name: NODE_TYPE
           value: config

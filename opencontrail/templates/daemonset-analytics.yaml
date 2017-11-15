@@ -7,18 +7,6 @@ metadata:
   name: analytics-env
 data:
   CONTROLLER_NODES: {{ .Values.conf.controller_nodes }}
-  RABBITMQ_NODES: rabbitmq.openstack.svc.cluster.local
-  RABBITMQ_PORT: "5672"
-  RABBITMQ_USER: rabbitmq
-  RABBITMQ_PASSWORD: password
-  CONFIG_API_AUTH: keystone
-  ANALYTICS_API_AAA_MODE: cloud-admin
-  CONFIG_AUTHN_SERVER: keystone-api.openstack.svc.cluster.local
-  ADMIN_USER: admin
-  ADMIN_TENANT: admin
-  ADMIN_PASSWORD: password
-  AUTH_URL_VERSION: v3
-  AUTH_URL_TOKENS: /v3/auth/tokens
   DOCKER_HOST: "unix://mnt/docker.sock"
 ---
 apiVersion: extensions/v1beta1
@@ -52,42 +40,58 @@ spec:
         envFrom:
         - configMapRef:
             name: analytics-env
+        - configMapRef:
+            name: configmap-auth
       - name: contrail-collector
         image: {{ .Values.images.tags.analytics_collector | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: analytics-env
+        - configMapRef:
+            name: configmap-auth
       - name: contrail-alarm-gen
         image: {{ .Values.images.tags.analytics_alarm_gen | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: analytics-env
+        - configMapRef:
+            name: configmap-auth
+        - configMapRef:
+            name: configmap-rabbitmq
       - name: contrail-query-engine
         image: {{ .Values.images.tags.analytics_query_engine | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: analytics-env
+        - configMapRef:
+            name: configmap-auth
       - name: contrail-snmp-collector
         image: {{ .Values.images.tags.analytics_snmp_collector | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: analytics-env
+        - configMapRef:
+            name: configmap-auth
       - name: contrail-topology
         image: {{ .Values.images.tags.analytics_topology | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: analytics-env
+        - configMapRef:
+            name: configmap-auth
       - name: contrail-analytics-nodemgr
         image: {{ .Values.images.tags.nodemgr | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
             name: analytics-env
+        - configMapRef:
+            name: configmap-auth
         env:
         - name: NODE_TYPE
           value: analytics

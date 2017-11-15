@@ -1,0 +1,45 @@
+{{- if .Values.manifests.daemonset_configmap }}
+{{- $envAll := . }}
+
+{{- $identityURI := tuple "identity" "internal" "api" . | include "helm-toolkit.endpoints.host_and_port_endpoint_uri_lookup" }}
+{{- $identityURIParts := split ":" $identityURI -}}
+
+{{- if empty .Values.conf.tokens_path -}}
+{{- if .Values.endpoints.identity.path.default == "/v3" -}}
+{{- set .Values.conf "tokens_path" "/v3/auth/tokens" -}}
+{{- else -}}
+{{- set .Values.conf "tokens_path" "/v2.0/tokens" -}}
+{{- end -}}
+{{- end -}}
+
+{{- $rabbitmqURI := tuple "oslo_messaging" "internal" "api" . | include "helm-toolkit.endpoints.host_and_port_endpoint_uri_lookup" }}
+{{- $rabbitmqURIParts := split ":" $rabbitmqURI -}}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: configmap-auth
+data:
+  CONFIG_API_AUTH: {{ .Values.conf.auth_type }}
+  CONFIG_API_AAA_MODE: {{ .Values.conf.aaa_mode }}
+  ANALYTICS_API_AAA_MODE: {{ .Values.conf.aaa_mode }}
+  CONFIG_AUTHN_SERVER: {{ $identityURIParts._0 }}
+  AUTH_URL_TOKENS: {{ .Values.conf.tokens_path }}
+  ADMIN_USER: {{ .Values.endpoints.identity.auth.admin.username }}
+  ADMIN_TENANT: {{ .Values.endpoints.identity.auth.admin.project_name }}
+  ADMIN_PASSWORD: {{ .Values.endpoints.identity.auth.admin.password }}
+  AUTH_URL_VERSION: {{ .Values.endpoints.identity.path.default }}
+  AUTH_USER_DOMAIN_NAME: {{ .Values.endpoints.identity.auth.admin.user_domain_name }}
+  AUTH_PROJECT_DOMAIN_NAME: {{ .Values.endpoints.identity.auth.admin.project_domain_name }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: configmap-rabbitmq
+data:
+  RABBITMQ_NODES: {{ $rabbitmqURIParts._0 }}
+  RABBITMQ_PORT: {{ .Values.endpoints.oslo_messaging.port.amqp.default | quote }}
+  RABBITMQ_USER: {{ .Values.endpoints.oslo_messaging.auth.user.username | quote }}
+  RABBITMQ_PASSWORD: {{ .Values.endpoints.oslo_messaging.auth.user.password | quote }}
+{{- end }}

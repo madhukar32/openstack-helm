@@ -42,18 +42,26 @@ conf:
   host_os: ubuntu
   controller_nodes: 10.87.65.153
 
+  auth_type: keystone
+  aaa_mode: cloud-admin
+
   keystone_config:
-     KEYSTONE:
-       version: v3
-       admin_port: 35357
-       public_port: 80
-       auth_protocol: http
-       admin_user: admin
-       admin_password: password
-       admin_tenant: admin
-       insecure: True
-       user_domain_name: Default
-       project_domain_name: Default
+    KEYSTONE:
+      version: v3
+      # server for vnc_api_lib.ini and host for keystone-auth.conf
+      server: dsfsdf
+      host: dsfsdf
+      tokens_url: /v2.0/tokens
+      auth_url: http://dsfsdf/v2.0
+      admin_port: 35357
+      public_port: 80
+      auth_protocol: http
+      admin_user: admin
+      admin_password: password
+      admin_tenant: admin
+      insecure: True
+      user_domain_name: Default
+      project_domain_name: Default
 
 
 # typically overriden by environmental
@@ -64,6 +72,14 @@ endpoints:
   cluster_domain_suffix: cluster.local
   identity:
     name: keystone
+    auth:
+      admin:
+        region_name: RegionOne
+        username: admin
+        password: password
+        project_name: admin
+        user_domain_name: default
+        project_domain_name: default
     hosts:
       default: keystone-api
       public: keystone
@@ -78,6 +94,7 @@ endpoints:
         default: 35357
       api:
         default: 80
+# TODO: pass network URL to webui
   network:
     name: neutron
     hosts:
@@ -93,6 +110,7 @@ endpoints:
       api:
         default: 9696
         public: 80
+# TODO: pass compute URL to webui
   compute:
     name: nova
     hosts:
@@ -110,21 +128,7 @@ endpoints:
         public: 80
       novncproxy:
         default: 6080
-  compute_metadata:
-    name: nova
-    hosts:
-      default: nova-metadata
-      public: metadata
-    host_fqdn_override:
-      default: null
-    path:
-      default: /
-    scheme:
-      default: 'http'
-    port:
-      metadata:
-        default: 8775
-        public: 80
+# TODO: pass image URL to webui
   image:
     name: glance
     hosts:
@@ -140,8 +144,26 @@ endpoints:
       api:
         default: 9292
         public: 80
+  oslo_messaging:
+    auth:
+      admin:
+        username: admin
+        password: password
+      user:
+        username: contrail
+        password: password
+    hosts:
+      default: rabbitmq
+    host_fqdn_override:
+      default: null
+    path: /
+    scheme: rabbit
+    port:
+      amqp:
+        default: 5672
 
 manifests:
+  daemonset_configmap: true
   daemonset_controller: true
   daemonset_analytics: true
   daemonset_analyticsdb: true
