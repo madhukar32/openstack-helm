@@ -59,8 +59,8 @@ endpoints:
         username: admin
         password: password
         project_name: admin
-        user_domain_name: default
-        project_domain_name: default
+        user_domain_name: Default
+        project_domain_name: Default
     hosts:
       default: keystone-api
       public: keystone
