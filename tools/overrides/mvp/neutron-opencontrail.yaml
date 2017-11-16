@@ -24,16 +24,17 @@ network:
 
 images:
   tags:
+    neutron_plugin_contrail_init: localhost:5000/contrail-neutron-plugin-init:4.0.2.0-35
     # For opencontrail, use below neutron-server image
-    server: madhukar32/ubuntu-neutron-server-contrail-plugin:3.0.4
+    #server: madhukar32/ubuntu-neutron-server-contrail-plugin:3.0.4
     # For opencontrail, use below metadata image
     metadata: docker.io/kolla/ubuntu-binary-neutron-metadata-agent:3.0.3
 
-pod:
-  user:
-    neutron:
-      # current image has this strange UID for neutron
-      uid: 107
+#pod:
+#  user:
+#    neutron:
+#      # current image has this strange UID for neutron
+#      uid: 107
 
 dependencies:
   server:
@@ -71,3 +72,31 @@ manifests:
   daemonset_lb_agent: false
   daemonset_metadata_agent: false
   daemonset_ovs_agent: false
+
+pod:
+  mounts:
+    init_container:
+      - name: neutron-plugin-contrail-init
+        image: {{ .Values.images.tags.neutron_plugin_contrail_init }}
+        imagePullPolicy: {{ .Values.images.pull_policy }}
+        securityContext:
+          runAsUser: {{ .Values.pod.user.neutron.uid }}
+        volumeMounts:
+          - name: neutronplugin_egginfo
+            mountPath: /tmp/neutron_plugin_contrail
+          - name: neutronplugin_egginfo_egginfo
+            mountPath: /tmp/neutron_plugin_contrail-0.1dev-py2.7.egg-info
+    neutron_server:
+      neutron_server:
+        volumeMounts:
+          - name: neutronplugin
+            mountPath: /usr/lib/python2.7/neutron_plugin_contrail
+            readOnly: true
+          - name: neutronplugin_egginfo
+            mountPath: /usr/lib/python2.7/neutron_plugin_contrail-0.1dev-py2.7.egg-info
+            readOnly: true
+        volumes:
+          - name: neutronplugin
+            emptyDir: {}
+          - name: neutronplugin_egginfo
+            emptyDir: {}
