@@ -1,13 +1,6 @@
 {{- if .Values.manifests.daemonset_controller }}
 {{- $envAll := . }}
 ---
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: config-webui-env
-data:
-  CONTROLLER_NODES: {{ .Values.conf.controller_nodes }}
----
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
@@ -38,7 +31,7 @@ spec:
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
-            name: config-webui-env
+            name: configmap-contrail
         - configMapRef:
             name: configmap-auth
       - name: contrail-webui-web
@@ -46,7 +39,7 @@ spec:
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
-            name: config-webui-env
+            name: configmap-contrail
         - configMapRef:
             name: configmap-auth
 {{- end }}

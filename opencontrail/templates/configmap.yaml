@@ -11,6 +11,14 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  name: configmap-contrail
+data:
+  CONTROLLER_NODES: {{ .Values.conf.controller_nodes }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
   name: configmap-auth
 data:
   CLOUD_ORCHESTRATOR: {{ .Values.conf.cloud_orchestrator }}
@@ -25,6 +33,7 @@ data:
   KEYSTONE_AUTH_PROTO: {{ .Values.endpoints.identity.scheme.default }}
   KEYSTONE_AUTH_ADMIN_PORT: {{ .Values.endpoints.identity.port.admin.default | quote }}
   KEYSTONE_AUTH_PUBLIC_PORT: {{ .Values.endpoints.identity.port.api.default | quote }}
+
 ---
 apiVersion: v1
 kind: ConfigMap

@@ -1,13 +1,6 @@
 {{- if .Values.manifests.daemonset_analytics }}
 {{- $envAll := . }}
 ---
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: analytics-env
-data:
-  CONTROLLER_NODES: {{ .Values.conf.controller_nodes }}
----
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
@@ -38,7 +31,7 @@ spec:
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
-            name: analytics-env
+            name: configmap-contrail
         - configMapRef:
             name: configmap-auth
       - name: contrail-collector
@@ -46,7 +39,7 @@ spec:
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
-            name: analytics-env
+            name: configmap-contrail
         - configMapRef:
             name: configmap-auth
       - name: contrail-alarm-gen
@@ -54,7 +47,7 @@ spec:
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
-            name: analytics-env
+            name: configmap-contrail
         - configMapRef:
             name: configmap-auth
         - configMapRef:
@@ -64,7 +57,7 @@ spec:
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
-            name: analytics-env
+            name: configmap-contrail
         - configMapRef:
             name: configmap-auth
       - name: contrail-snmp-collector
@@ -72,7 +65,7 @@ spec:
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
-            name: analytics-env
+            name: configmap-contrail
         - configMapRef:
             name: configmap-auth
       - name: contrail-topology
@@ -80,7 +73,7 @@ spec:
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
-            name: analytics-env
+            name: configmap-contrail
         - configMapRef:
             name: configmap-auth
       - name: contrail-analytics-nodemgr
@@ -88,7 +81,7 @@ spec:
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
-            name: analytics-env
+            name: configmap-contrail
         - configMapRef:
             name: configmap-auth
         env:
