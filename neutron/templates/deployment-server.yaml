@@ -46,6 +46,15 @@ spec:
       terminationGracePeriodSeconds: {{ .Values.pod.lifecycle.termination_grace_period.server.timeout | default "30" }}
       initContainers:
 {{ tuple $envAll $dependencies $mounts_neutron_server_init | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
+{{- if .Values.images.tags.plugin }}
+        - name: neutron-plugin-init
+          image: {{ .Values.images.tags.plugin }}
+          imagePullPolicy: {{ .Values.images.pull_policy }}
+          securityContext:
+            runAsUser: {{ .Values.pod.user.neutron.uid }}
+          volumeMounts:
+{{ if $mounts_neutron_server.volumeMountsPlugin }}{{ toYaml $mounts_neutron_server.volumeMountsPlugin | indent 12 }}{{ end }}
+{{- end }}
       containers:
         - name: neutron-server
           image: {{ .Values.images.tags.neutron_server }}
