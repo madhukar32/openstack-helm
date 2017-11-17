@@ -24,7 +24,7 @@ network:
 
 images:
   tags:
-    plugin: localhost:5000/contrail-openstack-neutron-plugin-init:4.0.2.0-35
+    plugin: localhost:5000/contrail-neutron-contrail-backend:4.0.2.0-35
     # For opencontrail, use below neutron-server image
     #server: madhukar32/ubuntu-neutron-server-contrail-plugin:3.0.4
     # For opencontrail, use below metadata image
@@ -72,25 +72,3 @@ manifests:
   daemonset_lb_agent: false
   daemonset_metadata_agent: false
   daemonset_ovs_agent: false
-
-pod:
-  mounts:
-    neutron_server:
-      neutron_server:
-        volumeMountsPlugin:
-          - name: neutronplugin
-            mountPath: /tmp/neutron_plugin_contrail
-          - name: neutronplugin-egginfo
-            mountPath: /tmp/neutron_plugin_contrail-0.1dev-py2.7.egg-info
-        volumeMounts:
-          - name: neutronplugin
-            mountPath: /usr/lib/python2.7/neutron_plugin_contrail
-            readOnly: true
-          - name: neutronplugin-egginfo
-            mountPath: /usr/lib/python2.7/neutron_plugin_contrail-0.1dev-py2.7.egg-info
-            readOnly: true
-        volumes:
-          - name: neutronplugin
-            emptyDir: {}
-          - name: neutronplugin-egginfo
-            emptyDir: {}
