@@ -24,7 +24,7 @@ network:
 
 images:
   tags:
-    plugin: localhost:5000/contrail-neutron-contrail-backend:4.0.2.0-35
+    plugin: localhost:5000/contrail-openstack-neutron-contrail-backend:4.0.2.0-35
     # For opencontrail, use below neutron-server image
     #server: madhukar32/ubuntu-neutron-server-contrail-plugin:3.0.4
     # For opencontrail, use below metadata image
