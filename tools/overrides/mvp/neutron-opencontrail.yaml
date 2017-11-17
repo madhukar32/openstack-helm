@@ -54,7 +54,7 @@ conf:
         # IP-s can be provided via '--set' option of 'helm install' command
         #api_server_ip: 10.87.65.153
         api_server_port: 8082
-        contrail_extensions: "ipam:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_ipam.NeutronPluginContrailIpam,policy:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_p
+        contrail_extensions: "ipam:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_ipam.NeutronPluginContrailIpam,policy:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_policy.NeutronPluginContrailPolicy,route-table:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_vpc.NeutronPluginContrailVpc,contrail:None,service-interface:None,vf-binding:None"
         multi_tenancy: True
       COLLECTOR:
         # IP-s can be provided via '--set' option of 'helm install' command
