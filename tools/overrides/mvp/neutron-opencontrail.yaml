@@ -25,16 +25,8 @@ network:
 images:
   tags:
     plugin: localhost:5000/contrail-openstack-neutron-contrail-backend:4.0.2.0-35
-    # For opencontrail, use below neutron-server image
-    #server: madhukar32/ubuntu-neutron-server-contrail-plugin:3.0.4
     # For opencontrail, use below metadata image
     metadata: docker.io/kolla/ubuntu-binary-neutron-metadata-agent:3.0.3
-
-#pod:
-#  user:
-#    neutron:
-#      # current image has this strange UID for neutron
-#      uid: 107
 
 dependencies:
   server:
@@ -50,12 +42,29 @@ conf:
       core_plugin: neutron_plugin_contrail.plugins.opencontrail.contrail_plugin.NeutronPluginContrailCoreV2
       service_plugins: neutron_plugin_contrail.plugins.opencontrail.loadbalancer.v2.plugin.LoadBalancerPluginV2
       l3_ha: False
-      api_extensions_path: /usr/lib/python2.7/dist-packages/neutron_plugin_contrail/extensions:/usr/lib/python2.7/dist-packages/neutron_lbaas/extensions
+      api_extensions_path: /opt/plugin/site-packages/neutron_plugin_contrail/extensions:/opt/plugin/site-packages/neutron_lbaas/extensions
+      interface_driver:
     quotas:
       quota_driver: neutron_plugin_contrail.plugins.opencontrail.quota.driver.QuotaDriver
   plugins:
     neutron_plugin_framework: opencontrail
     neutron_plugin_conf: ContrailPlugin.ini
+    opencontrail:
+      APISERVER:
+        # IP-s can be provided via '--set' option of 'helm install' command
+        #api_server_ip: 10.87.65.153
+        api_server_port: 8082
+        contrail_extensions: "ipam:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_ipam.NeutronPluginContrailIpam,policy:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_p
+        multi_tenancy: True
+      COLLECTOR:
+        # IP-s can be provided via '--set' option of 'helm install' command
+        #analytics_api_ip: 10.87.65.153
+        analytics_api_port: 8081
+      KEYSTONE:
+        admin_user: admin
+        admin_password: password
+        admin_tenant_name: admin
+        auth_user: admin
 
 endpoints:
   cluster_domain_suffix: cluster.local
