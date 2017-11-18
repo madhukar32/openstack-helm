@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+images:
+  tags:
+    plugin: localhost:5000/contrail-openstack-compute-contrail-backend:4.0.2.0-35
+
 dependencies:
   compute:
     daemonset:
