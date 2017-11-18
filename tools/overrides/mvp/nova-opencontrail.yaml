@@ -12,10 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-images:
-  tags:
-    compute: docker.io/madhukar32/ubuntu-source-nova-compute:3.0.4
-
 dependencies:
   compute:
     daemonset:

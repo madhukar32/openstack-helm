@@ -66,15 +66,6 @@ conf:
         admin_tenant_name: admin
         auth_user: admin
 
-endpoints:
-  cluster_domain_suffix: cluster.local
-  etcd:
-    hosts:
-      default: etcd
-    host_fqdn_override:
-      default: null
-    port: 2379
-
 manifests:
   daemonset_dhcp_agent: false
   daemonset_l3_agent: false

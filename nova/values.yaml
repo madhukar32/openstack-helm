@@ -71,7 +71,11 @@ images:
     placement: docker.io/kolla/ubuntu-source-nova-placement-api:3.0.3-beta.1
     bootstrap: docker.io/kolla/ubuntu-source-heat-engine:3.0.3
     dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.2.1
+<<<<<<< f282e30a9dd5fce167fb9e68bef7517d6c33231d
     cell_setup: docker.io/kolla/ubuntu-source-nova-api:3.0.3
+=======
+    plugin:
+>>>>>>> add plugin mechanism to compute
   pull_policy: "IfNotPresent"
 
 bootstrap:
