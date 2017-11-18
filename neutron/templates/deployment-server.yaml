@@ -109,9 +109,11 @@ spec:
               mountPath: /etc/neutron/policy.json
               subPath: policy.json
               readOnly: true
+{{- if .Values.images.tags.plugin }}
             - name: neutron-plugin-shared
               mountPath: /opt/plugin
               readOnly: true
+{{- end }}
 {{ if $mounts_neutron_server.volumeMounts }}{{ toYaml $mounts_neutron_server.volumeMounts | indent 12 }}{{ end }}
       volumes:
         - name: neutron-bin
@@ -122,7 +124,9 @@ spec:
           configMap:
             name: neutron-etc
             defaultMode: 0444
+{{- if .Values.images.tags.plugin }}
         - name: neutron-plugin-shared
           emptyDir: {}
+{{- end }}
 {{ if $mounts_neutron_server.volumes }}{{ toYaml $mounts_neutron_server.volumes | indent 8 }}{{ end }}
 {{- end }}

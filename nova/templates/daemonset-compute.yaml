@@ -216,9 +216,11 @@ spec:
             - name: machine-id
               mountPath: /etc/machine-id
               readOnly: true
+{{- if .Values.images.tags.plugin }}
             - name: nova-compute-plugin-shared
               mountPath: /opt/plugin
               readOnly: true
+{{- end }}
 {{ if $mounts_nova_compute.volumeMounts }}{{ toYaml $mounts_nova_compute.volumeMounts | indent 12 }}{{ end }}
         - name: nova-compute-ssh
           image: {{ .Values.images.tags.compute_ssh }}
@@ -293,8 +295,10 @@ spec:
         - name: machine-id
           hostPath:
             path: /etc/machine-id
+{{- if .Values.images.tags.plugin }}
         - name: nova-compute-plugin-shared
           emptyDir: {}
+{{- end }}
 {{ if $mounts_nova_compute.volumes }}{{ toYaml $mounts_nova_compute.volumes | indent 8 }}{{ end }}
 {{- end }}
 {{- end }}

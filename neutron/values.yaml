@@ -150,7 +150,6 @@ dependencies:
       endpoint: internal
     - service: identity
       endpoint: internal
-    daemonset:
   dhcp:
     services:
     - service: oslo_messaging
@@ -976,13 +975,10 @@ conf:
       # we can define here, which driver we are using: openvswitch or linuxbridge
       # for opencontrail, comment out interface_driver option
       interface_driver: openvswitch
-      # api_extensions_path can be:
-      # /usr/lib/python2.7/dist-packages/neutron_plugin_contIrail/extensions:/usr/lib/python2.7/dist-packages/neutron_lbaas/extensions for opencontrail
+      # for opencontrail api_extensions_path can be:
+      # /opt/plugin/site-packages/neutron_plugin_contrail/extensions:/opt/plugin/site-packages/neutron_lbaas/extensions
       # api_extensions_path:
     quotas:
-      quota_network: -1
-      quota_subnet: -1
-      quota_port: -1
       # quota_driver can be:
       # neutron_plugin_contrail.plugins.opencontrail.quota.driver.QuotaDriver for opencontrail
       # quota_driver:
