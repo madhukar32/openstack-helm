@@ -25,8 +25,10 @@ limitations under the License.
 {{- tuple "identity" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup"| set .Values.conf.neutron.keystone_authtoken "auth_url" | quote | trunc 0 -}}
 {{- end }}
 
+{{- if .Values.conf.plugins.opencontrail }}
 {{- if empty .Values.conf.plugins.opencontrail.KEYSTONE.auth_url -}}
 {{- tuple "identity" "internal" "admin" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup"| set .Values.conf.plugins.opencontrail.KEYSTONE "auth_url" | quote | trunc 0 -}}
+{{- end }}
 {{- end }}
 
 # Set a random string as secret key.
