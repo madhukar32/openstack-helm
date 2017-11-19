@@ -14,7 +14,6 @@ metadata:
   name: configmap-contrail
 data:
   CONTROLLER_NODES: {{ .Values.conf.controller_nodes }}
-
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -33,7 +32,6 @@ data:
   KEYSTONE_AUTH_PROTO: {{ .Values.endpoints.identity.scheme.default }}
   KEYSTONE_AUTH_ADMIN_PORT: {{ .Values.endpoints.identity.port.admin.default | quote }}
   KEYSTONE_AUTH_PUBLIC_PORT: {{ .Values.endpoints.identity.port.api.default | quote }}
-
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -44,4 +42,37 @@ data:
   RABBITMQ_PORT: {{ .Values.endpoints.oslo_messaging.port.amqp.default | quote }}
   RABBITMQ_USER: {{ .Values.endpoints.oslo_messaging.auth.user.username | quote }}
   RABBITMQ_PASSWORD: {{ .Values.endpoints.oslo_messaging.auth.user.password | quote }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: contrail-configdb
+data:
+# TODO: fix seeds and listen address
+  CASSANDRA_SEEDS: {{ .Values.conf.controller_nodes }}
+  CASSANDRA_CLUSTER_NAME: ContrailConfigDB
+  CASSANDRA_START_RPC: "true"
+  CASSANDRA_LISTEN_ADDRESS: {{ .Values.conf.controller_nodes }}
+  JVM_EXTRA_OPTS: >-
+    -Dcassandra.rpc_port=9161
+    -Dcassandra.native_transport_port=9041
+    -Dcassandra.ssl_storage_port=7011
+    -Dcassandra.storage_port=7010
+    -Dcassandra.jmx.local.port=7200
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: contrail-analyticsdb
+data:
+# TODO: fix seeds and listen address
+  CASSANDRA_SEEDS: {{ .Values.conf.controller_nodes }}
+  CASSANDRA_CLUSTER_NAME: Contrail
+  CASSANDRA_START_RPC: "true"
+  CASSANDRA_LISTEN_ADDRESS: {{ .Values.conf.controller_nodes }}
+  JVM_EXTRA_OPTS: >-
+    -Dcassandra.rpc_port=9160
+    -Dcassandra.native_transport_port=9042
+    -Dcassandra.ssl_storage_port=7001
+    -Dcassandra.storage_port=7000
 {{- end }}

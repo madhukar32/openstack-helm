@@ -25,6 +25,8 @@ spec:
         operator: Exists
         effect: NoSchedule
       hostNetwork: true
+      initContainers:
+{{ tuple $envAll .Values.dependencies.kafka [] | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
       containers:
       - name: kafka
         image: {{ .Values.images.tags.kafka | quote }}

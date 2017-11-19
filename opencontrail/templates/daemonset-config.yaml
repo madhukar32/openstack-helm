@@ -25,6 +25,8 @@ spec:
         operator: Exists
         effect: NoSchedule
       hostNetwork: true
+      initContainers:
+{{ tuple $envAll .Values.dependencies.config [] | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
       containers:
       - name: contrail-config-api
         image: {{ .Values.images.tags.config_api | quote }}

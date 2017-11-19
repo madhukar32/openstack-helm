@@ -25,6 +25,8 @@ spec:
         operator: Exists
         effect: NoSchedule
       hostNetwork: true
+      initContainers:
+{{ tuple $envAll .Values.dependencies.analytics [] | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
       containers:
       - name: contrail-analytics-api
         image: {{ .Values.images.tags.analytics_api | quote }}

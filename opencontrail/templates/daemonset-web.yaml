@@ -25,6 +25,8 @@ spec:
         operator: Exists
         effect: NoSchedule
       hostNetwork: true
+      initContainers:
+{{ tuple $envAll .Values.dependencies.webui [] | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
       containers:
       - name: contrail-webui-job
         image: {{ .Values.images.tags.webui_job | quote }}

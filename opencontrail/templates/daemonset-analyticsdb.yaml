@@ -1,22 +1,6 @@
 {{- if .Values.manifests.daemonset_analyticsdb }}
 {{- $envAll := . }}
 ---
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: contrail-analyticsdb
-data:
-# TODO: fix seeds and listen address
-  CASSANDRA_SEEDS: {{ .Values.conf.controller_nodes }}
-  CASSANDRA_CLUSTER_NAME: Contrail
-  CASSANDRA_START_RPC: "true"
-  CASSANDRA_LISTEN_ADDRESS: {{ .Values.conf.controller_nodes }}
-  JVM_EXTRA_OPTS: >-
-    -Dcassandra.rpc_port=9160
-    -Dcassandra.native_transport_port=9042
-    -Dcassandra.ssl_storage_port=7001
-    -Dcassandra.storage_port=7000
----
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
@@ -41,6 +25,8 @@ spec:
         operator: Exists
         effect: NoSchedule
       hostNetwork: true
+      initContainers:
+{{ tuple $envAll .Values.dependencies.analyticsdb [] | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
       containers:
       - name: contrail-analyticsdb
         image: {{ .Values.images.tags.cassandra | quote }}
