@@ -21,6 +21,7 @@ images:
     cassandra: "cassandra:2.2.10"
     redis: "redis:4.0.2"
     zookeeper: "zookeeper:3.4.10"
+    dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.2.1
   imagePullPolicy: "IfNotPresent"
 
 labels:
