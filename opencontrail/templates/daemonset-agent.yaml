@@ -32,7 +32,7 @@ spec:
       automountServiceAccountToken: false
       hostNetwork: true
       initContainers:
-{{ tuple $envAll .Values.dependencies.agent . | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
+{{ tuple $envAll .Values.dependencies.agent "[]" | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
       containers:
       - name: contrail-agent
         image: {{ .Values.images.tags.agent_vrouter | quote }}

@@ -26,7 +26,7 @@ spec:
         effect: NoSchedule
       hostNetwork: true
       initContainers:
-{{ tuple $envAll .Values.dependencies.redis . | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
+{{ tuple $envAll .Values.dependencies.redis "[]" | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
       containers:
       - name: redis
         image: {{ .Values.images.tags.redis | quote }}
