@@ -9,7 +9,7 @@ spec:
   template:
     metadata:
       labels:
-        app: redis
+{{ tuple $envAll "opencontrail" "redis" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
     spec:
       affinity:
         nodeAffinity:

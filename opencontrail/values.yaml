@@ -41,31 +41,31 @@ labels:
 dependencies:
   kafka:
     daemonset:
-    - contrail-agent
+    - agent
   zookeeper:
     daemonset:
-    - contrail-agent
+    - agent
   redis:
     daemonset:
-    - contrail-agent
+    - agent
   configdb:
     daemonset:
-    - contrail-agent
+    - agent
   analyticsdb:
     daemonset:
-    - contrail-agent
+    - agent
   config:
     daemonset:
-    - contrail-configdb
+    - configdb
   analytics:
     daemonset:
-    - contrail-analyticsdb
+    - analyticsdb
   control:
     daemonset:
-    - contrail-config
+    - config
   webui:
     daemonset:
-    - contrail-config
+    - config
 
 conf:
   # host_os - (OPTIONAL) host operating system release. Sample values "ubuntu" and "centos". Default is ubuntu

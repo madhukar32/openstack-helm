@@ -8,8 +8,9 @@ metadata:
 spec:
   template:
     metadata:
+    metadata:
       labels:
-        app: zookeeper
+{{ tuple $envAll "opencontrail" "zookeeper" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
     spec:
       affinity:
         nodeAffinity:

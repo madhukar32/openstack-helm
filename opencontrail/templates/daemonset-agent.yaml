@@ -12,7 +12,7 @@ spec:
   template:
     metadata:
       labels:
-{{ tuple $envAll "opencontrail" "vrouter-agent" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
+{{ tuple $envAll "opencontrail" "agent" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
     spec:
       #Disable affinity for single node setup
       affinity:
