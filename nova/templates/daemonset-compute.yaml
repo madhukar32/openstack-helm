@@ -139,12 +139,6 @@ spec:
           command:
             - /tmp/nova-compute.sh
           volumeMounts:
-{{- if .Values.images.tags.plugin }}
-            - name: nova-compute-plugin-shared
-              mountPath: /tmp/nova-compute.sh
-              subPath: nova-compute.sh
-              readOnly: true
-{{- else }}
             - name: nova-bin
               mountPath: /tmp/nova-compute.sh
               subPath: nova-compute.sh

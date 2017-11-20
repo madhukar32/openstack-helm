@@ -16,16 +16,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */}}
 
-{{- $neutron_plugin := .Values.conf.plugins.neutron_plugin_framework }}
-{{- $neutron_plugin_conf := .Values.conf.plugins.neutron_plugin_conf }}
-
 set -ex
 COMMAND="${@:-start}"
+export PYTHONPATH=/opt/plugin/site-packages
 
 function start () {
   exec neutron-server \
         --config-file /etc/neutron/neutron.conf \
-        --config-file /etc/neutron/plugins/{{ $neutron_plugin }}/{{ $neutron_plugin_conf }}
+        --config-file /etc/neutron/plugins/opencontrail/ContrailPlugin.ini
 }
 
 function stop () {

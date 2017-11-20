@@ -204,10 +204,7 @@ Nodes are labeled according to their Openstack roles:
     kubectl label nodes ceph-osd=enabled --all
     kubectl label nodes ceph-mds=enabled --all
     kubectl label nodes ceph-rgw=enabled --all
-    # For openvswitch SDN
     kubectl label nodes openvswitch=enabled --all
-    # For OpenContrail SDN
-    kubectl label node <node-name> opencontrail.org/controller=enabled
     kubectl label nodes openstack-compute-node=enabled --all
 
 Obtaining the Project
@@ -372,7 +369,7 @@ Installation of Other Services
 
 Now you can easily install the other services simply by going in order:
 
-**Install Memcached/Etcd/RabbitMQ/Ingress/Libvirt:**
+**Install Memcached/Etcd/RabbitMQ/Ingress/Libvirt/OpenVSwitch:**
 
 ::
 
@@ -381,6 +378,7 @@ Now you can easily install the other services simply by going in order:
     helm install --name=rabbitmq ./rabbitmq --namespace=openstack
     helm install --name=ingress ./ingress --namespace=openstack
     helm install --name=libvirt ./libvirt --namespace=openstack
+    helm install --name=openvswitch ./openvswitch --namespace=openstack
 
 **Install Keystone:**
 
@@ -388,21 +386,6 @@ Now you can easily install the other services simply by going in order:
 
     helm install --namespace=openstack --name=keystone ./keystone \
       --set pod.replicas.api=2
-
-**Install Open vSwitch or OpenContrail as neutron backend:**
-
-If you intend to install openvswitch as neutron backend
-
-::
-
-    helm install --namespace=openstack --name=openvswitch ./openvswitch
-
-If you intend to install opencontrail as neutron backend
-
-::
-
-    helm install --namespace=openstack --name=opencontrail ./opencontrail
-
 
 **Install RadosGW Object Storage:**
 

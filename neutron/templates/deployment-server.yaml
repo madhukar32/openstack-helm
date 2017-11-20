@@ -20,8 +20,6 @@ limitations under the License.
 
 {{- $mounts_neutron_server := .Values.pod.mounts.neutron_server.neutron_server }}
 {{- $mounts_neutron_server_init := .Values.pod.mounts.neutron_server.init_container }}
-{{- $neutron_plugin := .Values.conf.plugins.neutron_plugin_framework }}
-{{- $neutron_plugin_conf := .Values.conf.plugins.neutron_plugin_conf }}
 ---
 apiVersion: apps/v1beta1
 kind: Deployment
@@ -82,24 +80,17 @@ spec:
   In general should be a base ml2 init container for base scenario.
   It should copy vanilla neutron-server.sh to shared volume.
 */}}
-{{- if .Values.images.tags.plugin }}
-            - name: neutron-plugin-shared
-              mountPath: /tmp/neutron-server.sh
-              subPath: neutron-server.sh
-              readOnly: true
-{{- else }}
             - name: neutron-bin
               mountPath: /tmp/neutron-server.sh
               subPath: neutron-server.sh
               readOnly: true
-{{- end }}
             - name: neutron-etc
               mountPath: /etc/neutron/neutron.conf
               subPath: neutron.conf
               readOnly: true
             - name: neutron-etc
-              mountPath: /etc/neutron/plugins/{{ $neutron_plugin }}/{{ $neutron_plugin_conf }}
-              subPath: {{ $neutron_plugin_conf }}
+              mountPath: /etc/neutron/plugins/opencontrail/ContrailPlugin.ini
+              subPath: ContrailPlugin.ini
               readOnly: true
             - name: neutron-etc
               mountPath: /etc/neutron/api-paste.ini

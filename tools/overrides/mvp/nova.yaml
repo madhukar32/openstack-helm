@@ -18,11 +18,12 @@ ceph:
 conf:
   nova:
     libvirt:
+      images_type: null
       images_rbd_pool: null
       images_rbd_ceph_conf: null
       rbd_user: null
       rbd_secret_uuid: null
       disk_cachemodes: null
-      hw_disk_discard: ignore
+      hw_disk_discard: null
     upgrade_levels:
       compute: null

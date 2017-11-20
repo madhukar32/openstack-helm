@@ -320,21 +320,6 @@ Deploy Cinder
 .. warning:: Cinder deployment is not tested in the OSH development environment
    community gates
 
-**Install Open vSwitch or OpenContrail as neutron backend:**
-
-If you intend to install openvswitch as  neutron backend
-
-.. code-block:: shell
-
-  helm install --namespace=openstack --name=openvswitch ./openvswitch
-
-If you intend to install opencontrail as neutron backend.
-
-.. code-block:: shell
-
-  helm install --namespace=openstack --name=opencontrail ./opencontrail
-
-
 Once the OpenStack infrastructure components are installed and running, the
 OpenStack services can be installed.  In the below examples the default values
 that would be used in a production-like environment have been overridden with

@@ -998,10 +998,6 @@ conf:
       auth_type: password
       auth_version: v3
   plugins:
-    # neutron_plugin_framework can be: ml2, opencontrail
-    neutron_plugin_framework: ml2
-    # neutron_plugin_conf can be: ml2_conf.ini, ContrailPlugin.ini
-    neutron_plugin_conf: ml2_conf.ini
     ml2_conf:
       ml2:
         extension_drivers: port_security
