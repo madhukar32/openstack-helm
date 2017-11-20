@@ -41,36 +41,36 @@ labels:
 dependencies:
   kafka:
     daemonset:
-    - agent
+    - contrail-agent
   zookeeper:
     daemonset:
-    - agent
+    - contrail-agent
   redis:
     daemonset:
-    - agent
+    - contrail-agent
   configdb:
     daemonset:
-    - agent
+    - contrail-agent
   analyticsdb:
     daemonset:
-    - agent
+    - contrail-agent
   config:
     daemonset:
-    - configdb
+    - contrail-configdb
   analytics:
     daemonset:
-    - analyticsdb
+    - contrail-analyticsdb
   control:
     daemonset:
-    - config
+    - contrail-config
   webui:
     daemonset:
-    - config
+    - contrail-config
 
 conf:
   # host_os - (OPTIONAL) host operating system release. Sample values "ubuntu" and "centos". Default is ubuntu
   host_os: ubuntu
-  controller_nodes: 10.87.65.153
+  controller_nodes:
 
   cloud_orchestrator: openstack
   aaa_mode: cloud-admin

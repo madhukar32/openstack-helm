@@ -9,7 +9,7 @@ spec:
   template:
     metadata:
       labels:
-{{ tuple $envAll "opencontrail" "webui" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
+{{ tuple $envAll "opencontrail" "contrail-webui" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
     spec:
       affinity:
         nodeAffinity:
