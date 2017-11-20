@@ -1,4 +1,4 @@
-{{- if .Values.manifests.daemonset_analyticsdb }}
+{{- if .Values.manifests.daemonset_kafka }}
 {{- $envAll := . }}
 ---
 apiVersion: extensions/v1beta1
@@ -16,10 +16,10 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
             - matchExpressions:
-              - key: {{ .Values.labels.analyticsdb.node_selector_key }}
+              - key: {{ .Values.labels.kafka.node_selector_key }}
                 operator: In
                 values:
-                - {{ .Values.labels.analyticsdb.node_selector_value }}
+                - {{ .Values.labels.kafka.node_selector_value }}
       tolerations:
       - key: node-role.kubernetes.io/master
         operator: Exists

@@ -1,4 +1,4 @@
-{{- if .Values.manifests.daemonset_controller }}
+{{- if .Values.manifests.daemonset_webui }}
 {{- $envAll := . }}
 ---
 apiVersion: extensions/v1beta1
