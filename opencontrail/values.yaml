@@ -39,8 +39,6 @@ labels:
     node_selector_value: enabled
 
 dependencies:
-  agent:
-    daemonset:
   kafka:
     daemonset:
     - contrail-agent
