@@ -29,7 +29,6 @@ spec:
       - key: node-role.kubernetes.io/master
         operator: Exists
         effect: NoSchedule
-      automountServiceAccountToken: false
       hostNetwork: true
       initContainers:
 {{ tuple $envAll .Values.dependencies.agent "[]" | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
