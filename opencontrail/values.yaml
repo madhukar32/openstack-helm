@@ -39,21 +39,17 @@ labels:
     node_selector_value: enabled
 
 dependencies:
-  kafka:
-    daemonset:
-    - contrail-agent
-  zookeeper:
-    daemonset:
-    - contrail-agent
-  redis:
-    daemonset:
-    - contrail-agent
-  configdb:
-    daemonset:
-    - contrail-agent
   analyticsdb:
     daemonset:
-    - contrail-agent
+    - zookeeper
+    - kafka
+  configdb:
+    daemonset:
+    - zookeeper
+    - kafka
+  agent:
+    daemonset:
+    - contrail-config
   config:
     daemonset:
     - contrail-configdb
@@ -66,6 +62,7 @@ dependencies:
   webui:
     daemonset:
     - contrail-config
+    - redis
 
 conf:
   # host_os - (OPTIONAL) host operating system release. Sample values "ubuntu" and "centos". Default is ubuntu
