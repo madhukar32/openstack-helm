@@ -1,0 +1,69 @@
+{{- if .Values.manifests.daemonset_analyticsdb }}
+{{- $envAll := . }}
+# host_os is a mandatory field
+{{- $_ := required ".Values.conf.host_os must be specified, valid values are ubuntu, centos" .Values.conf.host_os }}
+{{- $suffix_obj_name := .Values.conf.suffix_obj_name | default "" }}
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: contrail-analyticsdb{{- $suffix_obj_name }}
+spec:
+  template:
+    metadata:
+      labels:
+{{ tuple $envAll "opencontrail" (printf "analyticsdb%s" $suffix_obj_name | quote) | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: {{ .Values.labels.analyticsdb.node_selector_key }}
+                operator: In
+                values:
+                - {{ .Values.labels.analyticsdb.node_selector_value }}
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      hostNetwork: true
+      containers:
+      - name: contrail-analyticsdb
+        image: {{ .Values.images.tags.analyticsdb }}
+        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: contrailctl-analyticsdb
+          mountPath: /etc/contrailctl/analyticsdb.conf
+          subPath: analyticsdb.conf
+        - name: controller-bin
+          mountPath: /tmp/analyticsdb-readiness.sh
+          subPath: analyticsdb-readiness.sh
+        - name: analyticsdb-data
+          mountPath: /var/lib/cassandra
+        - name: zookeeper-analyticsdb-data
+          mountPath: /var/lib/zookeeper
+        readinessProbe:
+          initialDelaySeconds: 120
+          periodSeconds: 30
+          timeoutSeconds: 500
+          exec:
+            command:
+              - /tmp/analyticsdb-readiness.sh
+      volumes:
+      - name: contrailctl-analyticsdb
+        configMap:
+          name: configmap-contrailctl{{- $suffix_obj_name }}
+          defaultMode: 0444
+      - name: controller-bin
+        configMap:
+          name: controller-bin{{ $suffix_obj_name }}
+          defaultMode: 0555
+      - name: analyticsdb-data
+        hostPath:
+          path: /var/lib/analyticsdb
+      - name: zookeeper-analyticsdb-data
+        hostPath:
+          path: /var/lib/analyticsdb_zookeeper_data
+{{- end }}

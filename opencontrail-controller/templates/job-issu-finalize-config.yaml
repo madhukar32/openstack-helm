@@ -1,0 +1,54 @@
+{{- if .Values.manifests.job_issu_finalize_config }}
+{{- $envAll := . }}
+{{- $dependencies := .Values.dependencies.issu_finalize_config }}
+{{- $mounts_issu_finalize_config_init := .Values.pod.mounts.issu_finalize_config.init_container }}
+{{- $suffix_obj_name := .Values.conf.suffix_obj_name | default "" }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-contrail-issu-finalize-config{{ $suffix_obj_name }}
+spec:
+  template:
+    metadata:
+      labels:
+{{ tuple $envAll "opencontrail" "issu-finalize-config" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
+    spec:
+      nodeSelector:
+        {{ .Values.labels.issu_finalize_config.node_selector_key }}: {{ .Values.labels.issu_finalize_config.node_selector_value }}
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      hostNetwork: true
+      restartPolicy: OnFailure
+      initContainers:
+{{ tuple $envAll $dependencies $mounts_issu_finalize_config_init | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
+      containers:
+      - name: issu-finalize-config
+        image: {{ .Values.images.tags.issu_finalize_config | quote }}
+        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
+        command:
+        - /tmp/contrail-issu.sh
+        - finalize-config
+        # - sleep
+        # - 100000s
+        volumeMounts:
+        - mountPath: /root/.kube/config
+          name: kube-config
+        - mountPath: /usr/bin/kubectl
+          name: bin-kubectl
+        - name: contrail-issu
+          mountPath: /tmp/contrail-issu.sh
+          subPath: contrail-issu.sh
+      volumes:
+      - name: contrail-issu
+        configMap:
+          name: controller-bin{{ $suffix_obj_name }}
+          defaultMode: 0777
+      - name: kube-config
+        hostPath:
+          path: /etc/kubernetes/admin.conf
+      - name: bin-kubectl
+        hostPath:
+          path: /usr/bin/kubectl
+{{- end }}

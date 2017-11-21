@@ -60,10 +60,6 @@ limitations under the License.
 {{- tuple "oslo_db_api" "internal" "user" "mysql" . | include "helm-toolkit.endpoints.authenticated_endpoint_uri_lookup" | set .Values.conf.nova.api_database "connection" | quote | trunc 0 -}}
 {{- end -}}
 
-{{- if empty .Values.conf.nova.cell0_database.connection -}}
-{{- tuple "oslo_db_cell0" "internal" "user" "mysql" . | include "helm-toolkit.endpoints.authenticated_endpoint_uri_lookup" | set .Values.conf.nova.cell0_database "connection" | quote | trunc 0 -}}
-{{- end -}}
-
 {{- if empty .Values.conf.nova.DEFAULT.transport_url -}}
 {{- tuple "oslo_messaging" "internal" "user" "amqp" . | include "helm-toolkit.endpoints.authenticated_endpoint_uri_lookup" | set .Values.conf.nova.DEFAULT "transport_url" | quote | trunc 0 -}}
 {{- end -}}
@@ -111,10 +107,6 @@ limitations under the License.
 
 {{- if empty .Values.conf.nova.DEFAULT.metadata_port -}}
 {{- tuple "compute_metadata" "public" "metadata" . | include "helm-toolkit.endpoints.endpoint_port_lookup" | set .Values.conf.nova.DEFAULT "metadata_port" | quote | trunc 0 -}}
-{{- end -}}
-
-{{- if empty .Values.conf.nova.placement.auth_url -}}
-{{- tuple "identity" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup"| set .Values.conf.nova.placement "auth_url" | quote | trunc 0 -}}
 {{- end -}}
 
 {{- if empty .Values.conf.nova.vnc.novncproxy_base_url -}}

@@ -1,0 +1,152 @@
+images:
+  tags:
+    vrouter_agent: "10.87.65.230:5000/contrail-agent-ubuntu16.04:4.0.2.0-34"
+    kubernetes_agent: "10.87.65.230:5000/contrail-kubernetes-agent-ubuntu16.04:4.0.2.0-34"
+    register_vrouter: "10.87.65.230:5000/contrail-agent-ubuntu16.04:4.0.2.0-34"
+    # vrouter_compiler: "contrail-vrouter-compiler-centos7:4.0.2.0-34"
+  imagePullPolicy: "IfNotPresent"
+
+labels:
+  vrouter_agent:
+    node_selector_key: openstack-compute-node
+    node_selector_value: enabled
+
+conf:
+  # host_os - (OPTIONAL) host operating system release. Sample values "ubuntu" and "centos". Default is ubuntu
+  host_os: ubuntu
+  global_config:
+    # global section configuration needed by all containers
+    GLOBAL:
+        # *_nodes - comma seperated list of controller server IP addresses
+        # Ex: controller_nodes: 10.87.65.154,10.87.65.154
+        # *_ip - virtual IP handled by load balancer in case of multi-node
+        # enable_*_service - Flag to enable opencontrail service
+
+        controller_nodes: 10.87.65.154
+        controller_ip: 10.87.65.154
+        # enable_control_service: "true"
+
+        analyticsdb_nodes: 10.87.65.154
+        # analyticsdb_cassandra_user: ''
+        # analyticsdb_cassandra_password: ''
+
+        analytics_nodes: 10.87.65.154
+        # analytics_ip:
+
+        # config_nodes:
+        # config_ip:
+        # enable_config_service: "true"
+        # configdb_cassandra_user: ''
+        # configdb_cassandra_password: ''
+
+        # webui_nodes:
+        # enable_webui_service: "true"
+
+        # In multi-controller systems, all hosts in the cluster should be reachable
+        # using its own hostname which is requirement for rabbitmq, so for that /etc/hosts entries are required,
+        # unless there is an external dns infrastructure to support it
+        # hosts_entries: { "host_name_1" : "host_ip_1", "host_name_2" : "host_ip_2" }
+
+        # cloud_orchestrator - valid values are 'kubernetes', 'openstack', 'openshift', 'mesos', 'vcenter'
+        cloud_orchestrator: openstack
+
+        # uve_partition_count: ''
+
+        # comma separated list of external servers like rabbitmq, zookeeper, cassandra
+        # external_rabbitmq_servers: 192.168.10.10,192.168.10.11
+        # external_zookeeper_servers: 192.168.10.10,192.168.10.11
+        # external_analyticsdb_zookeeper_servers: 192.168.10.10,192.168.10.11
+        # external_configdb_servers: 192.168.10.10,192.168.10.11
+
+        # Flags to enable ssl connections
+        # sandesh_ssl_enable: "false"
+        # introspect_ssl_enable: "false"
+
+        # Falgs to enable xmpp auth
+        # xmpp_auth_enable: "false"
+        # xmpp_dns_auth_enable: "false"
+
+        # apiserver_auth_protocol: "http"
+        # apiserver_certfile:
+        # apiserver_keyfile:
+        # apiserver_cafile:
+        # apiserver_insecure:
+
+        # neutron_metadata_ip:
+        # neutron_metadata_port:
+
+        # Below minimum_diskgb numbers are for only test/POC environments and not for production
+        configdb_minimum_diskgb: 5
+        analyticsdb_minimum_diskgb: 20
+
+  keystone_config:
+     KEYSTONE:
+       version: v3
+       admin_port: 35357
+       public_port: 80
+       auth_protocol: http
+       admin_user: admin
+       admin_password: password
+       admin_tenant: admin
+       insecure: True
+       user_domain_name: Default
+       project_domain_name: Default
+
+  # Sections related to kubemanager container
+  kubemanager_config:
+    KUBERNETES:
+      # set api_server to ip of kube-apiserver
+      # when cloud_orchestrator is kubernetes
+      # api_server: 10.87.65.154
+
+  # Sections related to agent container
+  agent_config:
+    AGENT:
+      # ctrl_data_network:
+      compile_vrouter_module: true
+
+      # qos_queue_id_list: []
+      # qos_logical_queue_list: []
+      # qos_default_nic_queue: None
+      # qos_priority_tagging: ''
+      # priority_id_list: []
+      # priority_scheduling_list: []
+      # priority_bandwidth_list: []
+      # vrouter_module_params: None
+
+    HYPERVISOR:
+      type: "kvm"
+
+  kubernetesagent_config:
+    AGENT:
+
+# typically overriden by environmental
+# values, but should include all endpoints
+# required by this chart
+endpoints:
+  namespace: openstack
+  cluster_domain_suffix: cluster.local
+  identity:
+    name: keystone
+    hosts:
+      default: keystone-api
+      public: keystone
+    host_fqdn_override:
+      default: null
+    path:
+      default: /v3
+    scheme:
+      default: http
+    port:
+      admin:
+        default: 35357
+      api:
+        default: 80
+
+manifests:
+  daemonset_vrouter_agent: true
+  configmap_contrailctl: true
+  # for cloud_orchestrator "kubernetes", set ths to false
+  configmap_bin: true
+  # for cloud_orchestrator "kubernetes", set ths to true
+  rbac_contrail: false

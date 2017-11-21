@@ -1,0 +1,68 @@
+{{- if .Values.manifests.configmap_contrailctl }}
+{{- $envAll := . }}
+{{- $suffix_obj_name := .Values.conf.suffix_obj_name | default "" }}
+{{- $cloud_orchestrator := .Values.conf.global_config.GLOBAL.cloud_orchestrator }}
+
+
+{{- if empty .Values.conf.keystone_config.KEYSTONE.auth_url -}}
+{{- tuple "identity" "internal" "admin" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup"| set .Values.conf.keystone_config.KEYSTONE "auth_url" | quote | trunc 0 -}}
+{{- end }}
+{{- if empty .Values.conf.keystone_config.KEYSTONE.ip -}}
+{{- tuple "identity" "internal" $envAll | include "helm-toolkit.endpoints.hostname_namespaced_endpoint_lookup" | set .Values.conf.keystone_config.KEYSTONE "ip" | quote | trunc 0 -}}
+{{- end }}
+
+{{- if empty .Values.conf.controller_config.WEBUI.nova_api_ip -}}
+{{- tuple "compute" "internal" $envAll | include "helm-toolkit.endpoints.hostname_namespaced_endpoint_lookup" | set .Values.conf.controller_config.WEBUI "nova_api_ip" | quote | trunc 0 -}}
+{{- end }}
+{{- if empty .Values.conf.controller_config.WEBUI.glance_api_ip -}}
+{{- tuple "image" "internal" $envAll | include "helm-toolkit.endpoints.hostname_namespaced_endpoint_lookup" | set .Values.conf.controller_config.WEBUI "glance_api_ip" | quote | trunc 0 -}}
+{{- end }}
+{{- if empty .Values.conf.controller_config.WEBUI.network_manager_ip -}}
+{{- tuple "network" "internal" $envAll | include "helm-toolkit.endpoints.hostname_namespaced_endpoint_lookup" | set .Values.conf.controller_config.WEBUI "network_manager_ip" | quote | trunc 0 -}}
+{{- end }}
+
+#FIXME - Waiting to be fixed in opencontrail code
+{{- if empty .Values.conf.global_config.GLOBAL.neutron_metadata_ip -}}
+{{- tuple "compute_metadata" "internal" $envAll | include "helm-toolkit.endpoints.hostname_namespaced_endpoint_lookup" | set .Values.conf.global_config.GLOBAL "neutron_metadata_ip" | quote | trunc 0 -}}
+{{- end }}
+{{- if empty .Values.conf.global_config.GLOBAL.neutron_metadata_port -}}
+{{- tuple "compute_metadata" "internal" "metadata" $envAll | include "helm-toolkit.endpoints.endpoint_port_lookup" | set .Values.conf.global_config.GLOBAL "neutron_metadata_port" | quote | trunc 0 -}}
+{{- end }}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: configmap-contrailctl{{- $suffix_obj_name }}
+  labels:
+{{ tuple $envAll "opencontrail" (printf "config%s" $suffix_obj_name) | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 4 }}
+data:
+  global.conf: |+
+{{ include "helm-toolkit.utils.to_oslo_conf" .Values.conf.global_config | indent 4 }}
+
+  controller.conf: |+
+{{ include "helm-toolkit.utils.to_oslo_conf" .Values.conf.global_config | indent 4 }}
+
+{{ include "helm-toolkit.utils.to_oslo_conf" .Values.conf.keystone_config | indent 4 }}
+
+{{ include "helm-toolkit.utils.to_oslo_conf" .Values.conf.rabbitmq_config | indent 4 }}
+
+{{ include "helm-toolkit.utils.to_oslo_conf" .Values.conf.controller_config | indent 4 }}
+
+  analytics.conf: |+
+{{ include "helm-toolkit.utils.to_oslo_conf" .Values.conf.global_config | indent 4 }}
+
+{{ include "helm-toolkit.utils.to_oslo_conf" .Values.conf.keystone_config | indent 4 }}
+
+{{ include "helm-toolkit.utils.to_oslo_conf" .Values.conf.rabbitmq_config | indent 4 }}
+
+{{ include "helm-toolkit.utils.to_oslo_conf" .Values.conf.analytics_config | indent 4 }}
+
+  analyticsdb.conf: |+
+{{ include "helm-toolkit.utils.to_oslo_conf" .Values.conf.global_config | indent 4 }}
+
+{{ include "helm-toolkit.utils.to_oslo_conf" .Values.conf.analyticsdb_config | indent 4 }}
+
+  kubemanager.conf: |+
+{{ include "helm-toolkit.utils.to_oslo_conf" .Values.conf.kubemanager_config | indent 4 }}
+
+{{- end }}

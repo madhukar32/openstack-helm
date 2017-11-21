@@ -39,9 +39,6 @@ labels:
   api_metadata:
     node_selector_key: openstack-control-plane
     node_selector_value: enabled
-  placement:
-    node_selector_key: openstack-control-plane
-    node_selector_value: enabled
   job:
     node_selector_key: openstack-control-plane
     node_selector_value: enabled
@@ -64,12 +61,12 @@ images:
     novncproxy: docker.io/kolla/ubuntu-source-nova-novncproxy:3.0.3
     novncproxy_assets: docker.io/kolla/ubuntu-source-nova-novncproxy:3.0.3
     consoleauth: docker.io/kolla/ubuntu-source-nova-consoleauth:3.0.3
-    compute: docker.io/kolla/ubuntu-source-nova-compute:3.0.3
+    # for opencontrail use the below nova-compute image
+    compute: docker.io/madhukar32/ubuntu-source-nova-compute:3.0.4
+    #compute: docker.io/kolla/ubuntu-source-nova-compute:3.0.3
     compute_ssh: docker.io/kolla/ubuntu-source-nova-ssh:3.0.3
-    placement: docker.io/kolla/ubuntu-source-nova-placement-api:3.0.3-beta.1
     bootstrap: docker.io/kolla/ubuntu-source-heat-engine:3.0.3
     dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.2.1
-    cell_setup: docker.io/kolla/ubuntu-source-nova-api:3.0.3
   pull_policy: "IfNotPresent"
 
 bootstrap:
@@ -114,7 +111,6 @@ network:
     port: 8774
     ingress:
       public: true
-    external_policy_local: false
     node_port:
       enabled: false
       port: 30774
@@ -124,17 +120,9 @@ network:
     port: 8775
     ingress:
       public: true
-    external_policy_local: false
     node_port:
       enabled: false
       port: 30775
-  placement:
-    port: 8778
-    ingress:
-      public: true
-    node_port:
-      enabled: false
-      port: 30778
   novncproxy:
     node_port:
       enabled: false
@@ -216,7 +204,9 @@ dependencies:
     daemonset:
     - libvirt
     # this should be set to corresponding neutron L2 agent
-    - neutron-ovs-agent
+    # for opencontrail, set to contrail-vrouter-agent
+    # - neutron-ovs-agent
+    - contrail-vrouter-agent
   consoleauth:
     jobs:
     - nova-db-sync
@@ -266,18 +256,6 @@ dependencies:
     - nova-db-sync
     services:
     - service: oslo_db
-      endpoint: internal
-  cell_setup:
-    jobs:
-    - nova-db-sync
-    services:
-    - service: oslo_messaging
-      endpoint: internal
-    - service: oslo_db
-      endpoint: internal
-    - service: identity
-      endpoint: internal
-    - service: compute
       endpoint: internal
 
 console:
@@ -965,7 +943,7 @@ conf:
       metadata_workers: 1
       use_neutron: true
       firewall_driver: nova.virt.firewall.NoopFirewallDriver
-      linuxnet_interface_driver: openvswitch
+      # linuxnet_interface_driver: openvswitch
       allow_resize_to_same_host: true
       compute_driver: libvirt.LibvirtDriver
       my_ip: 0.0.0.0
@@ -998,8 +976,6 @@ conf:
       max_retries: -1
     api_database:
       max_retries: -1
-    cell0_database:
-      max_retries: -1
     keystone_authtoken:
       auth_type: password
       auth_version: v3
@@ -1013,6 +989,7 @@ conf:
       rbd_secret_uuid: 457eb676-33da-42ec-9a8c-9293d545c337
       disk_cachemodes: "network=writeback"
       hw_disk_discard: unmap
+      virt_type: qemu
     upgrade_levels:
       compute: auto
     cache:
@@ -1022,29 +999,16 @@ conf:
       api_paste_config: /etc/nova/api-paste.ini
     oslo_messaging_notifications:
       driver: messagingv2
-    placement:
-      os_region_name: RegionOne
-      project_domain_name: default
-      project_name: service
-      auth_type: password
-      auth_version: v3
-      user_domain_name: default
-      username: placement
-      password: password
 
 # Names of secrets used by bootstrap and environmental checks
 secrets:
   identity:
     admin: nova-keystone-admin
     user: nova-keystone-user
-    placement: nova-keystone-placement
   oslo_db:
     admin: nova-db-admin
     user: nova-db-user
   oslo_db_api:
-    admin: nova-db-api-admin
-    user: nova-db-api-user
-  oslo_db_cell0:
     admin: nova-db-api-admin
     user: nova-db-api-user
 
@@ -1083,23 +1047,6 @@ endpoints:
     host_fqdn_override:
       default: null
     path: /nova_api
-    scheme: mysql+pymysql
-    port:
-      mysql:
-        default: 3306
-  oslo_db_cell0:
-    auth:
-      admin:
-        username: root
-        password: password
-      user:
-        username: nova
-        password: password
-    hosts:
-      default: mariadb
-    host_fqdn_override:
-      default: null
-    path: /nova_api_cell0
     scheme: mysql+pymysql
     port:
       mysql:
@@ -1154,14 +1101,6 @@ endpoints:
         user_domain_name: default
         username: neutron
         password: password
-      placement:
-        role: admin
-        region_name: RegionOne
-        username: placement
-        password: password
-        project_name: service
-        user_domain_name: default
-        project_domain_name: default
     hosts:
       default: keystone-api
       public: keystone
@@ -1236,21 +1175,6 @@ endpoints:
     port:
       novnc_proxy:
         default: 6080
-  placement:
-    name: placement
-    hosts:
-      default: placement-api
-      public: placement
-    host_fqdn_override:
-      default: null
-    path:
-      default: /
-    scheme:
-      default: 'http'
-    port:
-      api:
-        default: 8778
-        public: 80
   network:
     name: neutron
     hosts:
@@ -1284,9 +1208,6 @@ pod:
     nova_api_metadata:
       init_container: null
       nova_api_metadata:
-    nova_placement:
-      init_container: null
-      nova_placement:
     nova_api_osapi:
       init_container: null
       nova_api_osapi:
@@ -1310,7 +1231,6 @@ pod:
       nova_novncproxy:
   replicas:
     api_metadata: 1
-    placement: 1
     osapi: 1
     conductor: 1
     consoleauth: 1
@@ -1333,14 +1253,10 @@ pod:
     disruption_budget:
       metadata:
         min_available: 0
-      placement:
-        min_available: 0
       osapi:
         min_available: 0
     termination_grace_period:
       metadata:
-        timeout: 30
-      placement:
         timeout: 30
       osapi:
         timeout: 30
@@ -1354,13 +1270,6 @@ pod:
         memory: "1024Mi"
         cpu: "2000m"
     api_metadata:
-      requests:
-        memory: "128Mi"
-        cpu: "100m"
-      limits:
-        memory: "1024Mi"
-        cpu: "2000m"
-    placement:
       requests:
         memory: "128Mi"
         cpu: "100m"
@@ -1466,14 +1375,6 @@ pod:
         limits:
           memory: "1024Mi"
           cpu: "2000m"
-      cell_setup:
-        requests:
-          memory: "128Mi"
-          cpu: "100m"
-        limits:
-          memory: "1024Mi"
-          cpu: "2000m"
-
 
 manifests:
   configmap_bin: true
@@ -1481,38 +1382,27 @@ manifests:
   daemonset_compute: true
   deployment_api_metadata: true
   deployment_api_osapi: true
-  deployment_placement: true
   deployment_conductor: true
   deployment_consoleauth: true
   deployment_novncproxy: true
   deployment_scheduler: true
   ingress_metadata: true
-  ingress_placement: true
   ingress_osapi: true
   job_bootstrap: true
   job_db_init: true
-  job_db_init_placement: true
   job_db_sync: true
   job_db_drop: false
   job_ks_endpoints: true
   job_ks_service: true
   job_ks_user: true
-  job_ks_placement_endpoints: true
-  job_ks_placement_service: true
-  job_ks_placement_user: true
-  job_cell_setup: true
   pdb_metadata: true
-  pdb_placement: true
   pdb_osapi: true
   pod_rally_test: true
   secret_db_api: true
   secret_db: true
   secret_keystone: true
-  secret_keystone_placement: true
   service_ingress_metadata: true
-  service_ingress_placement: true
   service_ingress_osapi: true
   service_metadata: true
-  service_placement: true
   service_novncproxy: true
   service_osapi: true

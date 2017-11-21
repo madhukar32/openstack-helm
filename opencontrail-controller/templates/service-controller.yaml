@@ -1,0 +1,13 @@
+{{- if .Values.manifests.service_controller }}
+{{- $envAll := . }}
+{{- $suffix_obj_name := .Values.conf.suffix_obj_name | default "" }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: contrail-controller{{ $suffix_obj_name }}
+spec:
+  selector:
+{{ tuple $envAll "opencontrail" (printf "controller%s" $suffix_obj_name) | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 4 }}
+  clusterIP: None
+{{- end }}

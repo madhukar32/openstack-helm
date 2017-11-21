@@ -1,0 +1,40 @@
+{{- if .Values.manifests.rbac_contrail }}
+# host_os is a mandatory field
+{{- $_ := required ".Values.conf.host_os must be specified, valid values are ubuntu, centos" .Values.conf.host_os }}
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: contrail-vrouter
+rules:
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["*"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: contrail-vrouter
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: contrail-vrouter
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: contrail-vrouter
+subjects:
+- kind: ServiceAccount
+  name: contrail-vrouter
+  namespace: {{ .Release.Namespace }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: contrail-vrouter-token
+  annotations:
+    helm.sh/hook: post-install
+    kubernetes.io/service-account.name: contrail-vrouter
+type: kubernetes.io/service-account-token
+---
+{{- end }}

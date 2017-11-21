@@ -1,0 +1,432 @@
+images:
+  tags:
+    controller: "10.87.65.230:5000/contrail-controller-ubuntu16.04:4.0.2.0-34"
+    analyticsdb: "10.87.65.230:5000/contrail-analyticsdb-ubuntu16.04:4.0.2.0-34"
+    analytics: "10.87.65.230:5000/contrail-analytics-ubuntu16.04:4.0.2.0-34"
+    kubemanager: "10.87.65.230:5000/contrail-kube-manager-ubuntu16.04:4.0.2.0-34"
+    issu_gen_conf: "10.87.65.230:5000/contrail-kubernetes-agent-ubuntu16.04:4.0.2.0-34"
+    issu_config_migrate: "10.87.65.230:5000/contrail-kubernetes-agent-ubuntu16.04:4.0.2.0-34"
+    issu_finalize_config: "10.87.65.230:5000/contrail-kubernetes-agent-ubuntu16.04:4.0.2.0-34"
+    issu_update_vrouter: "10.87.65.230:5000/contrail-kubernetes-agent-ubuntu16.04:4.0.2.0-34"
+    # vrouter_compiler: "contrail-vrouter-compiler-centos7:4.0.2.0-34"
+  imagePullPolicy: "IfNotPresent"
+
+labels:
+  controller:
+    node_selector_key: opencontrail.org/controller
+    node_selector_value: "enabled"
+  analytics:
+    node_selector_key: opencontrail.org/controller
+    node_selector_value: "enabled"
+  analyticsdb:
+    node_selector_key: opencontrail.org/controller
+    node_selector_value: "enabled"
+  kubemanager:
+    node_selector_key: opencontrail.org/controller
+    node_selector_value: "enabled"
+  issu_gen:
+    node_selector_key: node-role.kubernetes.io/master
+    node_selector_value: ""
+  issu_config_migrate:
+    node_selector_key: node-role.kubernetes.io/master
+    node_selector_value: ""
+  issu_finalize_config:
+    node_selector_key: node-role.kubernetes.io/master
+    node_selector_value: ""
+  issu_update_vrouter:
+    node_selector_key: node-role.kubernetes.io/master
+    node_selector_value: ""
+
+dependencies:
+  issu_gen:
+    daemonset:
+    - contrail-controller
+  issu_config_migrate:
+    daemonset:
+    - contrail-controller
+    jobs:
+    - job-issu-gen-conf
+  issu_finalize_config:
+    daemonset:
+    - contrail-controller
+    jobs:
+    - job-issu-update-vrouter
+  issu_update_vrouter:
+    daemonset:
+    - contrail-controller
+    jobs:
+    - job-issu-config-migrate
+
+pod:
+  mounts:
+    issu_gen:
+      init_container: null
+      issu_gen:
+    issu_config_migrate:
+      init_container: null
+      issu_config_migrate:
+    issu_finalize_config:
+      init_container: null
+      issu_finalize_config:
+    issu_update_vrouter:
+      init_container: null
+      issu_update_vrouter:
+
+contrail:
+  readiness_check_svcs:
+    controller:
+      - rabbitmq-server
+      - zookeeper
+      - contrail-database
+      - contrail-api
+      - contrail-schema
+      - contrail-svc-monitor
+      - contrail-device-manager
+      - contrail-control
+      - contrail-webui
+    analytics:
+      - contrail-alarm-gen
+      - contrail-analytics-api
+      - contrail-collector
+      - contrail-query-engine
+      - contrail-snmp-collector
+      - contrail-topology
+    analyticsdb:
+      - contrail-database
+      - kafka
+    kubemanager:
+      - contrail-kube-manager
+    vrouter_agent:
+      - contrail-vrouter-agent
+
+conf:
+  # host_os - (OPTIONAL) host operating system release. Sample values "ubuntu" and "centos". Default is ubuntu
+  host_os: ubuntu
+  # Use suffix_obj_name, while upgrading contrail using ISSU
+  # suffix_obj_name:
+  # Controller node username and password details (Needed by ISSU)
+  global_config:
+    # global section configuration needed by all containers
+    GLOBAL:
+        # *_nodes - comma seperated list of controller server IP addresses
+        # Ex: controller_nodes: 10.87.65.154,10.87.65.154
+        # *_ip - virtual IP handled by load balancer in case of multi-node
+        # enable_*_service - Flag to enable opencontrail service
+
+        controller_nodes: 10.87.65.154
+        # enable_control_service: "true"
+
+        analyticsdb_nodes: 10.87.65.154
+        # analyticsdb_cassandra_user: ''
+        # analyticsdb_cassandra_password: ''
+
+        analytics_nodes: 10.87.65.154
+        # analytics_ip:
+
+        # config_nodes:
+        # config_ip:
+        # enable_config_service: "true"
+        # configdb_cassandra_user: ''
+        # configdb_cassandra_password: ''
+
+        # webui_nodes:
+        # enable_webui_service: "true"
+
+        # In multi-controller systems, all hosts in the cluster should be reachable
+        # using its own hostname which is requirement for rabbitmq, so for that /etc/hosts entries are required,
+        # unless there is an external dns infrastructure to support it
+        # hosts_entries: { "host_name_1" : "host_ip_1", "host_name_2" : "host_ip_2" }
+
+        # cloud_orchestrator - valid values are 'kubernetes', 'openstack', 'openshift', 'mesos', 'vcenter'
+        cloud_orchestrator: openstack
+
+        # uve_partition_count: ''
+
+        # comma separated list of external servers like rabbitmq, zookeeper, cassandra
+        # external_rabbitmq_servers: 192.168.10.10,192.168.10.11
+        # external_zookeeper_servers: 192.168.10.10,192.168.10.11
+        # external_analyticsdb_zookeeper_servers: 192.168.10.10,192.168.10.11
+        # external_configdb_servers: 192.168.10.10,192.168.10.11
+
+        # Flags to enable ssl connections
+        # sandesh_ssl_enable: "false"
+        # introspect_ssl_enable: "false"
+
+        # Falgs to enable xmpp auth
+        # xmpp_auth_enable: "false"
+        # xmpp_dns_auth_enable: "false"
+
+        # apiserver_auth_protocol: "http"
+        # apiserver_certfile:
+        # apiserver_keyfile:
+        # apiserver_cafile:
+        # apiserver_insecure:
+
+        # neutron_metadata_ip:
+        # neutron_metadata_port:
+
+        # Below minimum_diskgb numbers are for only test/POC environments and not for production
+        configdb_minimum_diskgb: 5
+        analyticsdb_minimum_diskgb: 20
+
+  keystone_config:
+     KEYSTONE:
+       version: v3
+       admin_port: 35357
+       public_port: 80
+       auth_protocol: http
+       admin_user: admin
+       admin_password: password
+       admin_tenant: admin
+       insecure: True
+       user_domain_name: Default
+       project_domain_name: Default
+
+  rabbitmq_config:
+    RABBITMQ:
+      user: guest
+      password: guest
+      vhost: '/'
+      port: 5672
+      # owner:
+      # group:
+      # ssl:
+      # cacert:
+      # server_key:
+      # server_cert:
+      # ssl_port:
+      # ha_queues:
+
+  # Sections related to controller container
+  controller_config:
+    CONTROLLER:
+      encap_priority: "MPLSoUDP,MPLSoGRE,VXLAN"
+      # external_routers_list: { "name1": "ip1", "name2": "ip2" }
+      # bgp_asn: 64512
+      # flow_export_rate - flow export rate to the collector
+      # flow_export_rate:
+
+    WEBUI:
+      http_listen_port: 8080
+      https_listen_port: 8143
+      webui_storage_enable: 'false'
+      enable_underlay: 'false'
+      enable_mx: 'false'
+      enable_udd: 'false'
+      service_endpoint_from_config: 'true'
+      # server_options_key_file:
+      # server_options_cert_file:
+
+    CONTROL:
+      log: "var/log/contrail/contrail-control.log"
+      log_level: "SYS_NOTICE"
+      introspect_port: 8083
+      bgp_port: 3179
+      xmpp_server_port: 5269
+
+    DNS:
+      log: "/var/log/contrail/contrail-dns.log"
+      log_level: "SYS_NOTICE"
+      introspect_port: 8092
+      named_log_file: "/var/log/contrail/contrail-named.log"
+      dns_server_port: 53
+
+    SCHEMA:
+      log: "/var/log/contrail/contrail-schema.log"
+      log_level: "SYS_NOTICE"
+
+    SVC_MONITOR:
+      log: "/var/log/contrail/contrail-svc-monitor.log"
+      log_level: "SYS_NOTICE"
+
+    DEVICE_MANAGER:
+      log: "/var/log/contrail/contrail-device-manager.log"
+      log_level: "SYS_NOTICE"
+
+    CASSANDRA:
+      # commitlog_dir: "/var/lib/cassandra/commitlog"
+      # data_dirs: ["/var/lib/cassandra/data"]
+
+    # contrail_api section
+    API:
+      log: "/var/log/contrail/contrail-api.log"
+      log_level: "SYS_NOTICE"
+      listen_port: 8082
+      listen_address: "0.0.0.0"
+      list_optimization_enabled: "true"
+      # cloud_admin_role: ""
+      # global_read_only_role: ""
+      # aaa_mode - no-auth, cloud-admin, rbac
+      # for cloud_orchestrator "kubernetes", set ths to "no-auth"
+      aaa_mode: "cloud-admin"
+
+    ANALYTICS_API:
+      # aaa_mode - no-auth, cloud-admin, rbac
+      # for cloud_orchestrator "kubernetes", set ths to no-auth
+      aaa_mode: "cloud-admin"
+
+  # Sections related to analytics container
+  analytics_config:
+    ALARM_GEN:
+      log: "/var/log/contrail/contrail-alarm-gen.log"
+      log_level: "SYS_NOTICE"
+      introspect_port: 5995
+
+    ANALYTICS_API:
+      log: "/var/log/contrail/contrail-analytics-api.log"
+      log_level: "SYS_NOTICE"
+      introspect_port: 8090
+      listen_port: 8081
+      # aaa_mode - no-auth, cloud-admin, rbac
+      # for cloud_orchestrator "kubernetes", set ths to no-auth
+      aaa_mode: "cloud-admin"
+
+    ANALYTICS_COLLECTOR:
+      log: "/var/log/contrail/contrail-collector.log"
+      log_level: "SYS_NOTICE"
+      introspect_port: 8089
+      listen_port: 8086
+      analytics_flow_ttl: 48
+      analytics_statistics_ttl: 2160
+      analytics_config_audit_ttl: 24
+      analytics_data_ttl: 2
+
+    SNMP_COLLECTOR:
+      log: "/var/log/contrail/contrail-snmp-collector.log"
+      log_level: "SYS_NOTICE"
+      introspect_port: 5920
+      listen_port: 600
+      scan_frequency: 600
+      fast_scan_frequency: 60
+
+    TOPOLOGY:
+      log: "/var/log/contrail/contrail-topology.log"
+      log_level: "SYS_NOTICE"
+      introspect_port: 5921
+
+    QUERY_ENGINE:
+      log: "/var/log/contrail/contrail-query-engine.log"
+      log_level: "SYS_NOTICE"
+      introspect_port: 8091
+
+  # Sections related to analyticsdb container
+  analyticsdb_config:
+    CASSANDRA:
+      # commitlog_dir: "/var/lib/cassandra/commitlog"
+      # data_dirs: ["/var/lib/cassandra/data"]
+
+  # Sections related to kubemanager container
+  kubemanager_config:
+    KUBERNETES:
+      # api_server: 10.87.65.154
+      # cluster_name: k8s-default
+      # pod_subnets: "10.32.0.0/12"
+      # service_subnets: "10.96.0.0/12"
+      # cluster_project: "{'domain': 'default-domain', 'project': 'default'}"
+
+    KUBERNETES_VNC:
+      # public fip pool to be used for service/ingress.
+      # public_fip_pool: {'domain': 'domain-name', 'project': 'project-name', 'network': 'network-name', 'name': 'fip-pool-name' }
+
+# typically overriden by environmental
+# values, but should include all endpoints
+# required by this chart
+endpoints:
+  namespace: openstack
+  cluster_domain_suffix: cluster.local
+  identity:
+    name: keystone
+    hosts:
+      default: keystone-api
+      public: keystone
+    host_fqdn_override:
+      default: null
+    path:
+      default: /v3
+    scheme:
+      default: http
+    port:
+      admin:
+        default: 35357
+      api:
+        default: 80
+  network:
+    name: neutron
+    hosts:
+      default: neutron-server
+      public: neutron
+    host_fqdn_override:
+      default: null
+    path:
+      default: null
+    scheme:
+      default: 'http'
+    port:
+      api:
+        default: 9696
+        public: 80
+  compute:
+    name: nova
+    hosts:
+      default: nova-api
+      public: nova
+    host_fqdn_override:
+      default: null
+    path:
+      default: "/v2/%(tenant_id)s"
+    scheme:
+      default: 'http'
+    port:
+      api:
+        default: 8774
+        public: 80
+      novncproxy:
+        default: 6080
+  compute_metadata:
+    name: nova
+    hosts:
+      default: nova-metadata
+      public: metadata
+    host_fqdn_override:
+      default: null
+    path:
+      default: /
+    scheme:
+      default: 'http'
+    port:
+      metadata:
+        default: 8775
+        public: 80
+  image:
+    name: glance
+    hosts:
+      default: glance-api
+      public: glance
+    host_fqdn_override:
+      default: null
+    path:
+      default: null
+    scheme:
+      default: http
+    port:
+      api:
+        default: 9292
+        public: 80
+
+manifests:
+  daemonset_controller: true
+  daemonset_analytics: true
+  daemonset_analyticsdb: true
+  configmap_contrailctl: true
+  # for cloud_orchestrator "kubernetes", set ths to false
+  configmap_bin: true
+  # for cloud_orchestrator "kubernetes", set ths to true
+  daemonset_kubemanager: false
+  # for cloud_orchestrator "kubernetes", set ths to true
+  rbac_contrail: false
+  # While upgrading, enable below jobs
+  job_issu_gen_conf: false
+  job_issu_config_migrate: false
+  job_issu_finalize_config: false
+  job_issu_update_vrouter: false
+  service_controller: true

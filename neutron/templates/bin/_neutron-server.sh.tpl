@@ -16,13 +16,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */}}
 
+{{- $neutron_plugin := .Values.conf.plugins.neutron_plugin_framework }}
+{{- $neutron_plugin_conf := .Values.conf.plugins.neutron_plugin_conf }}
+
 set -ex
 COMMAND="${@:-start}"
 
 function start () {
   exec neutron-server \
         --config-file /etc/neutron/neutron.conf \
-        --config-file /etc/neutron/plugins/ml2/ml2_conf.ini
+        --config-file /etc/neutron/plugins/{{ $neutron_plugin }}/{{ $neutron_plugin_conf }}
 }
 
 function stop () {

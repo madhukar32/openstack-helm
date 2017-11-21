@@ -30,3 +30,4 @@ limitations under the License.
 stdio_handler = "file"
 {{ if not .Values.conf.qemu.user }}#{{ end }}user = {{ .Values.conf.qemu.user | default "nova" | quote }}
 {{ if not .Values.conf.qemu.group }}#{{ end }}group = {{ .Values.conf.qemu.group | default "kvm" | quote }}
+{{ if not .Values.conf.qemu.cgroup_device_acl }}#{{ end }}cgroup_device_acl = [{{ range .Values.conf.qemu.cgroup_device_acl }}{{ . | quote }}, {{ end }}]

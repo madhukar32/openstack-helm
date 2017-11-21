@@ -48,6 +48,22 @@ limitations under the License.
 {{- set .Values.conf.heat.keystone_authtoken "password" .Values.endpoints.identity.auth.user.password | quote | trunc 0 -}}
 {{- end -}}
 
+# opencontrail conf needed contrail-heat plugin
+
+{{- if empty .Values.conf.heat.clients_contrail.user -}}
+{{- set .Values.conf.heat.clients_contrail "user" .Values.endpoints.identity.auth.admin.username | quote | trunc 0 -}}
+{{- end -}}
+{{- if empty .Values.conf.heat.clients_contrail.password -}}
+{{- set .Values.conf.heat.clients_contrail "password" .Values.endpoints.identity.auth.admin.password | quote | trunc 0 -}}
+{{- end -}}
+{{- if empty .Values.conf.heat.clients_contrail.tenant -}}
+{{- set .Values.conf.heat.clients_contrail "tenant" .Values.endpoints.identity.auth.admin.project_name | quote | trunc 0 -}}
+{{- end -}}
+{{- if empty .Values.conf.heat.clients_contrail.auth_host_ip -}}
+{{- tuple "identity" "internal" $envAll | include "helm-toolkit.endpoints.hostname_namespaced_endpoint_lookup" | set .Values.conf.heat.clients_contrail "auth_host_ip" | quote | trunc 0 -}}
+{{- end -}}
+
+
 {{- if empty .Values.conf.heat.trustee.region_name -}}
 {{- set .Values.conf.heat.trustee "region_name" .Values.endpoints.identity.auth.trustee.region_name | quote | trunc 0 -}}
 {{- end -}}

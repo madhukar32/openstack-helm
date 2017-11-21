@@ -1,0 +1,25 @@
+{{- if .Values.manifests.configmap_bin }}
+{{- $envAll := . }}
+{{- $suffix_obj_name := .Values.conf.suffix_obj_name | default "" }}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: controller-bin{{ $suffix_obj_name }}
+data:
+  contrail-issu.sh: |+
+{{ tuple "bin/_contrail-issu.sh.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
+  controller-readiness.sh: |+
+{{- $_ := set .Values "readiness_context" "controller" }}
+{{ tuple "bin/_contrail-readiness.sh.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
+  analytics-readiness.sh: |+
+{{- $_ := set .Values "readiness_context" "analytics" }}
+{{ tuple "bin/_contrail-readiness.sh.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
+  analyticsdb-readiness.sh: |+
+{{- $_ := set .Values "readiness_context" "analyticsdb" }}
+{{ tuple "bin/_contrail-readiness.sh.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
+  kubemanager-readiness.sh: |+
+{{- $_ := set .Values "readiness_context" "kubemanager" }}
+{{ tuple "bin/_contrail-readiness.sh.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
+
+{{- end }}

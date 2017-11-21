@@ -56,7 +56,7 @@ spec:
           imagePullPolicy: {{ .Values.images.pull_policy }}
 {{ tuple $envAll $envAll.Values.pod.resources.engine | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
           securityContext:
-            runAsUser: {{ .Values.pod.user.heat.uid }}
+            runAsUser: {{ .Values.pod.user.heat_engine.uid }}
           command:
             - /tmp/heat-engine.sh
             - start

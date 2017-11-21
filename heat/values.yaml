@@ -35,7 +35,7 @@ images:
     api: docker.io/kolla/ubuntu-source-heat-api:3.0.3
     cfn: docker.io/kolla/ubuntu-source-heat-api:3.0.3
     cloudwatch: docker.io/kolla/ubuntu-source-heat-api:3.0.3
-    engine: docker.io/kolla/ubuntu-source-heat-engine:3.0.3
+    engine: docker.io/madhukar32/ubuntu-binary-contrail-heat-engine:3.0.4
     dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.2.1
   pull_policy: "IfNotPresent"
 
@@ -190,6 +190,7 @@ conf:
     DEFAULT:
       num_engine_workers: 4
       trusts_delegated_roles: ""
+      plugin_dirs: /usr/lib/python2.7/dist-packages/vnc_api/gen/heat/resources,/usr/lib/python2.7/dist-packages/contrail_heat/resources
     keystone_authtoken:
       auth_type: password
       auth_version: v3
@@ -216,12 +217,15 @@ conf:
       endpoint_type: internalURL
     oslo_messaging_notifications:
       driver: messagingv2
+    # for opencontrail, update the below information
+    clients_contrail:
+      api_base_url: /
+      api_server: 10.87.65.154
 
 network:
   api:
     ingress:
       public: true
-    external_policy_local: false
     node_port:
       enabled: false
       port: 30004
@@ -473,6 +477,8 @@ endpoints:
 
 pod:
   user:
+    heat_engine:
+      uid: 105
     heat:
       uid: 1000
   affinity:

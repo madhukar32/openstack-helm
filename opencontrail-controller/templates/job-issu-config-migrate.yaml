@@ -1,0 +1,54 @@
+{{- if .Values.manifests.job_issu_config_migrate }}
+{{- $envAll := . }}
+{{- $dependencies := .Values.dependencies.issu_config_migrate }}
+{{- $mounts_issu_config_migrate_init := .Values.pod.mounts.issu_config_migrate.init_container }}
+{{- $suffix_obj_name := .Values.conf.suffix_obj_name | default "" }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-contrail-issu-config-migrate{{ $suffix_obj_name }}
+spec:
+  template:
+    metadata:
+      labels:
+{{ tuple $envAll "opencontrail" "issu-config-migrate" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
+    spec:
+      nodeSelector:
+        {{ .Values.labels.issu_config_migrate.node_selector_key }}: {{ .Values.labels.issu_config_migrate.node_selector_value }}
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      hostNetwork: true
+      restartPolicy: OnFailure
+      initContainers:
+{{ tuple $envAll $dependencies $mounts_issu_config_migrate_init | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
+      containers:
+      - name: issu-config-migrate
+        image: {{ .Values.images.tags.issu_config_migrate | quote }}
+        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
+        command:
+        - /tmp/contrail-issu.sh
+        - migrate-config
+        # - sleep
+        # - 1000000s
+        volumeMounts:
+        - mountPath: /root/.kube/config
+          name: kube-config
+        - mountPath: /usr/bin/kubectl
+          name: bin-kubectl
+        - name: contrail-issu
+          mountPath: /tmp/contrail-issu.sh
+          subPath: contrail-issu.sh
+      volumes:
+      - name: contrail-issu
+        configMap:
+          name: controller-bin{{ $suffix_obj_name }}
+          defaultMode: 0777
+      - name: kube-config
+        hostPath:
+          path: /etc/kubernetes/admin.conf
+      - name: bin-kubectl
+        hostPath:
+          path: /usr/bin/kubectl
+{{- end }}

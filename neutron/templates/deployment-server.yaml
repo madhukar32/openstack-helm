@@ -19,6 +19,8 @@ limitations under the License.
 {{- $dependencies := .Values.dependencies.server }}
 {{- $mounts_neutron_server := .Values.pod.mounts.neutron_server.neutron_server }}
 {{- $mounts_neutron_server_init := .Values.pod.mounts.neutron_server.init_container }}
+{{- $neutron_plugin := .Values.conf.plugins.neutron_plugin_framework }}
+{{- $neutron_plugin_conf := .Values.conf.plugins.neutron_plugin_conf }}
 ---
 apiVersion: apps/v1beta1
 kind: Deployment
@@ -73,8 +75,8 @@ spec:
               subPath: neutron.conf
               readOnly: true
             - name: neutron-etc
-              mountPath: /etc/neutron/plugins/ml2/ml2_conf.ini
-              subPath: ml2_conf.ini
+              mountPath: /etc/neutron/plugins/{{ $neutron_plugin }}/{{ $neutron_plugin_conf }}
+              subPath: {{ $neutron_plugin_conf }}
               readOnly: true
             - name: neutron-etc
               mountPath: /etc/neutron/api-paste.ini

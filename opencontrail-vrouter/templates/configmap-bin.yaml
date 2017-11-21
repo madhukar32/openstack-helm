@@ -1,0 +1,14 @@
+{{- if .Values.manifests.configmap_bin }}
+{{- $envAll := . }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vrouter-bin
+data:
+  register-vrouter.sh: |+
+{{ tuple "bin/_register-vrouter.sh.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
+  vrouter-agent-readiness.sh: |+
+{{ tuple "bin/_contrail-readiness.sh.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
+
+{{- end }}
