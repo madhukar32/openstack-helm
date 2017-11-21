@@ -76,10 +76,6 @@ spec:
             tcpSocket:
               port: {{ .Values.network.server.port }}
           volumeMounts:
-{{/*
-  In general should be a base ml2 init container for base scenario.
-  It should copy vanilla neutron-server.sh to shared volume.
-*/}}
             - name: neutron-bin
               mountPath: /tmp/neutron-server.sh
               subPath: neutron-server.sh
