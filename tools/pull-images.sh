@@ -1,4 +1,7 @@
 #!/bin/bash
+
+exit 0
+
 set -x
 
 if [ "x$1" == "x" ]; then
