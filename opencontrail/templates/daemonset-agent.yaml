@@ -34,7 +34,7 @@ spec:
 {{ tuple $envAll .Values.dependencies.agent "[]" | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
       containers:
       - name: contrail-agent
-        image: {{ printf "%s:%s" .Values.images.tags.agent_vrouter .Values.images.tags.contrail_vrouter | quote }}
+        image: {{ printf "%s/%s:%s" .Values.images.tags.registry .Values.images.tags.agent_vrouter .Values.images.tags.contrail_version | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         securityContext:
           privileged: true
@@ -54,7 +54,7 @@ spec:
         - mountPath: /var/lib/contrail/
           name: var-lib-contrail
       - name: contrail-agent-nodemgr
-        image: {{ printf "%s:%s" .Values.images.tags.nodemgr .Values.images.tags.contrail_vrouter | quote }}
+        image: {{ printf "%s/%s:%s" .Values.images.tags.registry .Values.images.tags.nodemgr .Values.images.tags.contrail_version | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
