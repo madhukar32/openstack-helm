@@ -29,7 +29,7 @@ spec:
 {{ tuple $envAll .Values.dependencies.webui "[]" | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
       containers:
       - name: contrail-webui-job
-        image: {{ .Values.images.tags.webui_job | quote }}
+        image: {{ printf "%s:%s" .Values.images.tags.webui_job .Values.images.tags.contrail_vrouter | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:
@@ -37,7 +37,7 @@ spec:
         - configMapRef:
             name: configmap-auth
       - name: contrail-webui-web
-        image: {{ .Values.images.tags.webui_web | quote }}
+        image: {{ printf "%s:%s" .Values.images.tags.webui_web .Values.images.tags.contrail_vrouter | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         envFrom:
         - configMapRef:

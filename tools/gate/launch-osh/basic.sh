@@ -206,6 +206,7 @@ elif [ "x$SDN_PLUGIN" == "xlinuxbridge" ]; then
 elif [ "x$SDN_PLUGIN" == "xopencontrail" ]; then
   helm install --namespace=openstack ${WORK_DIR}/neutron --name=neutron \
     --set conf.plugins.opencontrail.APISERVER.api_server_ip=$local_ip \
+    --set images.tags.contrail_version=${CONTRAIL_VERSION} \
     --values=${WORK_DIR}/tools/overrides/mvp/neutron-opencontrail.yaml
 fi
 
