@@ -167,7 +167,9 @@ elif [ "x$SDN_PLUGIN" == "xopencontrail" ]; then
 
   helm install --namespace=openstack ${WORK_DIR}/opencontrail --name=opencontrail \
     --set conf.controller_nodes=$local_ip \
-    --set conf.host_os=$HOST_OS
+    --set conf.host_os=$HOST_OS \
+    --set images.tags.contrail_version=${CONTRAIL_VERSION} \
+    --set images.tags.registry=${OPENCONTRAIL_REGISTRY_URL}
 fi
 kube_wait_for_pods openstack ${POD_START_TIMEOUT_OPENSTACK}
 
@@ -190,7 +192,7 @@ fi
 if [ "x$SDN_PLUGIN" == "xlinuxbridge" ]; then
   NOVA_INSTALL+=" --set dependencies.compute.daemonset={neutron-lb-agent}"
 elif [ "x$SDN_PLUGIN" == "xopencontrail" ]; then
-  NOVA_INSTALL+=" --values=${WORK_DIR}/tools/overrides/mvp/nova-opencontrail.yaml"
+  NOVA_INSTALL+=" --values=${WORK_DIR}/tools/overrides/mvp/nova-opencontrail.yaml --set images.tags.plugin=${OPENCONTRAIL_REGISTRY_URL}/contrail-openstack-compute-contrail-backend:${CONTRAIL_VERSION}"
 fi
 
 $NOVA_INSTALL
@@ -206,8 +208,7 @@ elif [ "x$SDN_PLUGIN" == "xlinuxbridge" ]; then
 elif [ "x$SDN_PLUGIN" == "xopencontrail" ]; then
   helm install --namespace=openstack ${WORK_DIR}/neutron --name=neutron \
     --set conf.plugins.opencontrail.APISERVER.api_server_ip=$local_ip \
-    --set images.tags.contrail_version=${CONTRAIL_VERSION} \
-    --set images.tags.registry=${OPENCONTRAIL_REGISTRY_URL} \
+    --set images.tags.plugin=${OPENCONTRAIL_REGISTRY_URL}/contrail-openstack-neutron-contrail-backend:${CONTRAIL_VERSION} \
     --values=${WORK_DIR}/tools/overrides/mvp/neutron-opencontrail.yaml
 fi
 

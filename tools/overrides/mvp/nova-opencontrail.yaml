@@ -1,7 +1,3 @@
-images:
-  tags:
-    plugin: localhost:5000/contrail-openstack-compute-contrail-backend:4.0.2.0-35
-
 dependencies:
   compute:
     daemonset:

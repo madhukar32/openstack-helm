@@ -10,7 +10,6 @@ network:
 
 images:
   tags:
-    plugin: localhost:5000/contrail-openstack-neutron-contrail-backend:4.0.2.0-35
     # For opencontrail, use below metadata image
     metadata: docker.io/kolla/ubuntu-binary-neutron-metadata-agent:3.0.3
 
