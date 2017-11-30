@@ -2,7 +2,7 @@ apiVersion: v1
 name: opencontrail
 description: A Helm chart for OpenContrail
 version: 0.1.0
-appVersion: Contrail 4.0.2
+appVersion: Contrail 4.1.0
 home: https://github.com/Juniper/contrail-docker/
 sources:
   - https://github.com/Juniper/contrail-controller/
