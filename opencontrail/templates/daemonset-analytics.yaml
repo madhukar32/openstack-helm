@@ -44,6 +44,8 @@ spec:
             name: configmap-contrail
         - configMapRef:
             name: configmap-auth
+        - configMapRef:
+            name: configmap-rabbitmq
       - name: contrail-alarm-gen
         image: {{ printf "%s/%s:%s" .Values.images.tags.registry .Values.images.tags.analytics_alarm_gen .Values.images.tags.contrail_version | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
@@ -70,6 +72,8 @@ spec:
             name: configmap-contrail
         - configMapRef:
             name: configmap-auth
+        - configMapRef:
+            name: configmap-rabbitmq
       - name: contrail-topology
         image: {{ printf "%s/%s:%s" .Values.images.tags.registry .Values.images.tags.analytics_topology .Values.images.tags.contrail_version | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
@@ -78,6 +82,8 @@ spec:
             name: configmap-contrail
         - configMapRef:
             name: configmap-auth
+        - configMapRef:
+            name: configmap-rabbitmq
       - name: contrail-analytics-nodemgr
         image: {{ printf "%s/%s:%s" .Values.images.tags.registry .Values.images.tags.nodemgr .Values.images.tags.contrail_version | quote }}
         imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
