@@ -14,6 +14,7 @@ spec:
       labels:
 {{ tuple $envAll "opencontrail" "contrail-agent" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
     spec:
+      restartPolicy: Never
       #Disable affinity for single node setup
       affinity:
         nodeAffinity:
