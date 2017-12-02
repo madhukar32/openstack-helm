@@ -168,6 +168,7 @@ elif [ "x$SDN_PLUGIN" == "xopencontrail" ]; then
   helm install --namespace=openstack ${WORK_DIR}/opencontrail --name=opencontrail \
     --set conf.controller_nodes=$local_ip \
     --set conf.host_os=$HOST_OS \
+    --set conf.log_level=SYS_DEBUG \
     --set images.tags.contrail_version=${CONTRAIL_VERSION} \
     --set images.tags.registry=${OPENCONTRAIL_REGISTRY_URL}
 fi

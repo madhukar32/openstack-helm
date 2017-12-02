@@ -14,6 +14,7 @@ metadata:
   name: configmap-contrail
 data:
   CONTROLLER_NODES: {{ .Values.conf.controller_nodes }}
+  LOG_LEVEL: {{ .Values.conf.log_level }}
 ---
 apiVersion: v1
 kind: ConfigMap
