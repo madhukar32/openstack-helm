@@ -20,7 +20,7 @@ images:
     webui_job: "contrail-controller-webui-job"
     webui_web: "contrail-controller-webui-web"
     kafka: "contrail-external-kafka"
-    cassandra: "cassandra:3.11.1"
+    cassandra: "cassandra:3.10"
     redis: "redis:4.0.2"
     zookeeper: "zookeeper:3.4.10"
     dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.2.1
