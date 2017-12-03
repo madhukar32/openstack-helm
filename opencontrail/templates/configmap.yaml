@@ -77,5 +77,5 @@ data:
     -Dcassandra.native_transport_port=9042
     -Dcassandra.ssl_storage_port=7001
     -Dcassandra.storage_port=7000
-    -Xms1g -Xmx2g
+    -Xms2g -Xmx4g -Xmn=1g
 {{- end }}
