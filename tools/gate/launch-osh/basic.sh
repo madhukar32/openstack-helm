@@ -171,6 +171,8 @@ elif [ "x$SDN_PLUGIN" == "xopencontrail" ]; then
     --set conf.log_level=SYS_DEBUG \
     --set images.tags.contrail_version=${CONTRAIL_VERSION} \
     --set images.tags.registry=${OPENCONTRAIL_REGISTRY_URL}
+
+  free -h && sudo sync && sudo sh -c 'echo 3 >/proc/sys/vm/drop_caches' && free -h
 fi
 kube_wait_for_pods openstack ${POD_START_TIMEOUT_OPENSTACK}
 
