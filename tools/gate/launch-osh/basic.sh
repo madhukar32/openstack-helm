@@ -165,6 +165,7 @@ elif [ "x$SDN_PLUGIN" == "xopencontrail" ]; then
   #helm repo add incubator http://storage.googleapis.com/kubernetes-charts-incubator
   #helm install --namespace openstack --name zookeeper --set storageClass=general --set servers=1 incubator/zookeeper
 
+  sudo sysctl -w vm.max_map_count=104857
   helm install --namespace=openstack ${WORK_DIR}/opencontrail --name=opencontrail \
     --set conf.controller_nodes=$local_ip \
     --set conf.host_os=$HOST_OS \
