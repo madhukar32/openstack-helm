@@ -155,6 +155,8 @@ else
         --set ceph.enabled="false" $libvirt_values
 fi
 
+free -h && sudo sync && sudo sh -c 'echo 3 >/proc/sys/vm/drop_caches' && free -h
+
 local_ip="$(net_default_host_ip)"
 if [ "x$SDN_PLUGIN" == "xovs" ]; then
   helm install --namespace=openstack ${WORK_DIR}/openvswitch --name=openvswitch
