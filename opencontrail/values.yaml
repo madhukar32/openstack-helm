@@ -53,6 +53,9 @@ labels:
     node_selector_value: enabled
 
 dependencies:
+  kafka:
+    daemonset:
+    - zookeeper
   analyticsdb:
     daemonset:
     - zookeeper
