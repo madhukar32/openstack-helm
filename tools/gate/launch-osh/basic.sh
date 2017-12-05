@@ -155,7 +155,7 @@ else
         --set ceph.enabled="false" $libvirt_values
 fi
 
-#free -h && sudo sh -c 'echo 3 >/proc/sys/vm/drop_caches' && free -h
+free -h && sudo sync && sudo sh -c 'echo 2 >/proc/sys/vm/drop_caches' && free -h
 
 local_ip="$(net_default_host_ip)"
 if [ "x$SDN_PLUGIN" == "xovs" ]; then
