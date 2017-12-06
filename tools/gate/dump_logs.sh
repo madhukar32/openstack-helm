@@ -20,7 +20,6 @@ mkdir -p ${LOGS_DIR}/k8s
 for OBJECT_TYPE in nodes \
                    namespace \
                    storageclass; do
-  echo "Getting status for object type: ${OBJECT_TYPE}"
   timeout -s 9 10 kubectl get ${OBJECT_TYPE} -o yaml > ${LOGS_DIR}/k8s/${OBJECT_TYPE}.yaml
 done
 echo "Describing nodes"
@@ -33,7 +32,6 @@ for OBJECT_TYPE in svc \
                    statefulsets \
                    configmaps \
                    secrets; do
-  echo "Getting status for object type: ${OBJECT_TYPE}"
   timeout -s 9 10 kubectl get --all-namespaces ${OBJECT_TYPE} -o yaml > \
     ${LOGS_DIR}/k8s/${OBJECT_TYPE}.yaml
 done
@@ -43,7 +41,6 @@ timeout -s 9 10 kubectl get pods -a --all-namespaces -o json | jq -r \
   '.items[].metadata | .namespace + " " + .name' | while read line; do
   NAMESPACE=$(echo $line | awk '{print $1}')
   NAME=$(echo $line | awk '{print $2}')
-  echo "Getting logs for pod ${NAME}"
   timeout -s 9 10 kubectl get --namespace $NAMESPACE pod $NAME -o json | jq -r \
     '.spec.containers[].name' | while read line; do
       CONTAINER=$(echo $line | awk '{print $1}')
@@ -57,7 +54,6 @@ timeout -s 9 10 kubectl get svc -o json --all-namespaces | jq -r \
   '.items[].metadata | .namespace + " " + .name' | while read line; do
   NAMESPACE=$(echo $line | awk '{print $1}')
   NAME=$(echo $line | awk '{print $2}')
-  echo "Describing svc for ${NAME}"
   timeout -s 9 10 kubectl describe svc $NAME --namespace $NAMESPACE > \
     ${LOGS_DIR}/k8s/svc/$NAMESPACE-$NAME.txt
 done
@@ -67,7 +63,6 @@ timeout -s 9 10 kubectl get pvc -o json --all-namespaces | jq -r \
   '.items[].metadata | .namespace + " " + .name' | while read line; do
   NAMESPACE=$(echo $line | awk '{print $1}')
   NAME=$(echo $line | awk '{print $2}')
-  echo "Describing pvc for ${NAME}"
   timeout -s 9 10 kubectl describe pvc $NAME --namespace $NAMESPACE > \
     ${LOGS_DIR}/k8s/pvc/$NAMESPACE-$NAME.txt
 done
@@ -77,7 +72,6 @@ for OBJECT_TYPE in clusterroles \
                    roles \
                    clusterrolebindings \
                    rolebindings; do
-  echo "Getting status for object type: ${OBJECT_TYPE}"
   timeout -s 9 10 kubectl get ${OBJECT_TYPE} -o yaml > ${LOGS_DIR}/k8s/rbac/${OBJECT_TYPE}.yaml
 done
 
@@ -87,7 +81,6 @@ for NAMESPACE in $(timeout -s 9 10 kubectl get namespaces -o name | awk -F '/' '
     OBJECT_TYPE=$(echo $OBJECT | awk -F '/' '{ print $1 }')
     OBJECT_NAME=$(echo $OBJECT | awk -F '/' '{ print $2 }')
     mkdir -p ${LOGS_DIR}/k8s/descriptions/${NAMESPACE}/${OBJECT_TYPE}
-    echo "Describing object: ${OBJECT}"
     timeout -s 9 10 kubectl describe -n $NAMESPACE $OBJECT > ${LOGS_DIR}/k8s/descriptions/${NAMESPACE}/$OBJECT_TYPE/$OBJECT_NAME.txt
   done
 done
@@ -118,13 +111,9 @@ if [ "x$INTEGRATION" == "xmulti" ]; then
     ssh-keyscan "${NODE_IP}" >> ~/.ssh/known_hosts
     NODE_NAME=$(ssh -i ${SSH_PRIVATE_KEY} $(whoami)@${NODE_IP} hostname)
     mkdir -p ${LOGS_DIR}/nodes/${NODE_NAME}
-    echo "Getting kubelet log from docker for multinode ${NODE_IP}"
     ssh -i ${SSH_PRIVATE_KEY} $(whoami)@${NODE_IP} sudo docker logs kubelet 2> ${LOGS_DIR}/nodes/${NODE_NAME}/kubelet.txt
-    echo "Getting kubeadm-aio log from docker for multinode ${NODE_IP}"
     ssh -i ${SSH_PRIVATE_KEY} $(whoami)@${NODE_IP} sudo docker logs kubeadm-aio 2>&1 > ${LOGS_DIR}/nodes/${NODE_NAME}/kubeadm-aio.txt
-    echo "Getting images from docker for multinode ${NODE_IP}"
     ssh -i ${SSH_PRIVATE_KEY} $(whoami)@${NODE_IP} sudo docker images --digests --no-trunc --all > ${LOGS_DIR}/nodes/${NODE_NAME}/images.txt
-    echo "Getting various system information for multinode ${NODE_IP}"
     ssh -i ${SSH_PRIVATE_KEY} $(whoami)@${NODE_IP} sudo timeout -s 9 120 du -h --max-depth=1 /var/lib/docker | sort -hr > ${LOGS_DIR}/nodes/${NODE_NAME}/docker-size.txt
     ssh -i ${SSH_PRIVATE_KEY} $(whoami)@${NODE_IP} sudo iptables-save > ${LOGS_DIR}/nodes/${NODE_NAME}/iptables.txt
     ssh -i ${SSH_PRIVATE_KEY} $(whoami)@${NODE_IP} sudo ip a > ${LOGS_DIR}/nodes/${NODE_NAME}/ip.txt
