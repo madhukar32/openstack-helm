@@ -32,16 +32,16 @@ spec:
       hostNetwork: true
       initContainers:
 {{ tuple $envAll .Values.dependencies.agent "[]" | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
-      - name: contrail-agent-init-kernel
-        image: {{ printf "%s/%s:%s" .Values.images.tags.registry .Values.images.tags.agent_vrouter_init_kernel .Values.images.tags.contrail_version | quote }}
-        imagePullPolicy: ""
-        securityContext:
-          privileged: true
-        envFrom:
-        - configMapRef:
-            name: configmap-contrail
-        - configMapRef:
-            name: configmap-auth
+        - name: contrail-agent-init-kernel
+          image: {{ printf "%s/%s:%s" .Values.images.tags.registry .Values.images.tags.agent_vrouter_init_kernel .Values.images.tags.contrail_version | quote }}
+          imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
+          securityContext:
+            privileged: true
+          envFrom:
+          - configMapRef:
+              name: configmap-contrail
+          - configMapRef:
+              name: configmap-auth
       containers:
       - name: contrail-agent
         image: {{ printf "%s/%s:%s" .Values.images.tags.registry .Values.images.tags.agent_vrouter .Values.images.tags.contrail_version | quote }}
