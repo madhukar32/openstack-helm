@@ -171,7 +171,7 @@ elif [ "x$SDN_PLUGIN" == "xopencontrail" ]; then
     --set conf.controller_nodes=$local_ip \
     --set conf.host_os=$HOST_OS \
     --set conf.log_level=SYS_DEBUG \
-    --set images.tags.contrail_version=${CONTRAIL_VERSION} \
+    --set images.tags.contrail_version=${CONTRAIL_VERSION}-${OPENSTACK_VERSION} \
     --set images.tags.registry=${OPENCONTRAIL_REGISTRY_URL}
 fi
 kube_wait_for_pods openstack ${POD_START_TIMEOUT_OPENSTACK}
