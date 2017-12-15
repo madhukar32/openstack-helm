@@ -17,29 +17,9 @@ this is found throughout the project. If you have any questions or
 comments, please create an `issue
 <https://bugs.launchpad.net/openstack-helm>`_.
 
-.. warning::
-  Please see the latest published information about our
-  application versions.
-
-  .. list-table::
-     :widths: 45 155 200
-     :header-rows: 1
-
-     * -
-       - Version
-       - Notes
-     * - **Kubernetes**
-       - `v1.7.5 <https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG.md#v175>`_
-       - `Custom Controller for RDB tools <https://quay.io/repository/attcomdev/kube-controller-manager?tab=tags>`_
-     * - **Helm**
-       - `v2.6.1 <https://github.com/kubernetes/helm/releases/tag/v2.6.1>`_
-       -
-     * - **Calico**
-       - `v2.1 <http://docs.projectcalico.org/v2.1/releases/>`_
-       - `calicoct v1.1 <https://github.com/projectcalico/calicoctl/releases>`_
-     * - **Docker**
-       - `v1.12.6 <https://github.com/docker/docker/releases/tag/v1.12.6>`_
-       - `Per kubeadm Instructions <https://kubernetes.io/docs/getting-started-guides/kubeadm/>`_
+.. note::
+  Please see the supported application versions outlined in the
+  `source variable file <https://github.com/openstack/openstack-helm/blob/master/tools/gate/vars.sh>`_.
 
 Other versions and considerations (such as other CNI SDN providers),
 config map data, and value overrides will be included in other
@@ -265,7 +245,10 @@ Nodes are labeled according to their Openstack roles:
     kubectl label nodes ceph-osd=enabled --all
     kubectl label nodes ceph-mds=enabled --all
     kubectl label nodes ceph-rgw=enabled --all
+    # For openvswitch SDN
     kubectl label nodes openvswitch=enabled --all
+    # For OpenContrail SDN
+    kubectl label node <node-name> opencontrail.org/controller=enabled
     kubectl label nodes openstack-compute-node=enabled --all
 
 Obtaining the Project
@@ -428,7 +411,7 @@ Installation of Other Services
 
 Now you can easily install the other services simply by going in order:
 
-**Install Memcached/Etcd/RabbitMQ/Ingress/Libvirt/OpenVSwitch:**
+**Install Memcached/Etcd/RabbitMQ/Ingress/Libvirt:**
 
 ::
 
@@ -436,8 +419,9 @@ Now you can easily install the other services simply by going in order:
     helm install --name=etcd-rabbitmq ./etcd --namespace=openstack
     helm install --name=rabbitmq ./rabbitmq --namespace=openstack
     helm install --name=ingress ./ingress --namespace=openstack
+    # for opencontrail, refer [opencontrail config docs](contrail/opencontrail_options_in_other_charts.rst)
+    # to change config values in libvirt/values.yaml
     helm install --name=libvirt ./libvirt --namespace=openstack
-    helm install --name=openvswitch ./openvswitch --namespace=openstack
 
 **Install Keystone:**
 
@@ -445,6 +429,26 @@ Now you can easily install the other services simply by going in order:
 
     helm install --namespace=openstack --name=keystone ./keystone \
       --set pod.replicas.api=2
+
+**Install Open vSwitch or OpenContrail as neutron backend:**
+
+If you intend to install openvswitch as neutron backend
+
+::
+
+    helm install --namespace=openstack --name=openvswitch ./openvswitch
+
+If you intend to install opencontrail as neutron backend, refer
+
+::
+
+    # for opencontrail, refer [opencontrail config docs](contrail/opencontrail.rst)
+    # to change config values in opencontrail-controller/values.yaml
+    helm install --namespace=openstack --name=opencontrail-controller ./opencontrail-controller
+    # for opencontrail, refer [opencontrail config docs](contrail/opencontrail.rst)
+    # to change config values in opencontrail-controller/values.yaml
+    helm install --namespace=openstack --name=opencontrail-vrouter ./opencontrail-vrouter
+
 
 **Install RadosGW Object Storage:**
 
@@ -499,12 +503,16 @@ RadosGW and created Keystone endpoints by changing the value for
 
 ::
 
+    # for opencontrail, refer [opencontrail config docs](contrail/opencontrail_options_in_other_charts.rst)
+    # to change config values in heat/values.yaml
     helm install --namespace=openstack --name=heat ./heat
 
 **Install Neutron:**
 
 ::
 
+    # for opencontrail, refer [opencontrail config docs](contrail/opencontrail_options_in_other_charts.rst)
+    # to change config values in neutron/values.yaml
     helm install --namespace=openstack --name=neutron ./neutron \
       --set pod.replicas.server=2
 
@@ -512,6 +520,8 @@ RadosGW and created Keystone endpoints by changing the value for
 
 ::
 
+    # for opencontrail, refer [opencontrail config docs](contrail/opencontrail_options_in_other_charts.rst)
+    # to change config values in nova/values.yaml
     helm install --namespace=openstack --name=nova ./nova \
       --set pod.replicas.api_metadata=2 \
       --set pod.replicas.osapi=2 \
