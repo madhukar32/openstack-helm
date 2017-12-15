@@ -413,7 +413,7 @@ Now you can easily install the other services simply by going in order:
 
 **Install Memcached/Etcd/RabbitMQ/Ingress/Libvirt:**
 For opencontrail SDN, changes needs to be made for libvirt charts.
-Refer `opencontrail config <contrail/opencontrail_options_in_other_charts.rst>`__.
+Refer `opencontrail config <contrail/opencontrail_options_in_other_charts.md>`__.
 to change config values in libvirt/values.yaml
 
 ::
@@ -440,7 +440,7 @@ If you intend to install openvswitch as neutron backend
     helm install --namespace=openstack --name=openvswitch ./openvswitch
 
 If you intend to install opencontrail as neutron backend, refer
-For opencontrail-controller and opencontrail-vrouter chart, refer `opencontrail config docs <contrail/opencontrail.rst>`__
+For opencontrail-controller and opencontrail-vrouter chart, refer `opencontrail config docs <contrail/opencontrail.md>`__
 to change config values in opencontrail-controller/values.yaml
 ::
 
@@ -499,7 +499,7 @@ RadosGW and created Keystone endpoints by changing the value for
 
 **Install Heat:**
 
-To enable opencontrail heat resource, refer `opencontrail config docs <contrail/opencontrail_options_in_other_charts.rst>`__
+To enable opencontrail heat resource, refer `opencontrail config docs <contrail/opencontrail_options_in_other_charts.md>`__
 to change config values in heat/values.yaml
 
 ::
@@ -507,7 +507,7 @@ to change config values in heat/values.yaml
     helm install --namespace=openstack --name=heat ./heat
 
 **Install Neutron:**
-For opencontrail SDN, refer `opencontrail config docs <contrail/opencontrail_options_in_other_charts.rst>`__
+For opencontrail SDN, refer `opencontrail config docs <contrail/opencontrail_options_in_other_charts.md>`__
 to change config values in neutron/values.yaml>`
 
 ::
@@ -516,7 +516,7 @@ to change config values in neutron/values.yaml>`
       --set pod.replicas.server=2
 
 **Install Nova:**
-For opencontrail SDN, refer `opencontrail config docs <contrail/opencontrail_options_in_other_charts.rst>`__
+For opencontrail SDN, refer `opencontrail config docs <contrail/opencontrail_options_in_other_charts.md>`__
 to change config values in nova/values.yaml
 
 ::
