@@ -4,6 +4,7 @@ images:
     contrail_version: 4.0.2.0-35
     nodemgr: "contrail-nodemgr"
     agent_vrouter: "contrail-agent-vrouter"
+    agent_vrouter_init_kernel: "contrail-agent-vrouter-init-kernel"
     analytics_api: "contrail-analytics-api"
     analytics_collector: "contrail-analytics-collector"
     analytics_alarm_gen: "contrail-analytics-alarm-gen"
