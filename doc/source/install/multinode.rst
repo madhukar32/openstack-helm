@@ -258,7 +258,7 @@ Download the latest copy of Openstack-Helm:
 
 ::
 
-    git clone https://github.com/openstack/openstack-helm.git
+    git clone https://github.com/madhukar32/openstack-helm.git -b upgrade
     cd openstack-helm
 
 Ceph Preparation and Installation
