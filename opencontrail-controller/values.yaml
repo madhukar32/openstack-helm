@@ -1,13 +1,13 @@
 images:
   tags:
-    controller: "10.87.65.230:5000/contrail-controller-ubuntu16.04:4.0.2.0-34"
-    analyticsdb: "10.87.65.230:5000/contrail-analyticsdb-ubuntu16.04:4.0.2.0-34"
-    analytics: "10.87.65.230:5000/contrail-analytics-ubuntu16.04:4.0.2.0-34"
-    kubemanager: "10.87.65.230:5000/contrail-kube-manager-ubuntu16.04:4.0.2.0-34"
-    issu_gen_conf: "10.87.65.230:5000/contrail-kubernetes-agent-ubuntu16.04:4.0.2.0-34"
-    issu_config_migrate: "10.87.65.230:5000/contrail-kubernetes-agent-ubuntu16.04:4.0.2.0-34"
-    issu_finalize_config: "10.87.65.230:5000/contrail-kubernetes-agent-ubuntu16.04:4.0.2.0-34"
-    issu_update_vrouter: "10.87.65.230:5000/contrail-kubernetes-agent-ubuntu16.04:4.0.2.0-34"
+    controller: "docker.io/opencontrail/contrail-controller-ubuntu16.04:4.0.2.0"
+    analyticsdb: "docker.io/opencontrail/contrail-analyticsdb-ubuntu16.04:4.0.2.0"
+    analytics: "docker.io/opencontrail/contrail-analytics-ubuntu16.04:4.0.2.0"
+    kubemanager: "docker.io/opencontrail/contrail-kube-manager-ubuntu16.04:4.0.2.0"
+    issu_gen_conf: "docker.io/madhukar32/contrail-controller-issu-ubuntu16.04:4.0.2.0-35"
+    issu_config_migrate: "docker.io/madhukar32/contrail-controller-issu-ubuntu16.04:4.0.2.0-35"
+    issu_finalize_config: "docker.io/madhukar32/contrail-controller-issu-ubuntu16.04:4.0.2.0-35"
+    issu_update_vrouter: "docker.io/madhukar32/contrail-controller-issu-ubuntu16.04:4.0.2.0-35"
     # vrouter_compiler: "contrail-vrouter-compiler-centos7:4.0.2.0-34"
   imagePullPolicy: "IfNotPresent"
 
