@@ -1,29 +1,28 @@
 images:
   tags:
-    controller: "10.87.65.230:5000/contrail-controller-issu-ubuntu16.04:4.0.2.0-35"
-    analyticsdb: "10.87.65.230:5000/contrail-analyticsdb-ubuntu16.04:4.0.2.0-35"
-    analytics: "10.87.65.230:5000/contrail-analytics-ubuntu16.04:4.0.2.0-35"
-    kubemanager: "10.87.65.230:5000/contrail-kube-manager-ubuntu16.04:4.0.2.0-35"
-    issu_gen_conf: "10.87.65.230:5000/contrail-controller-issu-ubuntu16.04:4.0.2.0-35"
-    issu_config_migrate: "10.87.65.230:5000/contrail-controller-issu-ubuntu16.04:4.0.2.0-35"
-    issu_finalize_config: "10.87.65.230:5000/contrail-controller-issu-ubuntu16.04:4.0.2.0-35"
-    issu_update_vrouter: "10.87.65.230:5000/contrail-controller-issu-ubuntu16.04:4.0.2.0-35"
-    # vrouter_compiler: "contrail-vrouter-compiler-centos7:4.0.2.0-35"
-    dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.2.1
+    controller: "10.87.65.230:5000/contrail-controller-ubuntu16.04:4.0.2.0-34"
+    analyticsdb: "10.87.65.230:5000/contrail-analyticsdb-ubuntu16.04:4.0.2.0-34"
+    analytics: "10.87.65.230:5000/contrail-analytics-ubuntu16.04:4.0.2.0-34"
+    kubemanager: "10.87.65.230:5000/contrail-kube-manager-ubuntu16.04:4.0.2.0-34"
+    issu_gen_conf: "10.87.65.230:5000/contrail-kubernetes-agent-ubuntu16.04:4.0.2.0-34"
+    issu_config_migrate: "10.87.65.230:5000/contrail-kubernetes-agent-ubuntu16.04:4.0.2.0-34"
+    issu_finalize_config: "10.87.65.230:5000/contrail-kubernetes-agent-ubuntu16.04:4.0.2.0-34"
+    issu_update_vrouter: "10.87.65.230:5000/contrail-kubernetes-agent-ubuntu16.04:4.0.2.0-34"
+    # vrouter_compiler: "contrail-vrouter-compiler-centos7:4.0.2.0-34"
   imagePullPolicy: "IfNotPresent"
 
 labels:
   controller:
-    node_selector_key: opencontrail.org/controllerv2
+    node_selector_key: opencontrail.org/controller
     node_selector_value: "enabled"
   analytics:
-    node_selector_key: opencontrail.org/controllerv2
+    node_selector_key: opencontrail.org/controller
     node_selector_value: "enabled"
   analyticsdb:
-    node_selector_key: opencontrail.org/controllerv2
+    node_selector_key: opencontrail.org/controller
     node_selector_value: "enabled"
   kubemanager:
-    node_selector_key: opencontrail.org/controllerv2
+    node_selector_key: opencontrail.org/controller
     node_selector_value: "enabled"
   issu_gen:
     node_selector_key: node-role.kubernetes.io/master
@@ -41,22 +40,22 @@ labels:
 dependencies:
   issu_gen:
     daemonset:
-    - contrail-controllerv2
+    - contrail-controller
   issu_config_migrate:
     daemonset:
-    - contrail-controllerv2
+    - contrail-controller
     jobs:
-    - job-contrail-issu-gen-confv2
+    - job-issu-gen-conf
   issu_finalize_config:
     daemonset:
-    - contrail-controllerv2
+    - contrail-controller
     jobs:
-    - job-contrail-issu-update-vrouterv2
+    - job-issu-update-vrouter
   issu_update_vrouter:
     daemonset:
-    - contrail-controllerv2
+    - contrail-controller
     jobs:
-    - job-contrail-issu-config-migratev2
+    - job-issu-config-migrate
 
 pod:
   mounts:
@@ -104,27 +103,24 @@ conf:
   # host_os - (OPTIONAL) host operating system release. Sample values "ubuntu" and "centos". Default is ubuntu
   host_os: ubuntu
   # Use suffix_obj_name, while upgrading contrail using ISSU
-  suffix_obj_name: v2
+  # suffix_obj_name:
   # Controller node username and password details (Needed by ISSU)
-  controller_node:
-    username: root
-    password: c0ntrail123
   global_config:
     # global section configuration needed by all containers
     GLOBAL:
         # *_nodes - comma seperated list of controller server IP addresses
-        # Ex: controller_nodes: 10.87.65.239,10.87.65.239
+        # Ex: controller_nodes: 10.87.65.154,10.87.65.154
         # *_ip - virtual IP handled by load balancer in case of multi-node
         # enable_*_service - Flag to enable opencontrail service
 
-        controller_nodes: 10.87.65.155
+        controller_nodes: 10.87.65.154
         # enable_control_service: "true"
 
-        analyticsdb_nodes: 10.87.65.155
+        analyticsdb_nodes: 10.87.65.154
         # analyticsdb_cassandra_user: ''
         # analyticsdb_cassandra_password: ''
 
-        analytics_nodes: 10.87.65.155
+        analytics_nodes: 10.87.65.154
         # analytics_ip:
 
         # config_nodes:
@@ -322,7 +318,7 @@ conf:
   # Sections related to kubemanager container
   kubemanager_config:
     KUBERNETES:
-      # api_server: 10.87.65.239
+      # api_server: 10.87.65.154
       # cluster_name: k8s-default
       # pod_subnets: "10.32.0.0/12"
       # service_subnets: "10.96.0.0/12"
@@ -429,8 +425,8 @@ manifests:
   # for cloud_orchestrator "kubernetes", set ths to true
   rbac_contrail: false
   # While upgrading, enable below jobs
-  job_issu_gen_conf: true
-  job_issu_config_migrate: true
-  job_issu_finalize_config: true
-  job_issu_update_vrouter: true
+  job_issu_gen_conf: false
+  job_issu_config_migrate: false
+  job_issu_finalize_config: false
+  job_issu_update_vrouter: false
   service_controller: true
