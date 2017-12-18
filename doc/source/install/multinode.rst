@@ -352,10 +352,10 @@ this then you should set the value of ``CEPH_RGW_KEYSTONE_ENABLED=false`` before
 running the following commands in the ``openstack-helm`` project folder:
 
 ::
-  # Export work_dir env variable
-  : ${WORK_DIR:=$(pwd)}
-  : ${CEPH_RGW_KEYSTONE_ENABLED:="true"}
-  helm install --namespace=ceph ${WORK_DIR}/ceph --name=ceph \
+
+    : ${WORK_DIR:=$(pwd)}
+    : ${CEPH_RGW_KEYSTONE_ENABLED:="true"}
+    helm install --namespace=ceph ${WORK_DIR}/ceph --name=ceph \
     --set endpoints.identity.namespace=openstack \
     --set endpoints.object_store.namespace=ceph \
     --set endpoints.ceph_mon.namespace=ceph \
