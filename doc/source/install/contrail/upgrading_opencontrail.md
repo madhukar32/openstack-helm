@@ -8,7 +8,7 @@
 
 #### Limitations
 
-  * You have an all in one contrail v1 cluster (This is what we have tested for now,
+  * You should have an all in one contrail v1 cluster (This is what we have tested for now,
     In future releases, we will take care of multi node HA clusters)
   * Upgrade to minor releases only
   * For now, its required for ISSU components to run on k8s master node
