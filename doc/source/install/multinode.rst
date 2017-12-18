@@ -284,6 +284,17 @@ use the installation guide from the
 `Kubernetes/Helm <https://github.com/kubernetes/helm/blob/master/docs/install.md#from-the-binary-releases>`__
 repository. Please take note of our required versions above.
 
+Sample helm installation steps:
+
+::
+
+    export HELM_VERSION=v2.5.1
+    export TMP_DIR=$(mktemp -d)
+    curl -sSL https://storage.googleapis.com/kubernetes-helm/helm-${HELM_VERSION}-linux-amd64.tar.gz | tar -zxv --strip-components=1 -C ${TMP_DIR}
+    sudo mv ${TMP_DIR}/helm /usr/local/bin/helm
+    rm -rf ${TMP_DIR}
+
+
 Once installed, and initiated (``helm init``), you will need your local
 environment to serve helm charts for use. You can do this by:
 
@@ -341,7 +352,8 @@ this then you should set the value of ``CEPH_RGW_KEYSTONE_ENABLED=false`` before
 running the following commands in the ``openstack-helm`` project folder:
 
 ::
-
+  # Export work_dir env variable
+  : ${WORK_DIR:=$(pwd)}
   : ${CEPH_RGW_KEYSTONE_ENABLED:="true"}
   helm install --namespace=ceph ${WORK_DIR}/ceph --name=ceph \
     --set endpoints.identity.namespace=openstack \
@@ -371,6 +383,7 @@ of your cluster by running:
 
 For more information on this, please see the section entitled `Ceph
 Troubleshooting <../troubleshooting/persistent-storage.html>`__.
+
 
 Activating Control-Plane Namespace for Ceph
 -------------------------------------------
