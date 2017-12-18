@@ -1,5 +1,4 @@
-### Basic Configurations (for both opencontrail-controller and
-opencontrail-vrouter charts)
+### Basic Configurations (for both opencontrail-controller and opencontrail-vrouter charts)
 
   1. Point the correct image for each of the opencontrail components
     under images.tags
