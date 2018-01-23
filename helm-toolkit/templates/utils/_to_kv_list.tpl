@@ -16,10 +16,21 @@ limitations under the License.
 
 {{- define "helm-toolkit.utils.to_kv_list" -}}
 {{- range $key, $value :=  . -}}
+{{- $valueKind := kindOf $value }}
+{{- if ne $valueKind "slice" }}
 {{- if regexMatch "^[0-9]+$" $value }}
 {{ $key }} = {{ $value }}
 {{- else }}
 {{ $key }} = {{ $value | quote }}
+{{- end }}
+{{- else }}
+{{ $key }} = [{{ range $value -}}
+{{- if regexMatch "^[0-9]+$" . -}}
+{{- . -}},
+{{- else -}}
+{{- . | quote -}},
+{{- end }}
+{{- end }}]
 {{- end }}
 {{- end -}}
 {{- end -}}
