@@ -21,6 +21,7 @@ make pull-images libvirt
 #NOTE: Deploy command
 helm install ./libvirt \
   --namespace=openstack \
+  --values=./tools/overrides/mvp/libvirt-opencontrail.yaml \
   --name=libvirt
 
 #NOTE: Wait for deploy

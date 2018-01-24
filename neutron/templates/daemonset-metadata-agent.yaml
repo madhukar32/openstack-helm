@@ -86,8 +86,13 @@ spec:
               subPath: neutron.conf
               readOnly: true
             - name: neutron-etc
+{{- if eq .Values.network.backend "opencontrail" }}
               mountPath: /etc/neutron/plugins/ml2/ml2_conf.ini
               subPath: ml2_conf.ini
+{{- else }}
+              mountPath: /etc/neutron/plugins/ml2/ml2_conf.ini
+              subPath: ml2_conf.ini
+{{- end }}
               readOnly: true
             {{- if eq .Values.network.backend "ovs" }}
             - name: neutron-etc

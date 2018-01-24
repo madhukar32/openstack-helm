@@ -65,8 +65,13 @@ spec:
               subPath: neutron.conf
               readOnly: true
             - name: neutron-etc
+{{- if eq .Values.network.backend "opencontrail" }}
               mountPath: /etc/neutron/plugins/opencontrail/ContrailPlugin.ini
               subPath: ContrailPlugin.ini
+{{- else }}
+              mountPath: /etc/neutron/plugins/ml2/ml2_conf.ini
+              subPath: ml2_conf.ini
+{{- end }}
               readOnly: true
       volumes:
         - name: etcneutron

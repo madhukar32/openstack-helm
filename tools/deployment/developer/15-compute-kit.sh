@@ -24,12 +24,14 @@ if [ "x$(systemd-detect-virt)" == "xnone" ]; then
   echo 'OSH is not being deployed in virtualized environment'
   helm install ./nova \
       --namespace=openstack \
+      --values=./tools/overrides/mvp/nova-opencontrail.yaml \
       --name=nova
 else
   echo 'OSH is being deployed in virtualized environment, using qemu for nova'
   helm install ./nova \
       --namespace=openstack \
       --name=nova \
+      --values=./tools/overrides/mvp/nova-opencontrail.yaml \
       --set conf.nova.libvirt.virt_type=qemu
 fi
 
@@ -37,7 +39,9 @@ fi
 helm install ./neutron \
     --namespace=openstack \
     --name=neutron \
-    --values=./tools/overrides/mvp/neutron-ovs.yaml
+    --values=./tools/overrides/mvp/neutron-opencontrail.yaml \
+    --set conf.plugins.opencontrail.APISERVER.api_server_ip=${CONFIG_NODE} \
+    --set conf.plugins.opencontrail.COLLECTOR.analytics_api_ip=${ANALYTICS_NODES:${CONFIG_NODES}}
 
 #NOTE: Wait for deploy
 ./tools/deployment/developer/wait-for-pods.sh openstack

@@ -107,9 +107,9 @@ spec:
               readOnly: true
             - name: pod-shared
               mountPath: /tmp/pod-shared
-{{- if .Values.images.tags.plugin }}
-        - name: nova-compute-plugin-init
-          image: {{ .Values.images.tags.plugin }}
+{{- if .Values.images.tags.opencontrail_compute_init }}
+        - name: opencontrail-compute-init
+          image: {{ .Values.images.tags.opencontrail_compute_init }}
           imagePullPolicy: {{ .Values.images.pull_policy }}
           securityContext:
             runAsUser: {{ .Values.pod.user.nova.uid }}

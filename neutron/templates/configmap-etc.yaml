@@ -25,6 +25,21 @@ limitations under the License.
 {{- tuple "identity" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup"| set .Values.conf.neutron.keystone_authtoken "auth_url" | quote | trunc 0 -}}
 {{- end }}
 
+{{- if empty .Values.conf.plugins.opencontrail.KEYSTONE.auth_url -}}
+{{- tuple "identity" "internal" "admin" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | set .Values.conf.plugins.opencontrail.KEYSTONE "auth_url" | quote | trunc 0 -}}
+{{- end }}
+
+{{- if empty .Values.conf.plugins.opencontrail.KEYSTONE.admin_user -}}
+{{- set .Values.conf.plugins.opencontrail.KEYSTONE "admin_user" .Values.endpoints.identity.auth.admin.username | quote | trunc 0 -}}
+{{- end }}
+{{- if empty .Values.conf.plugins.opencontrail.KEYSTONE.admin_password -}}
+{{- set .Values.conf.plugins.opencontrail.KEYSTONE "admin_password" .Values.endpoints.identity.auth.admin.password | quote | trunc 0 -}}
+{{- end }}
+{{- if empty .Values.conf.plugins.opencontrail.KEYSTONE.admin_tenant_name -}}
+{{- set .Values.conf.plugins.opencontrail.KEYSTONE "admin_tenant_name" .Values.endpoints.identity.auth.admin.project_name | quote | trunc 0 -}}
+{{- end }}
+
+
 # Set a random string as secret key.
 {{- if empty .Values.conf.neutron.keystone_authtoken.memcache_secret_key -}}
 {{- randAlphaNum 64 | set .Values.conf.neutron.keystone_authtoken "memcache_secret_key" | quote | trunc 0 -}}

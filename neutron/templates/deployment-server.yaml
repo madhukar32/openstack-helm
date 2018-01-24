@@ -47,9 +47,9 @@ spec:
       terminationGracePeriodSeconds: {{ .Values.pod.lifecycle.termination_grace_period.server.timeout | default "30" }}
       initContainers:
 {{ tuple $envAll $dependencies $mounts_neutron_server_init | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
-{{- if .Values.images.tags.plugin }}
-        - name: neutron-plugin-init
-          image: {{ .Values.images.tags.plugin }}
+{{- if eq .Values.network.backend "opencontrail" }}
+        - name: opencontrail-neutron-plugin-init
+          image: {{ .Values.images.tags.opencontrail_neutron_plugin }}
           imagePullPolicy: {{ .Values.images.pull_policy }}
           securityContext:
             runAsUser: {{ .Values.pod.user.neutron.uid }}
@@ -88,8 +88,13 @@ spec:
               subPath: neutron.conf
               readOnly: true
             - name: neutron-etc
+{{- if eq .Values.network.backend "opencontrail" }}
               mountPath: /etc/neutron/plugins/opencontrail/ContrailPlugin.ini
               subPath: ContrailPlugin.ini
+{{- else }}
+              mountPath: /etc/neutron/plugins/ml2/ml2_conf.ini
+              subPath: ml2_conf.ini
+{{- end }}
               readOnly: true
             - name: neutron-etc
               mountPath: /etc/neutron/api-paste.ini

@@ -1,5 +1,9 @@
+images:
+  tags:
+    opencontrail_compute_init: 10.87.65.243:5000/contrail-openstack-compute-init:5.0.0-139-newton
+
 dependencies:
   compute:
     daemonset:
     - libvirt
-    - contrail-agent
+    - contrail-vrouter-agent

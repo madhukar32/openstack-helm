@@ -11,7 +11,7 @@ network:
 images:
   tags:
     # For opencontrail, use below metadata image
-    metadata: docker.io/kolla/ubuntu-binary-neutron-metadata-agent:3.0.3
+    opencontrail_neutron_plugin: 10.87.65.243:5000/contrail-openstack-neutron-init:5.0.0-139-newton
 
 dependencies:
   server:
@@ -19,7 +19,7 @@ dependencies:
       - contrail-config
   metadata:
     daemonset:
-      - contrail-agent
+      - contrail-vrouter-agent
 
 conf:
   neutron:
@@ -31,23 +31,6 @@ conf:
       interface_driver:
     quotas:
       quota_driver: neutron_plugin_contrail.plugins.opencontrail.quota.driver.QuotaDriver
-  plugins:
-    opencontrail:
-      APISERVER:
-        # IP-s can be provided via '--set' option of 'helm install' command
-        #api_server_ip: 10.87.65.153
-        api_server_port: 8082
-        contrail_extensions: "ipam:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_ipam.NeutronPluginContrailIpam,policy:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_policy.NeutronPluginContrailPolicy,route-table:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_vpc.NeutronPluginContrailVpc,contrail:None,service-interface:None,vf-binding:None"
-        multi_tenancy: True
-      keystone_authtoken:
-        auth_host: keystone-api.openstack
-        auth_port: 35357
-        auth_protocol: http
-        admin_user: admin
-        admin_password: password
-        admin_tenant_name: admin
-        insecure: True
-        region_name: RegionOne
 
 manifests:
   daemonset_dhcp_agent: false
