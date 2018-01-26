@@ -68,6 +68,7 @@ images:
     compute_ssh: docker.io/kolla/ubuntu-source-nova-ssh:3.0.3
     placement: docker.io/kolla/ubuntu-source-nova-placement-api:3.0.3-beta.1
     bootstrap: docker.io/kolla/ubuntu-source-heat-engine:3.0.3
+    cell_setup: docker.io/kolla/ubuntu-source-nova-api:3.0.3
     dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.2.1
     opencontrail_compute_init:
   pull_policy: "IfNotPresent"

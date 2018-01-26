@@ -41,7 +41,7 @@ helm install ./neutron \
     --name=neutron \
     --values=./tools/overrides/mvp/neutron-opencontrail.yaml \
     --set conf.plugins.opencontrail.APISERVER.api_server_ip=${CONFIG_NODE} \
-    --set conf.plugins.opencontrail.COLLECTOR.analytics_api_ip=${ANALYTICS_NODES:${CONFIG_NODES}}
+    --set conf.plugins.opencontrail.COLLECTOR.analytics_api_ip=${ANALYTICS_NODES:-${CONFIG_NODE}}
 
 #NOTE: Wait for deploy
 ./tools/deployment/developer/wait-for-pods.sh openstack

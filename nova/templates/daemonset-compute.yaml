@@ -210,7 +210,7 @@ spec:
             - name: machine-id
               mountPath: /etc/machine-id
               readOnly: true
-{{- if .Values.images.tags.plugin }}
+{{- if .Values.images.tags.opencontrail_compute_init }}
             - name: nova-compute-plugin-shared
               mountPath: /opt/plugin
               readOnly: true
@@ -289,7 +289,7 @@ spec:
         - name: machine-id
           hostPath:
             path: /etc/machine-id
-{{- if .Values.images.tags.plugin }}
+{{- if .Values.images.tags.opencontrail_compute_init }}
         - name: nova-compute-plugin-shared
           emptyDir: {}
 {{- end }}
