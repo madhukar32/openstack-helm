@@ -11,7 +11,7 @@ network:
 images:
   tags:
     # For opencontrail, use below metadata image
-    opencontrail_neutron_plugin: 10.87.65.243:5000/contrail-openstack-neutron-init:5.0.0-139-newton
+    opencontrail_neutron_plugin: docker.io/opencontrail/contrail-openstack-neutron-init:5.0.0-175-centos7-newton
 
 dependencies:
   server:
