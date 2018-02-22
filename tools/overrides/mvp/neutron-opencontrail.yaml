@@ -11,15 +11,12 @@ network:
 images:
   tags:
     # For opencontrail, use below metadata image
-    opencontrail_neutron_plugin: docker.io/opencontrail/contrail-openstack-neutron-init:5.0.0-175-centos7-newton
+    opencontrail_neutron_plugin: docker.io/opencontrail/contrail-openstack-neutron-init:5.0.0-20180220070035-centos7-newton
 
 dependencies:
   server:
     daemonset:
       - contrail-config
-  metadata:
-    daemonset:
-      - contrail-vrouter-agent
 
 conf:
   neutron:

@@ -11,6 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+images:
+  tags:
+    libvirt: "docker.io/opencontrail/ubuntu-source-nova-libvirt-contrail:5.0.0-20180220070035-ubuntu16-newton"
 
 conf:
   qemu:

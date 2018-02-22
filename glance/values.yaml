@@ -277,7 +277,7 @@ network:
       annotations:
         kubernetes.io/ingress.class: "nginx"
         nginx.ingress.kubernetes.io/rewrite-target: /
-        nginx.ingress.kubernetes.io/proxy-body-size: "1024M"
+        nginx.ingress.kubernetes.io/proxy-body-size: "9024M"
     external_policy_local: false
     node_port:
       enabled: false

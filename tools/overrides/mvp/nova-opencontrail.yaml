@@ -1,9 +1,9 @@
 images:
   tags:
-    opencontrail_compute_init: docker.io/opencontrail/contrail-openstack-compute-init:5.0.0-175-centos7-newton
+    opencontrail_compute_init: docker.io/opencontrail/contrail-openstack-compute-init:5.0.0-20180220070035-centos7-newton
+    compute: docker.io/opencontrail/ubuntu-source-nova-compute-contrail:5.0.0-20180220070035-ubuntu16-newton
 
 dependencies:
   compute:
     daemonset:
     - libvirt
-    - contrail-vrouter-agent
