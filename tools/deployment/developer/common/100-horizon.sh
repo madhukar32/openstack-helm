@@ -20,9 +20,15 @@ set -xe
 make pull-images horizon
 
 #NOTE: Deploy command
+OPENSTACK_VERSION=${OPENSTACK_VERSION:-"ocata"}
+if [ "$OPENSTACK_VERSION" == "ocata" ]; then
+  values="--values=./tools/overrides/releases/ocata/loci.yaml "
+else
+  values=""
+fi
 : ${OSH_EXTRA_HELM_ARGS:=""}
 helm upgrade --install horizon ./horizon \
-    --namespace=openstack \
+    --namespace=openstack $values \
     --set network.node_port.enabled=true \
     --set network.node_port.port=31000 \
     ${OSH_EXTRA_HELM_ARGS}

@@ -15,12 +15,19 @@
 #    under the License.
 set -xe
 
+OPENSTACK_VERSION=${OPENSTACK_VERSION:-"ocata"}
+if [ "$OPENSTACK_VERSION" == "ocata" ]; then
+  values="--values=./tools/overrides/releases/ocata/loci.yaml "
+else
+  values=""
+fi
+
 #NOTE: Deploy command
 # dont scale out ds node
 # only one node per environment should be in active state
 # https://docs.openstack.org/congress/latest/admin/ha-overview.html#ha-overview
 helm upgrade --install congress ./congress \
-  --namespace=openstack \
+  --namespace=openstack $values \
   --set pod.replicas.api=2 \
   --set pod.replicas.policy_engine=2 \
   --set pod.replicas.datasource=1

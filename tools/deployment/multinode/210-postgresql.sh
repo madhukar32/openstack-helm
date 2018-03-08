@@ -15,9 +15,16 @@
 #    under the License.
 set -xe
 
+OPENSTACK_VERSION=${OPENSTACK_VERSION:-"ocata"}
+if [ "$OPENSTACK_VERSION" == "ocata" ]; then
+  values="--values=./tools/overrides/releases/ocata/loci.yaml "
+else
+  values=""
+fi
+
 #NOTE: Wait for deploy
 helm upgrade --install postgresql ./postgresql \
-  --namespace=openstack
+  --namespace=openstack $values
 
 #NOTE: Wait for deploy
 ./tools/deployment/common/wait-for-pods.sh openstack

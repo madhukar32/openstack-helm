@@ -17,6 +17,12 @@
 set -xe
 
 #NOTE: Deploy command
+OPENSTACK_VERSION=${OPENSTACK_VERSION:-"ocata"}
+if [ "$OPENSTACK_VERSION" == "ocata" ]; then
+  values="--values=./tools/overrides/releases/ocata/loci.yaml "
+else
+  values=""
+fi
 CEPH_PUBLIC_NETWORK="$(./tools/deployment/multinode/kube-node-subnet.sh)"
 CEPH_CLUSTER_NETWORK="$(./tools/deployment/multinode/kube-node-subnet.sh)"
 CEPH_FS_ID="$(cat /tmp/ceph-fs-uuid.txt)"
@@ -48,7 +54,7 @@ conf:
     enabled: true
 EOF
 helm upgrade --install radosgw-openstack ./ceph \
-  --namespace=openstack \
+  --namespace=openstack $values \
   --values=/tmp/radosgw-openstack.yaml
 
 #NOTE: Wait for deploy

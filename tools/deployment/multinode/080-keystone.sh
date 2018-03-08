@@ -17,8 +17,14 @@
 set -xe
 
 #NOTE: Deploy command
+OPENSTACK_VERSION=${OPENSTACK_VERSION:-"ocata"}
+if [ "$OPENSTACK_VERSION" == "ocata" ]; then
+  values="--values=./tools/overrides/releases/ocata/loci.yaml "
+else
+  values=""
+fi
 helm upgrade --install keystone ./keystone \
-    --namespace=openstack \
+    --namespace=openstack $values \
     --set pod.replicas.api=2
 
 #NOTE: Wait for deploy

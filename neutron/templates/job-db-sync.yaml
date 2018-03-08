@@ -15,7 +15,17 @@ limitations under the License.
 */}}
 
 {{- if .Values.manifests.job_db_sync }}
+
+{{- if eq .Values.network.backend "opencontrail" }}
+{{- $podVolMounts := list (dict "name" "db-sync-conf" "mountPath" "/etc/neutron/plugins/opencontrail/ContrailPlugin.ini" "subPath" "ContrailPlugin.ini" "readOnly" true )}}
+{{- $dbSyncJob := dict "envAll" . "serviceName" "neutron" "podVolMounts" $podVolMounts -}}
+{{ $dbSyncJob | include "helm-toolkit.manifests.job_db_sync" }}
+
+{{- else }}
+
 {{- $podVolMounts := list (dict "name" "db-sync-conf" "mountPath" "/etc/neutron/plugins/ml2/ml2_conf.ini" "subPath" "ml2_conf.ini" "readOnly" true )}}
 {{- $dbSyncJob := dict "envAll" . "serviceName" "neutron" "podVolMounts" $podVolMounts -}}
 {{ $dbSyncJob | include "helm-toolkit.manifests.job_db_sync" }}
+
+{{- end }}
 {{- end }}

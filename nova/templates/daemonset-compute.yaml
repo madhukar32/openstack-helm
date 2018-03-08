@@ -126,6 +126,17 @@ spec:
             - name: pod-shared
               mountPath: /tmp/pod-shared
         {{ end }}
+        {{- if eq .Values.network.backend "opencontrail" }}
+        - name: opencontrail-compute-init
+          image: {{ .Values.images.tags.opencontrail_compute_init }}
+          imagePullPolicy: {{ .Values.images.pull_policy }}
+{{ tuple $envAll $envAll.Values.pod.resources.compute | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
+          securityContext:
+            runAsUser: {{ .Values.pod.user.nova.uid }}
+          volumeMounts:
+            - name: opencontrail-plugin-shared
+              mountPath: /opt/plugin
+        {{- end }}
       containers:
         - name: nova-compute
           image: {{ .Values.images.tags.nova_compute }}
@@ -219,6 +230,11 @@ spec:
             - name: machine-id
               mountPath: /etc/machine-id
               readOnly: true
+            {{- if eq .Values.network.backend "opencontrail" }}
+            - name: opencontrail-plugin-shared
+              mountPath: /opt/plugin
+              readOnly: true
+            {{- end }}
 {{ if $mounts_nova_compute.volumeMounts }}{{ toYaml $mounts_nova_compute.volumeMounts | indent 12 }}{{ end }}
         - name: nova-compute-ssh
           image: {{ .Values.images.tags.nova_compute_ssh }}
@@ -293,6 +309,10 @@ spec:
         - name: machine-id
           hostPath:
             path: /etc/machine-id
+        {{- if eq .Values.network.backend "opencontrail" }}
+        - name: opencontrail-plugin-shared
+          emptyDir: {}
+        {{- end }}
 {{ if $mounts_nova_compute.volumes }}{{ toYaml $mounts_nova_compute.volumes | indent 8 }}{{ end }}
 {{- end }}
 {{- end }}

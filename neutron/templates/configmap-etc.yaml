@@ -132,6 +132,19 @@ limitations under the License.
 {{- tuple "network" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" | set .Values.conf.neutron.DEFAULT "bind_port" | quote | trunc 0 -}}
 {{- end -}}
 
+{{- if empty .Values.conf.plugins.opencontrail.KEYSTONE.auth_url -}}
+{{- tuple "identity" "internal" "admin" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | set .Values.conf.plugins.opencontrail.KEYSTONE "auth_url" | quote | trunc 0 -}}
+{{- end -}}
+{{- if empty .Values.conf.plugins.opencontrail.KEYSTONE.admin_user -}}
+{{- set .Values.conf.plugins.opencontrail.KEYSTONE "admin_user" .Values.endpoints.identity.auth.admin.username | quote | trunc 0 -}}
+{{- end -}}
+{{- if empty .Values.conf.plugins.opencontrail.KEYSTONE.admin_password -}}
+{{- set .Values.conf.plugins.opencontrail.KEYSTONE "admin_password" .Values.endpoints.identity.auth.admin.password | quote | trunc 0 -}}
+{{- end -}}
+{{- if empty .Values.conf.plugins.opencontrail.KEYSTONE.admin_tenant_name -}}
+{{- set .Values.conf.plugins.opencontrail.KEYSTONE "admin_tenant_name" .Values.endpoints.identity.auth.admin.project_name | quote | trunc 0 -}}
+{{- end -}}
+
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -166,6 +179,8 @@ data:
 {{ include "helm-toolkit.utils.to_oslo_conf" .Values.conf.plugins.openvswitch_agent | indent 4 }}
   sriov_agent.ini: |
 {{ include "helm-toolkit.utils.to_oslo_conf" .Values.conf.plugins.sriov_agent | indent 4 }}
+  ContrailPlugin.ini: |
+{{ include "helm-toolkit.utils.to_oslo_conf" .Values.conf.plugins.opencontrail | indent 4 }}
   dnsmasq.conf: ""
   neutron_sudoers: |
 {{- tuple .Values.conf.neutron_sudoers "etc/_neutron_sudoers.tpl" . | include "helm-toolkit.utils.configmap_templater" }}

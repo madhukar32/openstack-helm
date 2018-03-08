@@ -20,6 +20,12 @@ set -xe
 make pull-images ceph
 
 #NOTE: Deploy command
+OPENSTACK_VERSION=${OPENSTACK_VERSION:-"ocata"}
+if [ "$OPENSTACK_VERSION" == "ocata" ]; then
+  values="--values=./tools/overrides/releases/ocata/loci.yaml "
+else
+  values=""
+fi
 : ${OSH_EXTRA_HELM_ARGS:=""}
 CEPH_FS_ID="$(cat /tmp/ceph-fs-uuid.txt)"
 tee /tmp/radosgw-openstack.yaml <<EOF
@@ -50,7 +56,7 @@ conf:
       fsid: ${CEPH_FS_ID}
 EOF
 helm upgrade --install radosgw-openstack ./ceph \
-  --namespace=openstack \
+  --namespace=openstack $values \
   --values=/tmp/radosgw-openstack.yaml \
   ${OSH_EXTRA_HELM_ARGS}
 

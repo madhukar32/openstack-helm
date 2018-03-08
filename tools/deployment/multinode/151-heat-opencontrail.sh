@@ -23,10 +23,18 @@ else
 fi
 
 #NOTE: Deploy command
-helm upgrade --install magnum ./magnum \
+tee /tmp/heat.yaml << EOF
+pod:
+  replicas:
+    api: 2
+    cfn: 2
+    cloudwatch: 2
+    engine: 2
+EOF
+helm upgrade --install heat ./heat \
   --namespace=openstack $values \
-  --set pod.replicas.api=2 \
-  --set pod.replicas.conductor=2
+  --values=/tmp/heat.yaml \
+  --values=./tools/overrides/backends/opencontrail/heat.yaml
 
 #NOTE: Wait for deploy
 ./tools/deployment/common/wait-for-pods.sh openstack
@@ -34,3 +42,5 @@ helm upgrade --install magnum ./magnum \
 #NOTE: Validate Deployment info
 export OS_CLOUD=openstack_helm
 openstack service list
+sleep 30 #NOTE(portdirect): Wait for ingress controller to update rules and restart Nginx
+openstack orchestration service list

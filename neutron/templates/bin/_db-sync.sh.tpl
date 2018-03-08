@@ -20,5 +20,9 @@ set -ex
 
 neutron-db-manage \
   --config-file /etc/neutron/neutron.conf \
+{{- if eq .Values.network.backend "opencontrail" }}
+  --config-file /etc/neutron/plugins/opencontrail/ContrailPlugin.ini \
+{{- else }}
   --config-file /etc/neutron/plugins/ml2/ml2_conf.ini \
+{{- end }}
   upgrade head

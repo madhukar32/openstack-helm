@@ -15,9 +15,16 @@
 #    under the License.
 set -xe
 
+OPENSTACK_VERSION=${OPENSTACK_VERSION:-"ocata"}
+if [ "$OPENSTACK_VERSION" == "ocata" ]; then
+  values="--values=./tools/overrides/releases/ocata/loci.yaml "
+else
+  values=""
+fi
+
 #NOTE: Deploy command
 helm upgrade --install senlin ./senlin \
-  --namespace=openstack \
+  --namespace=openstack $values \
   --set pod.replicas.api=2 \
   --set pod.replicas.engine=2
 

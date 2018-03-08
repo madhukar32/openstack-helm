@@ -23,14 +23,12 @@ else
 fi
 
 #NOTE: Deploy command
-helm upgrade --install magnum ./magnum \
+helm upgrade --install libvirt ./libvirt \
   --namespace=openstack $values \
-  --set pod.replicas.api=2 \
-  --set pod.replicas.conductor=2
+  --values=./tools/overrides/backends/opencontrail/libvirt.yaml
 
 #NOTE: Wait for deploy
 ./tools/deployment/common/wait-for-pods.sh openstack
 
 #NOTE: Validate Deployment info
-export OS_CLOUD=openstack_helm
-openstack service list
+helm status libvirt

@@ -28,7 +28,7 @@ limitations under the License.
 {{- define "helm-toolkit.utils.to_kv_list" -}}
 {{- range $key, $value :=  . -}}
 {{- if kindIs "slice" $value }}
-{{ $key }} = {{ include "helm-toolkit.utils.joinListWithComma" $value | quote }}
+{{ $key }} = [{{ range $value -}}{{ . | quote }},{{ end -}}]
 {{- else if kindIs "string" $value }}
 {{- if regexMatch "^[0-9]+$" $value }}
 {{ $key }} = {{ $value }}

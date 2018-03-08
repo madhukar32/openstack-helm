@@ -17,6 +17,13 @@
 set -xe
 
 #NOTE: Deploy command
+OPENSTACK_VERSION=${OPENSTACK_VERSION:-"ocata"}
+if [ "$OPENSTACK_VERSION" == "ocata" ]; then
+  values="--values=./tools/overrides/releases/ocata/loci.yaml "
+else
+  values=""
+fi
+
 GLANCE_BACKEND="radosgw" # NOTE(portdirect), this could be: radosgw, rbd, swift or pvc
 tee /tmp/glance.yaml << EOF
 storage: ${GLANCE_BACKEND}
@@ -26,7 +33,7 @@ pod:
     registry: 2
 EOF
 helm upgrade --install glance ./glance \
-  --namespace=openstack \
+  --namespace=openstack $values \
   --values=/tmp/glance.yaml
 
 #NOTE: Wait for deploy

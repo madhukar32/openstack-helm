@@ -121,6 +121,22 @@ limitations under the License.
 {{- tuple "cloudformation" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" | set .Values.conf.heat.heat_api_cfn "bind_port" | quote | trunc 0 -}}
 {{- end -}}
 
+# conf needed by opencontrail-heat plugin
+{{- if .Values.conf.heat.clients_contrail -}}
+{{- if empty .Values.conf.heat.clients_contrail.user -}}
+{{- set .Values.conf.heat.clients_contrail "user" .Values.endpoints.identity.auth.admin.username | quote | trunc 0 -}}
+{{- end -}}
+{{- if empty .Values.conf.heat.clients_contrail.password -}}
+{{- set .Values.conf.heat.clients_contrail "password" .Values.endpoints.identity.auth.admin.password | quote | trunc 0 -}}
+{{- end -}}
+{{- if empty .Values.conf.heat.clients_contrail.tenant -}}
+{{- set .Values.conf.heat.clients_contrail "tenant" .Values.endpoints.identity.auth.admin.project_name | quote | trunc 0 -}}
+{{- end -}}
+{{- if empty .Values.conf.heat.clients_contrail.auth_host_ip -}}
+{{- tuple "identity" "internal" $envAll | include "helm-toolkit.endpoints.hostname_namespaced_endpoint_lookup" | set .Values.conf.heat.clients_contrail "auth_host_ip" | quote | trunc 0 -}}
+{{- end -}}
+{{- end -}}
+
 ---
 apiVersion: v1
 kind: ConfigMap

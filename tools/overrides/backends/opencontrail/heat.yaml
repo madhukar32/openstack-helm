@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # Copyright 2017 The Openstack-Helm Authors.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -13,24 +11,15 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-set -xe
 
-OPENSTACK_VERSION=${OPENSTACK_VERSION:-"ocata"}
-if [ "$OPENSTACK_VERSION" == "ocata" ]; then
-  values="--values=./tools/overrides/releases/ocata/loci.yaml "
-else
-  values=""
-fi
+images:
+  tags:
+    opencontrail_heat_init: docker.io/opencontrailnightly/contrail-openstack-heat-init:master-centos7-ocata-bld-13
 
-#NOTE: Deploy command
-helm upgrade --install magnum ./magnum \
-  --namespace=openstack $values \
-  --set pod.replicas.api=2 \
-  --set pod.replicas.conductor=2
-
-#NOTE: Wait for deploy
-./tools/deployment/common/wait-for-pods.sh openstack
-
-#NOTE: Validate Deployment info
-export OS_CLOUD=openstack_helm
-openstack service list
+conf:
+  heat:
+    DEFAULT:
+      plugin_dirs: /opt/plugin/site-packages/vnc_api/gen/heat/resources,/opt/plugin/site-packages/contrail_heat/resources
+    clients_contrail:
+      api_base_url: /
+      api_server: contrail-config-api.contrail

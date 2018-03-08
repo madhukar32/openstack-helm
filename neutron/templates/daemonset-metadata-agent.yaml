@@ -88,10 +88,17 @@ spec:
               mountPath: /etc/neutron/neutron.conf
               subPath: neutron.conf
               readOnly: true
+            {{- if eq .Values.network.backend "opencontrail" }}
+            - name: neutron-etc
+              mountPath: /etc/neutron/plugins/opencontrail/ContrailPlugin.ini
+              subPath: ContrailPlugin.ini
+              readOnly: true
+            {{- else }}
             - name: neutron-etc
               mountPath: /etc/neutron/plugins/ml2/ml2_conf.ini
               subPath: ml2_conf.ini
               readOnly: true
+            {{- end }}
             {{- if eq .Values.network.backend "ovs" }}
             - name: neutron-etc
               mountPath: /etc/neutron/plugins/ml2/openvswitch_agent.ini

@@ -20,9 +20,15 @@ set -xe
 make pull-images glance
 
 #NOTE: Deploy command
+OPENSTACK_VERSION=${OPENSTACK_VERSION:-"ocata"}
+if [ "$OPENSTACK_VERSION" == "ocata" ]; then
+  values="--values=./tools/overrides/releases/ocata/loci.yaml "
+else
+  values=""
+fi
 : ${OSH_EXTRA_HELM_ARGS:=""}
 helm upgrade --install glance ./glance \
-  --namespace=openstack \
+  --namespace=openstack $values \
   --set storage=pvc \
   ${OSH_EXTRA_HELM_ARGS}
 

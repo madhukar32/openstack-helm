@@ -13,24 +13,17 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+
 set -xe
 
-OPENSTACK_VERSION=${OPENSTACK_VERSION:-"ocata"}
-if [ "$OPENSTACK_VERSION" == "ocata" ]; then
-  values="--values=./tools/overrides/releases/ocata/loci.yaml "
-else
-  values=""
-fi
-
-#NOTE: Deploy command
-helm upgrade --install magnum ./magnum \
-  --namespace=openstack $values \
-  --set pod.replicas.api=2 \
-  --set pod.replicas.conductor=2
-
-#NOTE: Wait for deploy
-./tools/deployment/common/wait-for-pods.sh openstack
-
-#NOTE: Validate Deployment info
-export OS_CLOUD=openstack_helm
-openstack service list
+sudo apt-get update
+sudo apt-get install --no-install-recommends -y \
+        ca-certificates \
+        git \
+        make \
+        jq \
+        nmap \
+        curl \
+        uuid-runtime \
+        linux-headers-$(uname -r) \
+        ipcalc

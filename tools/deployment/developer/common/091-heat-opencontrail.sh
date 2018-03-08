@@ -15,18 +15,21 @@
 #    under the License.
 set -xe
 
+#NOTE: Pull images and lint chart
+make pull-images heat
+
+#NOTE: Deploy command
 OPENSTACK_VERSION=${OPENSTACK_VERSION:-"ocata"}
 if [ "$OPENSTACK_VERSION" == "ocata" ]; then
   values="--values=./tools/overrides/releases/ocata/loci.yaml "
 else
   values=""
 fi
-
-#NOTE: Deploy command
-helm upgrade --install magnum ./magnum \
+: ${OSH_EXTRA_HELM_ARGS:=""}
+helm upgrade --install heat ./heat \
   --namespace=openstack $values \
-  --set pod.replicas.api=2 \
-  --set pod.replicas.conductor=2
+  --values=./tools/overrides/backends/opencontrail/heat.yaml \
+  ${OSH_EXTRA_HELM_ARGS}
 
 #NOTE: Wait for deploy
 ./tools/deployment/common/wait-for-pods.sh openstack
@@ -34,3 +37,5 @@ helm upgrade --install magnum ./magnum \
 #NOTE: Validate Deployment info
 export OS_CLOUD=openstack_helm
 openstack service list
+sleep 30 #NOTE(portdirect): Wait for ingress controller to update rules and restart Nginx
+openstack orchestration service list

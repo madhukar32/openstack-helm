@@ -15,29 +15,40 @@
 #    under the License.
 set -xe
 
+#NOTE: Pull images and lint chart
+make pull-images nova
+make pull-images neutron
+
+#NOTE: Deploy nova
 OPENSTACK_VERSION=${OPENSTACK_VERSION:-"ocata"}
 if [ "$OPENSTACK_VERSION" == "ocata" ]; then
   values="--values=./tools/overrides/releases/ocata/loci.yaml "
 else
   values=""
 fi
+: ${OSH_EXTRA_HELM_ARGS:=""}
+if [ "x$(systemd-detect-virt)" == "xnone" ]; then
+  echo 'OSH is not being deployed in virtualized environment'
+  helm upgrade --install nova ./nova \
+      --namespace=openstack $values \
+      --values=./tools/overrides/backends/opencontrail/nova.yaml \
+      --set ceph.enabled=false \
+      ${OSH_EXTRA_HELM_ARGS}
+else
+  echo 'OSH is being deployed in virtualized environment, using qemu for nova'
+  helm upgrade --install nova ./nova \
+      --namespace=openstack $values \
+      --values=./tools/overrides/backends/opencontrail/nova.yaml \
+      --set ceph.enabled=false \
+      --set conf.nova.libvirt.virt_type=qemu \
+      ${OSH_EXTRA_HELM_ARGS}
+fi
 
-#NOTE: Deploy command
-tee /tmp/cinder.yaml << EOF
-pod:
-  replicas:
-    api: 2
-    volume: 1
-    scheduler: 1
-    backup: 1
-conf:
-  cinder:
-    DEFAULT:
-      backup_driver: cinder.backup.drivers.swift
-EOF
-helm upgrade --install cinder ./cinder \
-  --namespace=openstack $values \
-  --values=/tmp/cinder.yaml
+#NOTE: Deploy neutron
+helm upgrade --install neutron ./neutron \
+    --namespace=openstack $values \
+    --values=./tools/overrides/backends/opencontrail/neutron.yaml \
+    ${OSH_EXTRA_HELM_ARGS}
 
 #NOTE: Wait for deploy
 ./tools/deployment/common/wait-for-pods.sh openstack
@@ -46,5 +57,5 @@ helm upgrade --install cinder ./cinder \
 export OS_CLOUD=openstack_helm
 openstack service list
 sleep 30 #NOTE(portdirect): Wait for ingress controller to update rules and restart Nginx
-openstack volume type list
-helm test cinder --timeout 900
+openstack hypervisor list
+openstack network agent list

@@ -20,9 +20,15 @@ set -xe
 make pull-images keystone
 
 #NOTE: Deploy command
+OPENSTACK_VERSION=${OPENSTACK_VERSION:-"ocata"}
+if [ "$OPENSTACK_VERSION" == "ocata" ]; then
+  values="--values=./tools/overrides/releases/ocata/loci.yaml "
+else
+  values=""
+fi
 : ${OSH_EXTRA_HELM_ARGS:=""}
 helm upgrade --install keystone ./keystone \
-    --namespace=openstack \
+    --namespace=openstack $values \
     ${OSH_EXTRA_HELM_ARGS}
 
 #NOTE: Wait for deploy

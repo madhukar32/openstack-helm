@@ -37,6 +37,7 @@ images:
     neutron_openvswitch_agent: docker.io/openstackhelm/neutron:newton
     neutron_linuxbridge_agent: docker.io/openstackhelm/neutron:newton
     dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.2.1
+    opencontrail_neutron_init: 
   pull_policy: "IfNotPresent"
 
 labels:
@@ -1007,6 +1008,17 @@ conf:
       # ml2_type_vlan:
       #   network_vlan_ranges: "external:1100:1110"
     ml2_conf_sriov: null
+    opencontrail:
+      APISERVER:
+        api_server_ip: contrail-config-api.contrail
+        api_server_port: 8082
+        contrail_extensions: "ipam:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_ipam.NeutronPluginContrailIpam,policy:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_policy.NeutronPluginContrailPolicy,route-table:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_vpc.NeutronPluginContrailVpc,contrail:None,service-interface:None,vf-binding:None"
+        multi_tenancy: True
+      COLLECTOR:
+        analytics_api_ip: contrail-analytics-api.contrail
+        analytics_api_port: 8081
+      KEYSTONE:
+        insecure: True
     openvswitch_agent:
       agent:
         tunnel_types: vxlan
