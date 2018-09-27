@@ -169,6 +169,37 @@ just set it along with nova_metadata_host.
 {{- $formatter_fluent := dict "class" "oslo_log.formatters.FluentFormatter" -}}
 {{- $_ := set .Values.conf.logging "formatter_fluent" $formatter_fluent -}}
 {{- end -}}
+
+# tungstenfabric configs
+{{- if empty $envAll.Values.conf.plugins.tungstenfabric.KEYSTONE.auth_url -}}
+{{- tuple "identity" "internal" "admin" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | set $envAll.Values.conf.plugins.tungstenfabric.KEYSTONE "auth_url" | quote | trunc 0 -}}
+{{- end -}}
+{{- if empty $envAll.Values.conf.plugins.tungstenfabric.KEYSTONE.admin_user -}}
+{{- set .Values.conf.plugins.tungstenfabric.KEYSTONE "admin_user" $envAll.Values.endpoints.identity.auth.admin.username | quote | trunc 0 -}}
+{{- end -}}
+{{- if empty $envAll.Values.conf.plugins.tungstenfabric.KEYSTONE.admin_password -}}
+{{- set .Values.conf.plugins.tungstenfabric.KEYSTONE "admin_password" $envAll.Values.endpoints.identity.auth.admin.password | quote | trunc 0 -}}
+{{- end -}}
+{{- if empty $envAll.Values.conf.plugins.tungstenfabric.KEYSTONE.admin_tenant_name -}}
+{{- set .Values.conf.plugins.tungstenfabric.KEYSTONE "admin_tenant_name" $envAll.Values.endpoints.identity.auth.admin.project_name | quote | trunc 0 -}}
+{{- end -}}
+
+{{- if empty $envAll.Values.conf.plugins.tungstenfabric.APISERVER.api_server_ip -}}
+{{- $_ := tuple "tf_config_api" "default" . | include "helm-toolkit.endpoints.hostname_fqdn_endpoint_lookup" | set $envAll.Values.conf.plugins.tungstenfabric.APISERVER "api_server_ip" -}}
+{{- end -}}
+
+{{- if empty $envAll.Values.conf.plugins.tungstenfabric.APISERVER.api_server_port -}}
+{{- $_ := set $envAll.Values.conf.plugins.tungstenfabric.APISERVER "api_server_port" 8082 -}}
+{{- end -}}
+
+{{- if empty $envAll.Values.conf.plugins.tungstenfabric.COLLECTOR.analytics_api_ip -}}
+{{- $_ := tuple "tf_analytics_api" "default" . | include "helm-toolkit.endpoints.hostname_fqdn_endpoint_lookup" | set $envAll.Values.conf.plugins.tungstenfabric.COLLECTOR "analytics_api_ip" -}}
+{{- end -}}
+
+{{- if empty $envAll.Values.conf.plugins.tungstenfabric.COLLECTOR.analytics_api_port -}}
+{{- $_ := set $envAll.Values.conf.plugins.tungstenfabric.COLLECTOR "analytics_api_port" 8081 -}}
+{{- end -}}
+
 ---
 apiVersion: v1
 kind: Secret
@@ -196,6 +227,8 @@ data:
   dnsmasq.conf: ""
   neutron_sudoers: {{ $envAll.Values.conf.neutron_sudoers | b64enc }}
   rootwrap.conf: {{ $envAll.Values.conf.rootwrap | b64enc }}
+  ContrailPlugin.ini: {{ include "helm-toolkit.utils.to_oslo_conf" $envAll.Values.conf.plugins.tungstenfabric | b64enc }}
+
 {{- range $key, $value := $envAll.Values.conf.rootwrap_filters }}
 {{- $filePrefix := replace "_" "-"  $key }}
   {{ printf "%s.filters" $filePrefix }}: {{ $value.content | b64enc }}

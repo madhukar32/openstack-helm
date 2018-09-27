@@ -132,6 +132,29 @@ limitations under the License.
 {{- $formatter_fluent := dict "class" "oslo_log.formatters.FluentFormatter" -}}
 {{- $_ := set .Values.conf.logging "formatter_fluent" $formatter_fluent -}}
 {{- end -}}
+
+# conf needed by tungstenfabric heat plugin
+{{- if .Values.conf.heat.clients_contrail -}}
+{{- if empty .Values.conf.heat.clients_contrail.user -}}
+{{- $_ := set .Values.conf.heat.clients_contrail "user" .Values.endpoints.identity.auth.admin.username | quote | trunc 0 -}}
+{{- end -}}
+{{- if empty .Values.conf.heat.clients_contrail.password -}}
+{{- $_ := set .Values.conf.heat.clients_contrail "password" .Values.endpoints.identity.auth.admin.password | quote | trunc 0 -}}
+{{- end -}}
+{{- if empty .Values.conf.heat.clients_contrail.tenant -}}
+{{- $_ := set .Values.conf.heat.clients_contrail "tenant" .Values.endpoints.identity.auth.admin.project_name | quote | trunc 0 -}}
+{{- end -}}
+{{- if empty .Values.conf.heat.clients_contrail.auth_host_ip -}}
+{{- $_ := tuple "identity" "internal" $envAll | include "helm-toolkit.endpoints.hostname_namespaced_endpoint_lookup" | set .Values.conf.heat.clients_contrail "auth_host_ip" | quote | trunc 0 -}}
+{{- end -}}
+{{- if empty .Values.conf.heat.clients_contrail.api_server -}}
+{{- $_ := tuple "tf_config_api" "default" . | include "helm-toolkit.endpoints.hostname_fqdn_endpoint_lookup" | set .Values.conf.heat.clients_contrail "api_server" -}}
+{{- end -}}
+{{- if empty .Values.conf.heat.clients_contrail.api_base_url -}}
+{{- $_ := set .Values.conf.heat.clients_contrail "api_base_url" .Values.endpoints.tf_config_api.path.default -}}
+{{- end -}}
+{{- end -}}
+
 ---
 apiVersion: v1
 kind: Secret

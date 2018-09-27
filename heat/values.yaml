@@ -935,6 +935,22 @@ endpoints:
         default: 24224
       metrics:
         default: 24220
+  tf_config_api:
+    name: tf-config-api
+    hosts:
+      default: config-api-server
+      public: config-api
+    host_fqdn_override:
+      default: null
+    path:
+      default: /
+    scheme:
+      default: 'http'
+    port:
+      api:
+        default: 8082
+        public: 80
+    namespace: tungstenfabric
 
 pod:
   user:

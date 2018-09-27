@@ -1590,6 +1590,12 @@ conf:
         bridge_mappings: "external:br-ex"
       securitygroup:
         firewall_driver: neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
+    tungstenfabric:
+      APISERVER:
+        contrail_extensions: "ipam:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_ipam.NeutronPluginContrailIpam,policy:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_policy.NeutronPluginContrailPolicy,route-table:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_vpc.NeutronPluginContrailVpc,contrail:None,service-interface:None,vf-binding:None"
+        multi_tenancy: True
+      KEYSTONE:
+        insecure: True
     linuxbridge_agent:
       linux_bridge:
         # To define Flat and VLAN connections, in LB we can assign
@@ -1850,6 +1856,38 @@ endpoints:
         default: 24224
       metrics:
         default: 24220
+  tf_config_api:
+    name: tf-config-api
+    hosts:
+      default: config-api-server
+      public: config-api
+    host_fqdn_override:
+      default: null
+    path:
+      default: /
+    scheme:
+      default: 'http'
+    port:
+      api:
+        default: 8082
+        public: 80
+    namespace: tungstenfabric
+  tf_analytics_api:
+    name: tf-analytics-api
+    hosts:
+      default: analytics-api-server
+      public: analytics-api
+    host_fqdn_override:
+      default: null
+    path:
+      default: /
+    scheme:
+      default: 'http'
+    port:
+      api:
+        default: 8081
+        public: 80
+    namespace: tungstenfabric
 
 manifests:
   configmap_bin: true

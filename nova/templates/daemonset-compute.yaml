@@ -151,6 +151,21 @@ spec:
             - name: pod-shared
               mountPath: /tmp/pod-shared
         {{ end }}
+        {{- if ( has "tungstenfabric" .Values.network.backend ) }}
+        - name: tf-compute-init
+          image: {{ .Values.images.tags.opencontrail_compute_init }}
+          imagePullPolicy: {{ .Values.images.pull_policy }}
+{{ tuple $envAll $envAll.Values.pod.resources.compute | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
+          securityContext:
+            runAsUser: {{ .Values.pod.user.nova.uid }}
+          volumeMounts:
+            - name: tf-plugin-shared
+              mountPath: /opt/plugin
+            # TO-DO: Fix vif-plug-vrouter driver to detect executable dirs path
+            # from rootwrap conf
+            - name: opencontrail-plugin-bin
+              mountPath: /opt/plugin/bin
+        {{- end }}
       containers:
         - name: nova-compute
 {{ tuple $envAll "nova_compute" | include "helm-toolkit.snippets.image" | indent 10 }}
@@ -253,6 +268,20 @@ spec:
             - name: machine-id
               mountPath: /etc/machine-id
               readOnly: true
+            {{- if ( has "tungstenfabric" .Values.network.backend ) }}
+            - name: tf-plugin-shared
+              mountPath: /opt/plugin
+              readOnly: true
+            # TO-DO: Fix vif-plug-vrouter driver to detect executable dirs path
+            # from rootwrap conf
+            - name: tf-plugin-bin
+              mountPath: /usr/sbin
+              readOnly: true
+            - name: nova-bin
+              mountPath: /usr/local/lib/python2.7/site-packages/tf-plugin.pth
+              subPath: tf-plugin.pth
+              readOnly: true
+            {{- end }}
 {{ if $mounts_nova_compute.volumeMounts }}{{ toYaml $mounts_nova_compute.volumeMounts | indent 12 }}{{ end }}
         - name: nova-compute-ssh
 {{ tuple $envAll "nova_compute_ssh" | include "helm-toolkit.snippets.image" | indent 10 }}
@@ -328,6 +357,14 @@ spec:
         - name: machine-id
           hostPath:
             path: /etc/machine-id
+        {{- if ( has "tungstenfabric" .Values.network.backend ) }}
+        - name: tf-plugin-shared
+          emptyDir: {}
+        # TO-DO: Fix vif-plug-vrouter driver to detect executable dirs path
+        # from rootwrap conf
+        - name: tf-plugin-bin
+          emptyDir: {}
+        {{- end }}
 {{ if $mounts_nova_compute.volumes }}{{ toYaml $mounts_nova_compute.volumes | indent 8 }}{{ end }}
 {{- end }}
 {{- end }}

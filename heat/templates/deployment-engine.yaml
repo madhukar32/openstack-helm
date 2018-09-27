@@ -61,6 +61,16 @@ spec:
       terminationGracePeriodSeconds: {{ .Values.pod.lifecycle.termination_grace_period.engine.timeout | default "30" }}
       initContainers:
 {{ tuple $envAll "engine" $mounts_heat_engine_init | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
+      {{- if .Values.conf.heat.clients_contrail }}
+        - name: tf-heat-init
+          image: {{ .Values.images.tags.opencontrail_heat_init }}
+          imagePullPolicy: {{ .Values.images.pull_policy }}
+          securityContext:
+            runAsUser: {{ .Values.pod.user.heat.uid }}
+          volumeMounts:
+            - name: heat-plugin-shared
+              mountPath: /opt/plugin
+      {{- end }}
       containers:
         - name: heat-engine
 {{ tuple $envAll "heat_engine" | include "helm-toolkit.snippets.image" | indent 10 }}
@@ -95,6 +105,14 @@ spec:
               mountPath: /etc/heat/policy.json
               subPath: policy.json
               readOnly: true
+            {{- if .Values.conf.heat.clients_contrail }}
+            - name: heat-plugin-shared
+              mountPath: /opt/plugin
+            - name: heat-bin
+              mountPath: /usr/local/lib/python2.7/site-packages/tf-plugin.pth
+              subPath: tf-plugin.pth
+              readOnly: true
+            {{- end }}
 {{ if $mounts_heat_engine.volumeMounts }}{{ toYaml $mounts_heat_engine.volumeMounts | indent 12 }}{{ end }}
       volumes:
         - name: pod-etc-heat
@@ -107,5 +125,9 @@ spec:
           secret:
             secretName: heat-etc
             defaultMode: 0444
+        {{- if .Values.conf.heat.clients_contrail }}
+        - name: heat-plugin-shared
+          emptyDir: {}
+        {{- end }}
 {{ if $mounts_heat_engine.volumes }}{{ toYaml $mounts_heat_engine.volumes | indent 8 }}{{ end }}
 {{- end }}

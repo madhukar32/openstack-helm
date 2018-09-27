@@ -22,7 +22,11 @@ COMMAND="${@:-start}"
 function start () {
   exec neutron-server \
         --config-file /etc/neutron/neutron.conf \
+{{- if ( has "tungstenfabric" .Values.network.backend ) }}
+        --config-file /etc/neutron/plugins/opencontrail/ContrailPlugin.ini
+{{- else }}
         --config-file /etc/neutron/plugins/ml2/ml2_conf.ini
+{{- end }}
 {{- if .Values.conf.plugins.taas.taas.enabled }} \
         --config-file /etc/neutron/taas_plugin.ini
 {{- end }}
